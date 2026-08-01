@@ -18,29 +18,27 @@ const app = express();
 // ─── Request Correlation ID ────────────────────────────
 app.use(requestId);
 
+// ─── Manual CORS Headers (Bulletproof) ─────────────────
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-request-id, X-API-Key');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
+
+// ─── CORS (npm package) ────────────────────────────────
+app.use(cors({ origin: '*' }));
+
 // ─── Security ──────────────────────────────────────────
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: false,
   })
 );
-
-// ─── CORS ──────────────────────────────────────────────
-const corsOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map((s) => s.trim())
-  : ['*'];
-
-app.use(
-  cors({
-    origin: corsOrigins.includes('*') ? true : corsOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'X-API-Key'],
-    credentials: true,
-  })
-);
-
-// Explicitly handle preflight OPTIONS requests
-app.options('*', cors());
 
 // ─── Compression ───────────────────────────────────────
 app.use(
