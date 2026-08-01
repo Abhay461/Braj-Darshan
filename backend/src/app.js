@@ -32,12 +32,15 @@ const corsOrigins = process.env.CORS_ORIGIN
 
 app.use(
   cors({
-    origin: corsOrigins.includes('*') ? '*' : corsOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id'],
-    credentials: false,
+    origin: corsOrigins.includes('*') ? true : corsOrigins,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'X-API-Key'],
+    credentials: true,
   })
 );
+
+// Explicitly handle preflight OPTIONS requests
+app.options('*', cors());
 
 // ─── Compression ───────────────────────────────────────
 app.use(
