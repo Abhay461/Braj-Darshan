@@ -6,7 +6,7 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   static String customApiUrl = '';
-  static const String productionApiUrl = 'https://braj-darshan-api.onrender.com/api/v1';
+  static const String productionApiUrl = 'https://braj-darshan-wdw9.onrender.com/api/v1';
 
   // Base API URL with Production, Custom, and Emulator Fallbacks
   static String get apiBaseUrl {
