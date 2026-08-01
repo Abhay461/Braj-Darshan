@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Flutter / Dart
+.dart_tool/
+.pub-cache/
+.pub/
+app/.dart_tool/
+app/.pub-cache/
+app/.pub/
+app/build/
+**/build/
+
+# Environment variables & secrets
+.env
+.env.local
+.env.production
+*.env
+
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# Android / Gradle build files
+.gradle/
+app/android/.gradle/
+app/android/app/build/
+app/android/local.properties

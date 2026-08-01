@@ -1,0 +1,45 @@
+{
+  "name": "braj-darshan-backend",
+  "version": "1.0.0",
+  "description": "Production REST API for Braj Darshan - Temple Discovery Platform",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/seed/seedData.js",
+    "seed:destroy": "node src/seed/seedData.js --destroy"
+  },
+  "keywords": [
+    "braj-darshan",
+    "temple",
+    "api",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "Braj Darshan",
+  "license": "MIT",
+  "dependencies": {
+    "cloudinary": "^2.5.1",
+    "compression": "^1.7.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.0.0",
+    "mongoose": "^8.9.5",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "slugify": "^1.6.6",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
