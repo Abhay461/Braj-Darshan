@@ -24,6 +24,22 @@ const startServer = async () => {
       logger.info(`║  API: http://localhost:${PORT}/api/v1`.padEnd(46) + '║');
       logger.info(`║  Docs: http://localhost:${PORT}/api-docs`.padEnd(46) + '║');
       logger.info(`╚════════════════════════════════════════════╝`);
+
+      // Keep-alive: Ping self every 14 minutes to prevent Render free tier sleep
+      if (process.env.NODE_ENV === 'production') {
+        const RENDER_URL = process.env.RENDER_EXTERNAL_URL || `https://braj-darshan-wdw9.onrender.com`;
+        setInterval(async () => {
+          try {
+            const https = require('https');
+            https.get(`${RENDER_URL}/health`, (res) => {
+              logger.info(`Keep-alive ping: ${res.statusCode}`);
+            });
+          } catch (err) {
+            logger.warn(`Keep-alive ping failed: ${err.message}`);
+          }
+        }, 14 * 60 * 1000); // Every 14 minutes
+        logger.info('Keep-alive ping enabled (every 14 minutes)');
+      }
     });
 
     // Graceful shutdown
