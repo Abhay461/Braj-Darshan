@@ -18,6 +18,11 @@ final featuredTemplesProvider = FutureProvider<List<Temple>>((ref) async {
   return ref.watch(templeRepositoryProvider).getFeaturedTemples();
 });
 
+// All Temples Provider
+final allTemplesProvider = FutureProvider<List<Temple>>((ref) async {
+  return ref.watch(templeRepositoryProvider).getTemples(limit: 50);
+});
+
 // Popular Temples Provider
 final popularTemplesProvider = FutureProvider<List<Temple>>((ref) async {
   return ref.watch(templeRepositoryProvider).getPopularTemples();

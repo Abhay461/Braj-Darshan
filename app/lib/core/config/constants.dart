@@ -11,13 +11,7 @@ class AppConstants {
   // Base API URL with Production, Custom, and Emulator Fallbacks
   static String get apiBaseUrl {
     if (customApiUrl.isNotEmpty) return customApiUrl;
-    if (kReleaseMode) {
-      return productionApiUrl;
-    }
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:5000/api/v1';
-    }
-    return 'http://localhost:5000/api/v1';
+    return productionApiUrl;
   }
 
   // Vrindavan Default Coordinates
