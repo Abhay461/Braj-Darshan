@@ -10,12 +10,14 @@ import {
   IconButton,
   TextField,
   CircularProgress,
+  Chip,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import CloudUploadIcon from '@mui/icons-material/CloudUploadOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import AspectRatioIcon from '@mui/icons-material/AspectRatioOutlined';
 import { GalleryImage } from '../../types';
 import { uploadApi } from '../../api/uploadApi';
 import { useSnackbar } from 'notistack';
@@ -24,12 +26,14 @@ interface GalleryManagerProps {
   images: GalleryImage[];
   onChange: (images: GalleryImage[]) => void;
   slug?: string;
+  recommendation?: string;
 }
 
 export const GalleryManager: React.FC<GalleryManagerProps> = ({
   images = [],
   onChange,
   slug = 'general',
+  recommendation = 'Recommended Size: 1080 x 720 px (3:2 Aspect Ratio)',
 }) => {
   const [uploading, setUploading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
@@ -104,9 +108,19 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
 
   return (
     <Box sx={{ mb: 3 }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1.5 }}>
-        Temple Gallery Images ({images.length})
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+          Temple Gallery Images ({images.length})
+        </Typography>
+        <Chip
+          icon={<AspectRatioIcon style={{ fontSize: 14 }} />}
+          label={recommendation}
+          size="small"
+          color="primary"
+          variant="outlined"
+          sx={{ fontWeight: 600, fontSize: '0.75rem', height: 24 }}
+        />
+      </Box>
 
       <Box
         {...getRootProps()}
@@ -137,12 +151,31 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
         ) : (
           <Box>
             <CloudUploadIcon sx={{ fontSize: 32, color: '#71717A', mb: 1 }} />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            <Typography variant="body2" sx={{ fontWeight: 700 }}>
               Drag & drop multiple gallery images or click to select
             </Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
               Automatic WebP compression & thumbnail generation
             </Typography>
+            <Box
+              sx={{
+                mt: 1.5,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 0.5,
+                backgroundColor: '#EFF6FF',
+                color: '#1D4ED8',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: '8px',
+                fontWeight: 700,
+                fontSize: '0.8rem',
+                border: '1px solid #BFDBFE',
+              }}
+            >
+              <AspectRatioIcon style={{ fontSize: 16 }} />
+              <span>{recommendation}</span>
+            </Box>
           </Box>
         )}
       </Box>

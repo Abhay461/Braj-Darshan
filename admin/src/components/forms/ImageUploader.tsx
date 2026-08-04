@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Box, Typography, Button, CircularProgress, IconButton } from '@mui/material';
+import { Box, Typography, CircularProgress, IconButton, Chip } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUploadOutlined';
 import DeleteIcon from '@mui/icons-material/DeleteOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopyOutlined';
+import AspectRatioIcon from '@mui/icons-material/AspectRatioOutlined';
 import { uploadApi } from '../../api/uploadApi';
 import { useSnackbar } from 'notistack';
 
@@ -14,6 +15,7 @@ interface ImageUploaderProps {
   folder?: string;
   slug?: string;
   type?: 'cover' | 'generic';
+  recommendation?: string;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
@@ -23,9 +25,17 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   folder = 'misc',
   slug = 'general',
   type = 'generic',
+  recommendation,
 }) => {
   const [uploading, setUploading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
+
+  const defaultRecommendation =
+    type === 'cover'
+      ? 'Recommended Size: 1200 x 675 px (16:9 Aspect Ratio)'
+      : 'Recommended Size: 800 x 600 px (4:3 Aspect Ratio)';
+
+  const displayRecommendation = recommendation || defaultRecommendation;
 
   const onDrop = async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
@@ -68,9 +78,19 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   return (
     <Box sx={{ mb: 2 }}>
       {label && (
-        <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-          {label}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+            {label}
+          </Typography>
+          <Chip
+            icon={<AspectRatioIcon style={{ fontSize: 14 }} />}
+            label={displayRecommendation}
+            size="small"
+            color="primary"
+            variant="outlined"
+            sx={{ fontWeight: 600, fontSize: '0.75rem', height: 24 }}
+          />
+        </Box>
       )}
 
       {value ? (
@@ -111,6 +131,22 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 8,
+              left: 8,
+              backgroundColor: 'rgba(0, 0, 0, 0.75)',
+              color: '#FFFFFF',
+              px: 1.2,
+              py: 0.4,
+              borderRadius: '6px',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+            }}
+          >
+            📐 {displayRecommendation}
+          </Box>
         </Box>
       ) : (
         <Box
@@ -119,7 +155,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
             border: '2px dashed',
             borderColor: isDragActive ? '#18181B' : '#E4E4E7',
             borderRadius: '14px',
-            p: 4,
+            p: 3,
             textAlign: 'center',
             backgroundColor: isDragActive ? '#F4F4F5' : '#FFFFFF',
             cursor: 'pointer',
@@ -141,12 +177,33 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           ) : (
             <Box>
               <CloudUploadIcon sx={{ fontSize: 36, color: '#71717A', mb: 1 }} />
-              <Typography variant="body2" sx={{ fontWeight: 600, color: '#18181B' }}>
+              <Typography variant="body2" sx={{ fontWeight: 700, color: '#18181B' }}>
                 Drag & drop or click to upload
               </Typography>
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
                 JPEG, PNG, WebP or AVIF (Max 10MB)
               </Typography>
+
+              {/* Recommended Size Chip Box */}
+              <Box
+                sx={{
+                  mt: 1.5,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  backgroundColor: '#EFF6FF',
+                  color: '#1D4ED8',
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: '8px',
+                  fontWeight: 700,
+                  fontSize: '0.8rem',
+                  border: '1px solid #BFDBFE',
+                }}
+              >
+                <AspectRatioIcon style={{ fontSize: 16 }} />
+                <span>{displayRecommendation}</span>
+              </Box>
             </Box>
           )}
         </Box>

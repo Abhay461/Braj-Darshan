@@ -31,7 +31,9 @@ import { GalleryImage, Category, Location, Temple } from '../../types';
 
 const templeSchema = z.object({
   name: z.string().min(1, 'Temple name is required').max(200),
+  nameHindi: z.string().optional().default(''),
   history: z.string().optional().default(''),
+  historyHindi: z.string().optional().default(''),
   categoryId: z.string().min(1, 'Category is required'),
   locationId: z.string().min(1, 'Location is required'),
   coverImage: z.string().min(1, 'Cover image is required'),
@@ -67,7 +69,9 @@ export const TempleForm: React.FC = () => {
     resolver: zodResolver(templeSchema),
     defaultValues: {
       name: '',
+      nameHindi: '',
       history: '',
+      historyHindi: '',
       categoryId: '',
       locationId: '',
       coverImage: '',
@@ -89,7 +93,9 @@ export const TempleForm: React.FC = () => {
 
       reset({
         name: templeData.name || '',
+        nameHindi: (templeData as any).nameHindi || '',
         history: templeData.history || '',
+        historyHindi: (templeData as any).historyHindi || '',
         categoryId: catId || '',
         locationId: locId || '',
         coverImage: templeData.coverImage || '',
@@ -134,7 +140,7 @@ export const TempleForm: React.FC = () => {
     <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
       <PageHeader
         title={isEdit ? `Edit Temple: ${templeData?.name || ''}` : 'Add New Temple'}
-        subtitle="Manage basic shrine details and Cloudinary media"
+        subtitle="Manage English & Hindi shrine details and Cloudinary media"
         breadcrumbs={[
           { label: 'Dashboard', path: '/' },
           { label: 'Temples', path: '/temples' },
@@ -168,18 +174,19 @@ export const TempleForm: React.FC = () => {
           <Card sx={{ p: 1, mb: 3 }}>
             <CardContent>
               <Typography variant="h4" sx={{ mb: 2.5, fontWeight: 700 }}>
-                General Information
+                General Information (English & Hindi)
               </Typography>
 
               <Grid container spacing={2.5}>
-                <Grid size={{ xs: 12 }}>
+                {/* Temple Name (English) */}
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <Controller
                     name="name"
                     control={control}
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Temple Name *"
+                        label="Temple Name (English) *"
                         fullWidth
                         error={!!errors.name}
                         helperText={errors.name?.message}
@@ -188,12 +195,47 @@ export const TempleForm: React.FC = () => {
                   />
                 </Grid>
 
+                {/* Temple Name (Hindi) */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="nameHindi"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="हिंदी नाम (Temple Name in Hindi)"
+                        placeholder="उदा: श्री बांके बिहारी जी"
+                        fullWidth
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* History (English) */}
                 <Grid size={{ xs: 12 }}>
                   <Controller
                     name="history"
                     control={control}
                     render={({ field }) => (
-                      <TextField {...field} label="History & Details" fullWidth multiline rows={4} />
+                      <TextField {...field} label="History & Details (English)" fullWidth multiline rows={3} />
+                    )}
+                  />
+                </Grid>
+
+                {/* History (Hindi) */}
+                <Grid size={{ xs: 12 }}>
+                  <Controller
+                    name="historyHindi"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="हिंदी विवरण (History & Details in Hindi)"
+                        placeholder="उदा: मंदिर का प्राचीन इतिहास एवं दर्शन महिमा..."
+                        fullWidth
+                        multiline
+                        rows={3}
+                      />
                     )}
                   />
                 </Grid>

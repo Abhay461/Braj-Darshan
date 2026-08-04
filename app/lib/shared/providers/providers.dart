@@ -110,3 +110,16 @@ class ThemeModeNotifier extends StateNotifier<ThemeMode> {
 final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((ref) {
   return ThemeModeNotifier();
 });
+
+// App Language Notifier ('en' | 'hi')
+class AppLanguageNotifier extends StateNotifier<String> {
+  AppLanguageNotifier() : super('en');
+
+  void setLanguage(String langCode) {
+    state = langCode;
+  }
+}
+
+final appLanguageProvider = StateNotifierProvider<AppLanguageNotifier, String>((ref) {
+  return AppLanguageNotifier();
+});
