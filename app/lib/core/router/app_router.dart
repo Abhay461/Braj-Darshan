@@ -7,6 +7,7 @@ import '../../features/categories/categories_screen.dart';
 import '../../features/locations/locations_screen.dart';
 import '../../features/festivals/festivals_screen.dart';
 import '../../features/map/interactive_map_screen.dart';
+import '../../features/planner/yatra_planner_screen.dart';
 import '../../features/settings/settings_screen.dart';
 
 final appRouter = GoRouter(
@@ -46,6 +47,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/map',
       builder: (context, state) => const InteractiveMapScreen(),
+    ),
+    GoRoute(
+      path: '/yatra-planner',
+      builder: (context, state) => const YatraPlannerScreen(),
     ),
     GoRoute(
       path: '/settings',

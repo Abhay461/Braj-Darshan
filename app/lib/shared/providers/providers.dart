@@ -113,10 +113,11 @@ final themeModeProvider = StateNotifierProvider<ThemeModeNotifier, ThemeMode>((r
 
 // App Language Notifier ('en' | 'hi')
 class AppLanguageNotifier extends StateNotifier<String> {
-  AppLanguageNotifier() : super('en');
+  AppLanguageNotifier() : super(HiveService.getLanguage());
 
   void setLanguage(String langCode) {
     state = langCode;
+    HiveService.setLanguage(langCode);
   }
 }
 

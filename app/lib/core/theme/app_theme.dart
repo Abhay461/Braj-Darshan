@@ -1,46 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-/// Braj Darshan v2.0 — Design System
-/// Apple + Notion + Linear inspired monochrome design language.
+/// Braj Darshan — System Theme & Color Tokens
 class AppTheme {
-  // Monochrome Color Palette
-  static const Color primaryCharcoal = Color(0xFF18181B); // Zinc 900
-  static const Color pureBlack = Color(0xFF09090B);        // Zinc 950
-  static const Color canvasLight = Color(0xFFFAFAFA);      // Zinc 50
-  static const Color canvasDark = Color(0xFF09090B);       // Zinc 950
+  // Color Tokens
+  static const Color primaryCharcoal = Color(0xFF18181B); // Charcoal Black
+  static const Color secondaryIndigo = Color(0xFF5E5CE6); // Royal Indigo
+  static const Color accentSkyBlue = Color(0xFF0EA5E9);   // Sky Blue
+  static const Color canvasLight = Color(0xFFFAF9F6);     // Off-white canvas
+  static const Color canvasDark = Color(0xFF09090B);      // Pure dark obsidian
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color cardDark = Color(0xFF141417);
-  static const Color borderLight = Color(0xFFE4E4E7);      // Zinc 200
-  static const Color borderDark = Color(0xFF27272A);       // Zinc 800
-  static const Color mutedGray = Color(0xFF71717A);        // Zinc 500
-  static const Color lightGrayBg = Color(0xFFF4F4F5);      // Zinc 100
-  static const Color darkGrayBg = Color(0xFF1E1E22);
+  static const Color borderLight = Color(0xFFE5E7EB);     // Clean Gray Border
+  static const Color borderDark = Color(0xFF27272A);
+  static const Color mutedGray = Color(0xFF71717A);
 
   // System Design Tokens
   static const double borderRadius = 18.0;
-  static const double minTouchTarget = 48.0;
-
-  // Soft Elevation Shadows
-  static const List<BoxShadow> softShadowLight = [
-    BoxShadow(
-      color: Color(0x08000000),
-      blurRadius: 10,
-      offset: Offset(0, 4),
-    ),
-    BoxShadow(
-      color: Color(0x04000000),
-      blurRadius: 2,
-      offset: Offset(0, 1),
-    ),
-  ];
-
-  static const List<BoxShadow> softShadowDark = [
-    BoxShadow(
-      color: Color(0x20000000),
-      blurRadius: 12,
-      offset: Offset(0, 4),
-    ),
-  ];
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -49,14 +25,19 @@ class AppTheme {
     colorScheme: const ColorScheme.light(
       primary: primaryCharcoal,
       onPrimary: Colors.white,
-      secondary: mutedGray,
+      secondary: secondaryIndigo,
+      tertiary: accentSkyBlue,
       surface: cardLight,
-      onSurface: pureBlack,
+      onSurface: primaryCharcoal,
       outline: borderLight,
-      surfaceContainerHighest: lightGrayBg,
     ),
     fontFamily: 'Inter',
     appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
       backgroundColor: canvasLight,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -64,7 +45,7 @@ class AppTheme {
       titleTextStyle: TextStyle(
         color: primaryCharcoal,
         fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         fontFamily: 'Inter',
         letterSpacing: -0.4,
       ),
@@ -79,7 +60,7 @@ class AppTheme {
       ),
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: lightGrayBg,
+      backgroundColor: Colors.white,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -108,16 +89,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: primaryCharcoal, width: 1.5),
       ),
-      hintStyle: const TextStyle(
-        color: mutedGray,
-        fontSize: 14,
-        fontFamily: 'Inter',
-      ),
-    ),
-    dividerTheme: const DividerThemeData(
-      color: borderLight,
-      thickness: 1,
-      space: 1,
     ),
   );
 
@@ -128,14 +99,19 @@ class AppTheme {
     colorScheme: const ColorScheme.dark(
       primary: Colors.white,
       onPrimary: primaryCharcoal,
-      secondary: mutedGray,
+      secondary: secondaryIndigo,
+      tertiary: accentSkyBlue,
       surface: cardDark,
       onSurface: Colors.white,
       outline: borderDark,
-      surfaceContainerHighest: darkGrayBg,
     ),
     fontFamily: 'Inter',
     appBarTheme: const AppBarTheme(
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       backgroundColor: canvasDark,
       elevation: 0,
       scrolledUnderElevation: 0,
@@ -143,7 +119,7 @@ class AppTheme {
       titleTextStyle: TextStyle(
         color: Colors.white,
         fontSize: 18,
-        fontWeight: FontWeight.w700,
+        fontWeight: FontWeight.w800,
         fontFamily: 'Inter',
         letterSpacing: -0.4,
       ),
@@ -158,7 +134,7 @@ class AppTheme {
       ),
     ),
     chipTheme: ChipThemeData(
-      backgroundColor: darkGrayBg,
+      backgroundColor: cardDark,
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -187,16 +163,6 @@ class AppTheme {
         borderRadius: BorderRadius.circular(14),
         borderSide: const BorderSide(color: Colors.white, width: 1.5),
       ),
-      hintStyle: const TextStyle(
-        color: mutedGray,
-        fontSize: 14,
-        fontFamily: 'Inter',
-      ),
-    ),
-    dividerTheme: const DividerThemeData(
-      color: borderDark,
-      thickness: 1,
-      space: 1,
     ),
   );
 }

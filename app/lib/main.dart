@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/ad_service.dart';
@@ -33,15 +34,23 @@ class BrajDarshanApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
+    const overlayStyle = SystemUiOverlayStyle(
+      statusBarColor: Color(0xFFFAF9F6),
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
+      systemNavigationBarColor: Color(0xFFFAF9F6),
+      systemNavigationBarIconBrightness: Brightness.dark,
+    );
 
-    return MaterialApp.router(
-      title: 'Braj Darshan',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeMode,
-      routerConfig: appRouter,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlayStyle,
+      child: MaterialApp.router(
+        title: 'Braj Darshan',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.lightTheme,
+        themeMode: ThemeMode.light,
+        routerConfig: appRouter,
+      ),
     );
   }
 }

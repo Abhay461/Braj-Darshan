@@ -64,16 +64,16 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
         : (widget.temple.location is Map ? widget.temple.location['name'] ?? '' : 'Vrindavan');
 
     // -------------------------------------------------------------------------
-    // 1. Text-Only Compact Mode (for All Temples vertical list)
+    // 1. Clean Soft Card List Item
     // -------------------------------------------------------------------------
     if (!widget.showImage) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 8),
+        margin: const EdgeInsets.only(bottom: 8.0),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF141417) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE5E7EB),
             width: 1,
           ),
           boxShadow: [
@@ -86,17 +86,17 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(16),
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
               child: Row(
                 children: [
                   Container(
-                    width: 38,
-                    height: 38,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
                       borderRadius: BorderRadius.circular(12),
@@ -123,7 +123,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 2),
+                        const SizedBox(height: 3),
                         Row(
                           children: [
                             const Icon(Icons.location_on_outlined, size: 12, color: Color(0xFF71717A)),
@@ -145,7 +145,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                       ],
                     ),
                   ),
-                  // Favorite Button
+                  // Favorite Heart Button
                   ScaleTransition(
                     scale: _scaleAnimation,
                     child: IconButton(
@@ -171,7 +171,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
     final tag = widget.heroTag ?? 'temple_image_${widget.temple.id}';
 
     // -------------------------------------------------------------------------
-    // 2. Image-Only Mode (No Column flex, direct Stack layout)
+    // 2. Image-Only Mode (for Top Featured Carousel)
     // -------------------------------------------------------------------------
     if (!widget.showDetails) {
       return Container(
@@ -369,12 +369,12 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
             ],
           ),
         ),
