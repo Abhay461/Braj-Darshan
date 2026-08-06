@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/error_view.dart';
+import '../../core/theme/app_theme.dart';
 
 class FestivalsScreen extends ConsumerWidget {
   const FestivalsScreen({super.key});
@@ -24,20 +25,26 @@ class FestivalsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final festivalsAsync = ref.watch(festivalsProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Braj Utsav & Festivals'),
+        title: Text(
+          'Braj Utsav & Festivals',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: festivalsAsync.when(
         data: (festivals) {
           if (festivals.isEmpty) {
-            return const Center(child: Text('No upcoming festivals listed'));
+            return Center(
+              child: Text(
+                'No upcoming festivals listed',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            );
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16.0),
@@ -51,45 +58,40 @@ class FestivalsScreen extends ConsumerWidget {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141417) : Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark ? const Color(0x20000000) : const Color(0x06000000),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Date Timeline Badge
+                      // Festival Devotional Saffron Badge Highlight
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                          color: AppTheme.saffronHighlight.withOpacity(0.15),
                           borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: AppTheme.saffronHighlight.withOpacity(0.3),
+                          ),
                         ),
                         child: Column(
                           children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
+                            const Icon(
+                              Icons.event_outlined,
                               size: 18,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                              color: AppTheme.saffronHighlight,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               monthBadge,
-                              style: TextStyle(
-                                fontSize: 11,
+                              style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                 fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white : const Color(0xFF18181B),
+                                color: AppTheme.saffronHighlight,
                               ),
                             ),
                           ],
@@ -102,19 +104,13 @@ class FestivalsScreen extends ConsumerWidget {
                           children: [
                             Text(
                               fest.name,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: isDark ? Colors.white : const Color(0xFF18181B),
-                                letterSpacing: -0.3,
-                              ),
+                              style: Theme.of(context).textTheme.titleMedium,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               descText,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF71717A),
+                              style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                                 height: 1.4,
                               ),
                               maxLines: 2,
@@ -148,3 +144,4 @@ class FestivalsScreen extends ConsumerWidget {
     );
   }
 }
+

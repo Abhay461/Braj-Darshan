@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:go_router/go_router.dart';
@@ -32,7 +33,6 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final plans = ref.watch(yatraPlannerProvider);
 
     final upcomingPlans = plans.where((p) => !p.isCompleted).toList()
@@ -41,36 +41,35 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
       ..sort((a, b) => b.plannedDate.compareTo(a.plannedDate));
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121110) : const Color(0xFFFAF8F5),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF1A1817) : const Color(0xFFF3EFEA),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            HapticFeedback.lightImpact();
+            context.pop();
+          },
         ),
         title: Text(
           'My Yatra Plan',
-          style: TextStyle(
-            color: isDark ? Colors.white : const Color(0xFF18181B),
-            fontWeight: FontWeight.w800,
-            fontSize: 18,
-          ),
+          style: Theme.of(context).textTheme.headlineSmall,
         ),
         actions: [
           IconButton(
             tooltip: _isCalendarView ? 'Switch to List View' : 'Switch to Calendar View',
             icon: Icon(_isCalendarView ? Icons.view_list_outlined : Icons.calendar_month_outlined),
             onPressed: () {
+              HapticFeedback.lightImpact();
               setState(() => _isCalendarView = !_isCalendarView);
             },
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: isDark ? Colors.white : const Color(0xFF18181B),
-          labelColor: isDark ? Colors.white : const Color(0xFF18181B),
-          unselectedLabelColor: const Color(0xFF71717A),
+          indicatorColor: Theme.of(context).colorScheme.primary,
+          labelColor: Theme.of(context).colorScheme.primary,
+          unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
           tabs: [
             Tab(text: 'Upcoming (${upcomingPlans.length})'),
             Tab(text: 'History (${completedPlans.length})'),
@@ -80,21 +79,14 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
       body: TabBarView(
         controller: _tabController,
         children: [
-          // -------------------------------------------------------------------
-          // TAB 1: Upcoming Yatra Visits
-          // -------------------------------------------------------------------
-          _buildUpcomingTab(context, upcomingPlans, isDark),
-
-          // -------------------------------------------------------------------
-          // TAB 2: Completed Yatra History
-          // -------------------------------------------------------------------
-          _buildHistoryTab(context, completedPlans, isDark),
+          _buildUpcomingTab(context, upcomingPlans),
+          _buildHistoryTab(context, completedPlans),
         ],
       ),
     );
   }
 
-  Widget _buildUpcomingTab(BuildContext context, List<YatraPlan> plans, bool isDark) {
+  Widget _buildUpcomingTab(BuildContext context, List<YatraPlan> plans) {
     if (plans.isEmpty) {
       return Center(
         child: Padding(
@@ -105,25 +97,28 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                  color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
+                  border: Border.all(color: Theme.of(context).colorScheme.outline),
                 ),
-                child: const Icon(Icons.event_note_outlined, size: 40, color: Color(0xFF71717A)),
+                child: Icon(
+                  Icons.event_note_outlined,
+                  size: 40,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'No Upcoming Yatra Planned',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                ),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 6),
-              const Text(
+              Text(
                 'Open any temple screen and tap "+ Plan Yatra Visit" to set scheduled alerts and darshan reminders.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Color(0xFF71717A)),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             ],
           ),
@@ -142,9 +137,9 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
             Container(
               margin: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A1817) : Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: isDark ? const Color(0xFF2C2826) : const Color(0xFFE8E4DF)),
+                border: Border.all(color: Theme.of(context).colorScheme.outline),
               ),
               child: TableCalendar(
                 firstDay: DateTime.now().subtract(const Duration(days: 30)),
@@ -155,22 +150,32 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                   return plans.where((p) => isSameDay(p.plannedDate, day)).toList();
                 },
                 onDaySelected: (selectedDay, focusedDay) {
+                  HapticFeedback.selectionClick();
                   setState(() {
                     _selectedDay = selectedDay;
                     _focusedDay = focusedDay;
                   });
                 },
                 calendarStyle: CalendarStyle(
-                  todayDecoration: const BoxDecoration(color: Color(0xFFE56B00), shape: BoxShape.circle),
-                  selectedDecoration: const BoxDecoration(color: Color(0xFF18181B), shape: BoxShape.circle),
-                  markerDecoration: const BoxDecoration(color: Color(0xFFDC2626), shape: BoxShape.circle),
+                  todayDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  markerDecoration: const BoxDecoration(
+                    color: Colors.redAccent,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
-                children: selectedDatePlans.map((plan) => _buildPlanCard(context, plan, isDark)).toList(),
+                children: selectedDatePlans.map((plan) => _buildPlanCard(context, plan)).toList(),
               ),
             ),
           ],
@@ -183,12 +188,12 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
       itemCount: plans.length,
       itemBuilder: (context, index) {
         final plan = plans[index];
-        return _buildPlanCard(context, plan, isDark);
+        return _buildPlanCard(context, plan);
       },
     );
   }
 
-  Widget _buildHistoryTab(BuildContext context, List<YatraPlan> completedPlans, bool isDark) {
+  Widget _buildHistoryTab(BuildContext context, List<YatraPlan> completedPlans) {
     if (completedPlans.isEmpty) {
       return Center(
         child: Padding(
@@ -196,21 +201,23 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.history_outlined, size: 40, color: Color(0xFF71717A)),
+              Icon(
+                Icons.history_outlined,
+                size: 40,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+              ),
               const SizedBox(height: 12),
               Text(
                 'No Completed Yatra Yet',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                ),
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
               const SizedBox(height: 4),
-              const Text(
+              Text(
                 'Mark your planned visits as completed after Darshan to save them in history.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Color(0xFF71717A)),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             ],
           ),
@@ -223,22 +230,22 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
       itemCount: completedPlans.length,
       itemBuilder: (context, index) {
         final plan = completedPlans[index];
-        return _buildPlanCard(context, plan, isDark, isHistory: true);
+        return _buildPlanCard(context, plan, isHistory: true);
       },
     );
   }
 
-  Widget _buildPlanCard(BuildContext context, YatraPlan plan, bool isDark, {bool isHistory = false}) {
+  Widget _buildPlanCard(BuildContext context, YatraPlan plan, {bool isHistory = false}) {
     final dateStr = '${plan.plannedDate.day}/${plan.plannedDate.month}/${plan.plannedDate.year}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF141417) : Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(
-          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE5E7EB),
+          color: Theme.of(context).colorScheme.outline,
         ),
       ),
       child: Column(
@@ -249,13 +256,13 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
               Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                  color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   isHistory ? Icons.check_circle_outline : Icons.temple_hindu_outlined,
                   size: 20,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
               const SizedBox(width: 12),
@@ -265,59 +272,70 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                   children: [
                     Text(
                       plan.templeName,
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                        letterSpacing: -0.3,
-                      ),
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 3),
                     Row(
                       children: [
-                        const Icon(Icons.event_outlined, size: 13, color: Color(0xFF71717A)),
+                        Icon(
+                          Icons.event_outlined,
+                          size: 13,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           'Visit Date: $dateStr',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF71717A), fontWeight: FontWeight.w500),
+                          style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-              // Mark Completed Checkbox
               IconButton(
                 tooltip: isHistory ? 'Mark as Pending' : 'Mark Completed',
                 icon: Icon(
                   isHistory ? Icons.check_circle : Icons.radio_button_unchecked,
-                  color: isHistory ? (isDark ? Colors.white : const Color(0xFF18181B)) : const Color(0xFFA1A1AA),
+                  color: isHistory
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
                 ),
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   ref.read(yatraPlannerProvider.notifier).toggleCompleted(plan.id);
                 },
               ),
-              // Delete Button
               IconButton(
                 tooltip: 'Delete Plan',
-                icon: const Icon(Icons.delete_outline, color: Color(0xFF71717A), size: 20),
+                icon: Icon(
+                  Icons.delete_outline,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  size: 20,
+                ),
                 onPressed: () {
+                  HapticFeedback.lightImpact();
                   ref.read(yatraPlannerProvider.notifier).removePlan(plan.id);
                 },
               ),
             ],
           ),
-
-          // Simple Clean Subtitle for Active Alerts
           if (!isHistory && (plan.oneDayBeforeReminder || plan.reminderOption != 'none')) ...[
             const SizedBox(height: 8),
             Row(
               children: [
-                const Icon(Icons.notifications_active_outlined, size: 13, color: Color(0xFF71717A)),
+                Icon(
+                  Icons.notifications_active_outlined,
+                  size: 13,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
                 const SizedBox(width: 4),
                 Text(
                   'Alerts Active: ${plan.oneDayBeforeReminder ? "1-Day Evening" : ""}${plan.reminderOption != "none" ? " • ${plan.reminderOption == "1_hour" ? "1 Hr" : "30m"} Pre-Darshan" : ""}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF71717A), fontWeight: FontWeight.w500),
+                  style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  ),
                 ),
               ],
             ),
@@ -327,3 +345,4 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
     );
   }
 }
+

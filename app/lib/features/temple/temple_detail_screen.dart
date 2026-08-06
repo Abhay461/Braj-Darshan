@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,7 +12,7 @@ import '../../shared/providers/providers.dart';
 import '../../shared/providers/yatra_planner_provider.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/ad_banner_widget.dart';
-
+import '../../core/theme/app_theme.dart';
 import '../../core/localization/app_translations.dart';
 
 class TempleDetailScreen extends ConsumerStatefulWidget {
@@ -66,10 +67,12 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   void _shareTemple(Temple temple) {
+    HapticFeedback.lightImpact();
     Share.share('Explore ${temple.name} on Braj Darshan! Location: ${temple.address?.full ?? "Vrindavan"}');
   }
 
   void _openPlanYatraBottomSheet(Temple temple) {
+    HapticFeedback.lightImpact();
     DateTime selectedDate = DateTime.now().add(const Duration(days: 1));
     bool oneDayBefore = true;
     String reminderOption = '30_mins';
@@ -80,7 +83,6 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return StatefulBuilder(
           builder: (context, setModalState) {
             final dateStr = '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
@@ -92,7 +94,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                 bottom: MediaQuery.of(context).viewInsets.bottom + 20,
               ),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1A1817) : Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
               ),
               child: SingleChildScrollView(
@@ -105,7 +107,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                         width: 40,
                         height: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFA1A1AA),
+                          color: Theme.of(context).colorScheme.outline,
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
@@ -113,23 +115,25 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'Plan Yatra Visit — ${temple.name}',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 16),
 
-                    // Date Selection Tile
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.calendar_month, color: Color(0xFFE56B00)),
-                      title: const Text('Planned Visit Date', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                      subtitle: Text(dateStr, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                      leading: const Icon(Icons.calendar_month, color: AppTheme.saffronHighlight),
+                      title: Text('Planned Visit Date', style: Theme.of(context).textTheme.titleSmall),
+                      subtitle: Text(dateStr, style: Theme.of(context).textTheme.titleMedium),
                       trailing: TextButton(
-                        child: const Text('Change Date', style: TextStyle(color: Color(0xFFE56B00), fontWeight: FontWeight.w700)),
+                        child: Text(
+                          'Change Date',
+                          style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                            color: AppTheme.saffronHighlight,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                         onPressed: () async {
+                          HapticFeedback.lightImpact();
                           final picked = await showDatePicker(
                             context: context,
                             initialDate: selectedDate,
@@ -145,40 +149,46 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
 
                     const Divider(),
 
-                    // 1 Day Before Reminder Toggle
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('1 Day Before Evening Reminder', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                      subtitle: const Text('Get an alert at 8:00 PM the evening before your visit', style: TextStyle(fontSize: 12)),
+                      title: Text('1 Day Before Evening Reminder', style: Theme.of(context).textTheme.titleSmall),
+                      subtitle: Text('Get an alert at 8:00 PM the evening before your visit', style: Theme.of(context).textTheme.bodySmall),
                       value: oneDayBefore,
-                      activeColor: const Color(0xFFE56B00),
-                      onChanged: (val) => setModalState(() => oneDayBefore = val),
+                      activeColor: AppTheme.saffronHighlight,
+                      onChanged: (val) {
+                        HapticFeedback.selectionClick();
+                        setModalState(() => oneDayBefore = val);
+                      },
                     ),
 
                     const Divider(),
 
-                    // Pre-Darshan Alert Window
-                    const Text('Pre-Darshan Reminder Option', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                    Text('Pre-Darshan Reminder Option', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 8),
                     Row(
                       children: [
                         ChoiceChip(
                           label: const Text('30 Mins Before'),
                           selected: reminderOption == '30_mins',
-                          onSelected: (val) => setModalState(() => reminderOption = '30_mins'),
+                          onSelected: (val) {
+                            HapticFeedback.selectionClick();
+                            setModalState(() => reminderOption = '30_mins');
+                          },
                         ),
                         const SizedBox(width: 8),
                         ChoiceChip(
                           label: const Text('1 Hour Before'),
                           selected: reminderOption == '1_hour',
-                          onSelected: (val) => setModalState(() => reminderOption = '1_hour'),
+                          onSelected: (val) {
+                            HapticFeedback.selectionClick();
+                            setModalState(() => reminderOption = '1_hour');
+                          },
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 16),
 
-                    // Notes Field
                     TextField(
                       controller: notesController,
                       decoration: const InputDecoration(
@@ -189,15 +199,15 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
 
                     const SizedBox(height: 20),
 
-                    // Save Plan Button
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE56B00),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppTheme.saffronHighlight,
+                        foregroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                       ),
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         final newPlan = YatraPlan(
                           id: DateTime.now().millisecondsSinceEpoch.toString(),
                           templeId: temple.id,
@@ -216,13 +226,19 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text('Yatra visit planned! Notification reminder scheduled.'),
-                            backgroundColor: Color(0xFFE56B00),
+                            backgroundColor: AppTheme.saffronHighlight,
                           ),
                         );
 
                         context.push('/yatra-planner');
                       },
-                      child: const Text('Confirm & Save Yatra Plan', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                      child: Text(
+                        'Confirm & Save Yatra Plan',
+                        style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -236,8 +252,6 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(title: const Text('Temple Details')),
@@ -275,228 +289,223 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     return SafeArea(
       top: true,
       child: Scaffold(
-      backgroundColor: isDark ? const Color(0xFF121110) : const Color(0xFFFAF8F5),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF1A1817) : const Color(0xFFF3EFEA),
-        title: Text(
-          temple.name,
-          style: TextStyle(
-            color: isDark ? Colors.white : const Color(0xFF18181B),
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: Text(
+            temple.name,
+            style: Theme.of(context).textTheme.headlineSmall,
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isFav ? Icons.favorite : Icons.favorite_border,
-              color: isFav ? const Color(0xFFDC2626) : (isDark ? Colors.white : const Color(0xFF18181B)),
+          actions: [
+            IconButton(
+              icon: Icon(
+                isFav ? Icons.favorite : Icons.favorite_border,
+                color: isFav ? Colors.redAccent : Theme.of(context).colorScheme.onSurface,
+              ),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                ref.read(favoritesProvider.notifier).toggleFavorite(temple.id);
+              },
             ),
-            onPressed: () {
-              ref.read(favoritesProvider.notifier).toggleFavorite(temple.id);
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.share_outlined, color: isDark ? Colors.white : const Color(0xFF18181B)),
-            onPressed: () => _shareTemple(temple),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            controller: _scrollController,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 1. Banner Image Card
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: Hero(
-                    tag: 'temple_image_${temple.id}',
-                    child: CachedNetworkImage(
-                      imageUrl: temple.coverImage.isNotEmpty ? temple.coverImage : 'https://via.placeholder.com/600',
-                      height: 220,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
-                        height: 220,
-                        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
-                      ),
-                      errorWidget: (_, __, ___) => Container(
-                        height: 220,
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-                        child: const Icon(Icons.temple_hindu_outlined, size: 64, color: Color(0xFF71717A)),
+            IconButton(
+              icon: Icon(Icons.share_outlined, color: Theme.of(context).colorScheme.onSurface),
+              onPressed: () => _shareTemple(temple),
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: Hero(
+                      tag: 'temple_image_${temple.id}',
+                      child: Semantics(
+                        label: temple.name,
+                        image: true,
+                        child: CachedNetworkImage(
+                          imageUrl: temple.coverImage.isNotEmpty ? temple.coverImage : 'https://via.placeholder.com/600',
+                          height: 220,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (_, __) => Container(
+                            height: 220,
+                            color: Theme.of(context).colorScheme.surface,
+                          ),
+                          errorWidget: (_, __, ___) => Container(
+                            height: 220,
+                            color: Theme.of(context).colorScheme.surface,
+                            child: Icon(Icons.temple_hindu_outlined, size: 64, color: Theme.of(context).colorScheme.onSurface),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Temple Name & Location Header
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            temple.name,
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w800,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
-                              letterSpacing: -0.5,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              temple.name,
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
-                          ),
-                          const SizedBox(height: 6),
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined, size: 15, color: Color(0xFF71717A)),
-                              const SizedBox(width: 4),
-                              Text(
-                                locationName,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF71717A),
-                                  fontWeight: FontWeight.w600,
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.location_on_outlined,
+                                  size: 15,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                const SizedBox(width: 4),
+                                Text(
+                                  locationName,
+                                  style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 20),
-
-                // 2. Darshan & Aarti Timings Card
-                _buildSectionCard(
-                  context: context,
-                  icon: Icons.access_time_outlined,
-                  title: AppTranslations.getText(currentLang, 'darshan_timing'),
-                  child: Text(
-                    temple.darshanTiming?.isNotEmpty == true
-                        ? temple.darshanTiming!
-                        : 'Morning: 05:00 AM – 12:00 PM\nEvening: 04:00 PM – 09:00 PM',
-                    style: TextStyle(
-                      fontSize: 14,
-                      height: 1.5,
-                      color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF3F3F46),
-                    ),
+                    ],
                   ),
-                ),
 
-                const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
-                // 3. History & Heritage Card
-                if (temple.history?.isNotEmpty == true)
                   _buildSectionCard(
                     context: context,
-                    icon: Icons.auto_stories_outlined,
-                    title: AppTranslations.getText(currentLang, 'history'),
+                    icon: Icons.access_time_outlined,
+                    title: AppTranslations.getText(currentLang, 'darshan_timing'),
                     child: Text(
-                      temple.history!,
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.6,
-                        color: isDark ? const Color(0xFFD4D4D8) : const Color(0xFF3F3F46),
+                      temple.darshanTiming?.isNotEmpty == true
+                          ? temple.darshanTiming!
+                          : 'Morning: 05:00 AM – 12:00 PM\nEvening: 04:00 PM – 09:00 PM',
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        height: 1.5,
                       ),
                     ),
                   ),
 
-                const SizedBox(height: 24),
-                const AdBannerWidget(),
-                const SizedBox(height: 100), // Padding for dual sticky bottom bar
-              ],
-            ),
-          ),
+                  const SizedBox(height: 16),
 
-          // Floating Scroll To Top Button
-          if (_showScrollToTop)
-            Positioned(
-              bottom: 100,
-              right: 16,
-              child: FloatingActionButton.small(
-                backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                foregroundColor: isDark ? Colors.black : Colors.white,
-                onPressed: () {
-                  _scrollController.animateTo(
-                    0,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeOutCubic,
-                  );
-                },
-                child: const Icon(Icons.arrow_upward, size: 18),
+                  if (temple.history?.isNotEmpty == true)
+                    _buildSectionCard(
+                      context: context,
+                      icon: Icons.auto_stories_outlined,
+                      title: AppTranslations.getText(currentLang, 'history'),
+                      child: Text(
+                        temple.history!,
+                        style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          height: 1.6,
+                        ),
+                      ),
+                    ),
+
+                  const SizedBox(height: 24),
+                  const AdBannerWidget(),
+                  const SizedBox(height: 100),
+                ],
               ),
-            ).animate().scale(duration: 200.ms),
+            ),
 
-          // Sticky Bottom Action Bar (Plan Yatra + Get Directions)
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: SafeArea(
-                top: false,
-                child: Row(
-                  children: [
-                    // Plan Yatra Button
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFE56B00), // Saffron
-                          foregroundColor: Colors.white,
-                          minimumSize: const Size(0, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+            if (_showScrollToTop)
+              Positioned(
+                bottom: 100,
+                right: 16,
+                child: FloatingActionButton.small(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    _scrollController.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeOutCubic,
+                    );
+                  },
+                  child: const Icon(Icons.arrow_upward, size: 18),
+                ),
+              ).animate().scale(duration: 200.ms),
+
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: SafeArea(
+                  top: false,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.saffronHighlight,
+                            foregroundColor: Colors.black,
+                            minimumSize: const Size(0, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
                           ),
-                        ),
-                        icon: const Icon(Icons.event_available_outlined, size: 18),
-                        label: Text(
-                          AppTranslations.getText(currentLang, 'plan_yatra'),
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                        ),
-                        onPressed: () => _openPlanYatraBottomSheet(temple),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // Get Directions Button
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                          foregroundColor: isDark ? Colors.black : Colors.white,
-                          minimumSize: const Size(0, 48),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(14),
+                          icon: const Icon(Icons.event_available_outlined, size: 18),
+                          label: Text(
+                            AppTranslations.getText(currentLang, 'plan_yatra'),
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
+                          onPressed: () => _openPlanYatraBottomSheet(temple),
                         ),
-                        icon: const Icon(Icons.directions_outlined, size: 18),
-                        label: Text(
-                          AppTranslations.getText(currentLang, 'directions'),
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-                        ),
-                        onPressed: () => _openGoogleMaps(temple.latitude, temple.longitude, temple.name),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                            minimumSize: const Size(0, 48),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const Icon(Icons.directions_outlined, size: 18),
+                          label: Text(
+                            AppTranslations.getText(currentLang, 'directions'),
+                            style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          onPressed: () {
+                            HapticFeedback.lightImpact();
+                            _openGoogleMaps(temple.latitude, temple.longitude, temple.name);
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget _buildSectionCard({
     required BuildContext context,
@@ -504,7 +513,6 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     required String title,
     required Widget child,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Column(
@@ -512,16 +520,11 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: isDark ? Colors.white : const Color(0xFF18181B)),
+              Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurface),
               const SizedBox(width: 8),
               Text(
                 title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                  letterSpacing: -0.3,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
           ),
@@ -532,3 +535,4 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     );
   }
 }
+

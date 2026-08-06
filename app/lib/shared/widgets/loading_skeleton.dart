@@ -43,8 +43,7 @@ class _LoadingSkeletonState extends State<LoadingSkeleton>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? const Color(0xFF1E1E22) : const Color(0xFFE4E4E7);
+    final baseColor = Theme.of(context).colorScheme.outlineVariant;
 
     return AnimatedBuilder(
       animation: _animation,
@@ -61,3 +60,4 @@ class _LoadingSkeletonState extends State<LoadingSkeleton>
     );
   }
 }
+

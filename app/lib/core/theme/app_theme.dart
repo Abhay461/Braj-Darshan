@@ -3,20 +3,101 @@ import 'package:flutter/services.dart';
 
 /// Braj Darshan — System Theme & Color Tokens
 class AppTheme {
-  // Color Tokens
+  // Brand color tokens — Primary design language: Charcoal Black + White + Indigo
   static const Color primaryCharcoal = Color(0xFF18181B); // Charcoal Black
   static const Color secondaryIndigo = Color(0xFF5E5CE6); // Royal Indigo
   static const Color accentSkyBlue = Color(0xFF0EA5E9);   // Sky Blue
+  
+  // Devotional / Festival Accent (Reserved for badges & highlights, NOT primary/secondary)
+  static const Color saffronHighlight = Color(0xFFFFB300); // Saffron
+
   static const Color canvasLight = Color(0xFFFAF9F6);     // Off-white canvas
-  static const Color canvasDark = Color(0xFF09090B);      // Pure dark obsidian
+  static const Color canvasDark = Color(0xFF09090B);      // Obsidian dark
   static const Color cardLight = Color(0xFFFFFFFF);
   static const Color cardDark = Color(0xFF141417);
   static const Color borderLight = Color(0xFFE5E7EB);     // Clean Gray Border
   static const Color borderDark = Color(0xFF27272A);
-  static const Color mutedGray = Color(0xFF71717A);
+  static const Color mutedGrayLight = Color(0xFF64748B);  // WCAG AA compliant slate gray
+  static const Color mutedGrayDark = Color(0xFFA1A1AA);   // Light slate gray for dark theme
 
   // System Design Tokens
   static const double borderRadius = 18.0;
+
+  // Complete Typography Scale (Inter Font Family)
+  static TextTheme appTextTheme(Color defaultTextColor) => TextTheme(
+        headlineLarge: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.w800,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        headlineMedium: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        headlineSmall: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        titleLarge: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        titleMedium: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        titleSmall: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        bodyMedium: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        bodySmall: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        labelLarge: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        labelMedium: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+        labelSmall: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          fontFamily: 'Inter',
+          color: defaultTextColor,
+        ),
+      );
 
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
@@ -26,12 +107,15 @@ class AppTheme {
       primary: primaryCharcoal,
       onPrimary: Colors.white,
       secondary: secondaryIndigo,
+      onSecondary: Colors.white,
       tertiary: accentSkyBlue,
       surface: cardLight,
       onSurface: primaryCharcoal,
       outline: borderLight,
+      outlineVariant: borderLight,
     ),
     fontFamily: 'Inter',
+    textTheme: appTextTheme(primaryCharcoal),
     appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -47,7 +131,6 @@ class AppTheme {
         fontSize: 18,
         fontWeight: FontWeight.w800,
         fontFamily: 'Inter',
-        letterSpacing: -0.4,
       ),
     ),
     cardTheme: CardThemeData(
@@ -61,17 +144,27 @@ class AppTheme {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         side: const BorderSide(color: borderLight, width: 1),
       ),
       labelStyle: const TextStyle(
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w600,
         color: primaryCharcoal,
         fontFamily: 'Inter',
       ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(48, 48),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      minVerticalPadding: 12,
+      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      iconColor: primaryCharcoal,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -100,12 +193,15 @@ class AppTheme {
       primary: Colors.white,
       onPrimary: primaryCharcoal,
       secondary: secondaryIndigo,
+      onSecondary: Colors.white,
       tertiary: accentSkyBlue,
       surface: cardDark,
       onSurface: Colors.white,
       outline: borderDark,
+      outlineVariant: borderDark,
     ),
     fontFamily: 'Inter',
+    textTheme: appTextTheme(Colors.white),
     appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
@@ -121,7 +217,6 @@ class AppTheme {
         fontSize: 18,
         fontWeight: FontWeight.w800,
         fontFamily: 'Inter',
-        letterSpacing: -0.4,
       ),
     ),
     cardTheme: CardThemeData(
@@ -135,17 +230,27 @@ class AppTheme {
     ),
     chipTheme: ChipThemeData(
       backgroundColor: cardDark,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         side: const BorderSide(color: borderDark, width: 1),
       ),
       labelStyle: const TextStyle(
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w600,
         color: Colors.white,
         fontFamily: 'Inter',
       ),
+    ),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        minimumSize: const Size(48, 48),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      minVerticalPadding: 12,
+      contentPadding: EdgeInsets.symmetric(horizontal: 16),
+      iconColor: Colors.white,
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -166,3 +271,4 @@ class AppTheme {
     ),
   );
 }
+

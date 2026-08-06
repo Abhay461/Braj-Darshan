@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -11,20 +12,26 @@ class LocationsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final locationsAsync = ref.watch(locationsProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Holy Dham Locations'),
+        title: Text(
+          'Holy Dham Locations',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: locationsAsync.when(
         data: (locations) {
           if (locations.isEmpty) {
-            return const Center(child: Text('No locations found'));
+            return Center(
+              child: Text(
+                'No locations found',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            );
           }
           return ListView.separated(
             padding: const EdgeInsets.all(16.0),
@@ -39,24 +46,18 @@ class LocationsScreen extends ConsumerWidget {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141417) : Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark ? const Color(0x20000000) : const Color(0x06000000),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Material(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(18),
                   child: InkWell(
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       ref.read(searchQueryProvider.notifier).state = SearchQuery(
                         locationId: loc.id,
                       );
@@ -71,13 +72,13 @@ class LocationsScreen extends ConsumerWidget {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
                               Icons.location_on_outlined,
                               size: 26,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -87,25 +88,23 @@ class LocationsScreen extends ConsumerWidget {
                               children: [
                                 Text(
                                   loc.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                    color: isDark ? Colors.white : const Color(0xFF18181B),
-                                    letterSpacing: -0.3,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleMedium,
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   locationSubtitle,
-                                  style: const TextStyle(
-                                    fontSize: 13,
-                                    color: Color(0xFF71717A),
+                                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.chevron_right, size: 20, color: Color(0xFFA1A1AA)),
+                          Icon(
+                            Icons.chevron_right,
+                            size: 20,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                          ),
                         ],
                       ),
                     ),
@@ -133,3 +132,4 @@ class LocationsScreen extends ConsumerWidget {
     );
   }
 }
+

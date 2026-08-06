@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/providers/providers.dart';
 import '../../core/config/constants.dart';
@@ -12,35 +13,30 @@ class SettingsScreen extends ConsumerWidget {
     final currentLanguage = ref.watch(appLanguageProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(
+          'Settings',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 8.0),
           decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF141417) : Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+              color: Theme.of(context).colorScheme.outline,
               width: 1.5,
             ),
-            boxShadow: [
-              BoxShadow(
-                color: isDark ? const Color(0x30000000) : const Color(0x0A000000),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Dark Mode Switch (No Divider Line)
+              // 1. Dark Mode Switch
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
@@ -48,38 +44,38 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       isDark ? Icons.dark_mode : Icons.light_mode_outlined,
                       size: 20,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Dark Mode',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(width: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
+                        color: Theme.of(context).colorScheme.primary,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         isDark ? 'ON' : 'OFF',
-                        style: TextStyle(
+                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: isDark ? Colors.black : Colors.white,
-                          letterSpacing: 0.5,
+                          color: Theme.of(context).colorScheme.onPrimary,
                         ),
                       ),
                     ),
                     const Spacer(),
                     Switch(
                       value: isDark,
-                      activeColor: isDark ? Colors.black : Colors.white,
-                      activeTrackColor: isDark ? Colors.white : const Color(0xFF18181B),
-                      inactiveThumbColor: const Color(0xFF71717A),
-                      inactiveTrackColor: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                      activeColor: Theme.of(context).colorScheme.onPrimary,
+                      activeTrackColor: Theme.of(context).colorScheme.primary,
+                      inactiveThumbColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                      inactiveTrackColor: Theme.of(context).colorScheme.outline,
                       onChanged: (bool enabled) {
+                        HapticFeedback.lightImpact();
                         ref.read(themeModeProvider.notifier).setTheme(enabled ? ThemeMode.dark : ThemeMode.light);
                       },
                     ),
@@ -89,7 +85,7 @@ class SettingsScreen extends ConsumerWidget {
 
               const SizedBox(height: 12),
 
-              // 2. Language Selection Header (No Divider Line)
+              // 2. Language Selection Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                 child: Row(
@@ -97,46 +93,48 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       Icons.language_outlined,
                       size: 20,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     const SizedBox(width: 12),
-                    const Text(
+                    Text(
                       'Language',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                   ],
                 ),
               ),
 
-              // English Radio Option
               RadioListTile<String>(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                dense: true,
-                title: const Text('English', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                title: Text('English', style: Theme.of(context).textTheme.bodyMedium),
                 value: 'en',
                 groupValue: currentLanguage,
-                activeColor: isDark ? Colors.white : const Color(0xFF18181B),
+                activeColor: Theme.of(context).colorScheme.secondary,
                 onChanged: (val) {
-                  if (val != null) ref.read(appLanguageProvider.notifier).setLanguage(val);
+                  if (val != null) {
+                    HapticFeedback.selectionClick();
+                    ref.read(appLanguageProvider.notifier).setLanguage(val);
+                  }
                 },
               ),
 
-              // Hindi Radio Option
               RadioListTile<String>(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                dense: true,
-                title: const Text('हिंदी (Hindi)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                title: Text('हिंदी (Hindi)', style: Theme.of(context).textTheme.bodyMedium),
                 value: 'hi',
                 groupValue: currentLanguage,
-                activeColor: isDark ? Colors.white : const Color(0xFF18181B),
+                activeColor: Theme.of(context).colorScheme.secondary,
                 onChanged: (val) {
-                  if (val != null) ref.read(appLanguageProvider.notifier).setLanguage(val);
+                  if (val != null) {
+                    HapticFeedback.selectionClick();
+                    ref.read(appLanguageProvider.notifier).setLanguage(val);
+                  }
                 },
               ),
 
               const SizedBox(height: 12),
 
-              // 3. About Section (No Divider Line)
+              // 3. About Section
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                 child: Row(
@@ -144,21 +142,20 @@ class SettingsScreen extends ConsumerWidget {
                     Icon(
                       Icons.info_outline,
                       size: 20,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       AppConstants.appName,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const Spacer(),
                     Text(
                       'v${AppConstants.appVersion}',
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF71717A), fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.labelSmall!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -170,3 +167,4 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 }
+

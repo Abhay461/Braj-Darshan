@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -11,20 +12,26 @@ class CategoriesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Shrine Categories'),
+        title: Text(
+          'Shrine Categories',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: categoriesAsync.when(
         data: (categories) {
           if (categories.isEmpty) {
-            return const Center(child: Text('No categories found'));
+            return Center(
+              child: Text(
+                'No categories found',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            );
           }
           return GridView.builder(
             padding: const EdgeInsets.all(16.0),
@@ -42,24 +49,18 @@ class CategoriesScreen extends ConsumerWidget {
 
               return Container(
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF141417) : Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(18),
                   border: Border.all(
-                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: isDark ? const Color(0x20000000) : const Color(0x06000000),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
                 ),
                 child: Material(
                   color: Colors.transparent,
                   borderRadius: BorderRadius.circular(18),
                   child: InkWell(
                     onTap: () {
+                      HapticFeedback.lightImpact();
                       ref.read(searchQueryProvider.notifier).state = SearchQuery(
                         categoryId: cat.id,
                       );
@@ -75,13 +76,13 @@ class CategoriesScreen extends ConsumerWidget {
                           Container(
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               Icons.temple_hindu_outlined,
                               size: 24,
-                              color: isDark ? Colors.white : const Color(0xFF18181B),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                           Column(
@@ -89,21 +90,15 @@ class CategoriesScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 cat.name,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                                  letterSpacing: -0.3,
-                                ),
+                                style: Theme.of(context).textTheme.titleMedium,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 displayDesc,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF71717A),
+                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -140,3 +135,4 @@ class CategoriesScreen extends ConsumerWidget {
     );
   }
 }
+

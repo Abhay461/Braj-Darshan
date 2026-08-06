@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -53,6 +54,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
   }
 
   void _selectSuggestion(String suggestion) {
+    HapticFeedback.selectionClick();
     _searchController.text = suggestion;
     ref.read(searchQueryProvider.notifier).state = SearchQuery(
       text: suggestion,
@@ -61,16 +63,14 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final searchAsync = ref.watch(searchTemplesProvider);
     final queryText = ref.watch(searchQueryProvider).text;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
         titleSpacing: 0,
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Padding(
           padding: const EdgeInsets.only(right: 16.0),
           child: TextField(
@@ -84,6 +84,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   ? IconButton(
                       icon: const Icon(Icons.clear, size: 18),
                       onPressed: () {
+                        HapticFeedback.lightImpact();
                         _searchController.clear();
                         _onSearchChanged('');
                         setState(() {});
@@ -103,26 +104,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             if (queryText.isEmpty) ...[
               Text(
                 'Popular Searches',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : const Color(0xFF18181B),
-                ),
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               Wrap(
                 spacing: 8,
-                runSpacing: 8,
+                runSpacing: 10,
                 children: _popularSuggestions
                     .map((sug) => ActionChip(
                           label: Text(sug),
-                          backgroundColor: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
-                          side: BorderSide(color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7)),
-                          labelStyle: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : const Color(0xFF18181B),
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          backgroundColor: Theme.of(context).colorScheme.surface,
+                          side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                          labelStyle: Theme.of(context).textTheme.labelMedium,
                           onPressed: () => _selectSuggestion(sug),
                         ))
                     .toList(),
@@ -140,13 +134,16 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.search_off_outlined, size: 48, color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A)),
+                          Icon(
+                            Icons.search_off_outlined,
+                            size: 48,
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                          ),
                           const SizedBox(height: 12),
                           Text(
                             'No shrines matching "$queryText"',
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ),
                           ),
                         ],
@@ -164,22 +161,25 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                   children: [
                     Text(
                       '${temples.length} Results Found',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
-                      ),
+                      style: Theme.of(context).textTheme.titleSmall,
                     ),
                     const SizedBox(height: 12),
-                    Column(
-                      children: temples
-                          .map((t) => TempleCard(
-                                temple: t,
-                                showImage: false,
-                                heroTag: 'search_${t.id}',
-                                onTap: () => context.push('/temple/${t.id}'),
-                              ))
-                          .toList(),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: temples.length,
+                      itemBuilder: (context, index) {
+                        final t = temples[index];
+                        return TempleCard(
+                          temple: t,
+                          showImage: false,
+                          heroTag: 'search_${t.id}',
+                          onTap: () {
+                            HapticFeedback.lightImpact();
+                            context.push('/temple/${t.id}');
+                          },
+                        );
+                      },
                     ).animate().fadeIn(duration: 250.ms),
                   ],
                 );
@@ -204,3 +204,4 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     );
   }
 }
+

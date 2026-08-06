@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -12,16 +13,17 @@ class FavoritesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final favoriteIds = ref.watch(favoritesProvider);
     final allTemplesAsync = ref.watch(allTemplesProvider);
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF09090B) : const Color(0xFFFAFAFA),
       appBar: AppBar(
-        title: const Text('Saved Favorites'),
+        title: Text(
+          'Saved Favorites',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
         elevation: 0,
-        backgroundColor: isDark ? const Color(0xFF09090B) : Colors.white,
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
       body: favoriteIds.isEmpty
           ? Center(
@@ -33,46 +35,48 @@ class FavoritesScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
+                        color: Theme.of(context).colorScheme.surface,
                         shape: BoxShape.circle,
+                        border: Border.all(color: Theme.of(context).colorScheme.outline),
                       ),
                       child: Icon(
                         Icons.favorite_border,
                         size: 48,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Text(
                       'No Saved Shrines Yet',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                      ),
+                      style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Tap the heart icon on any temple card to save it here for quick access.',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                         height: 1.5,
                       ),
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isDark ? Colors.white : const Color(0xFF18181B),
-                        foregroundColor: isDark ? Colors.black : Colors.white,
+                        minimumSize: const Size(160, 48),
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                       ),
-                      onPressed: () => context.go('/'),
-                      child: const Text('Explore Shrines', style: TextStyle(fontWeight: FontWeight.w600)),
+                      onPressed: () {
+                        HapticFeedback.lightImpact();
+                        context.go('/');
+                      },
+                      child: Text('Explore Shrines', style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      )),
                     ),
                   ],
                 ),
@@ -82,27 +86,34 @@ class FavoritesScreen extends ConsumerWidget {
               data: (temples) {
                 final favTemples = temples.where((t) => favoriteIds.contains(t.id)).toList();
                 if (favTemples.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Padding(
-                      padding: EdgeInsets.all(32.0),
-                      child: Text('Loading saved shrines...'),
+                      padding: const EdgeInsets.all(32.0),
+                      child: Text(
+                        'Loading saved shrines...',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   );
                 }
-                return SingleChildScrollView(
+                return ListView.separated(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: favTemples
-                        .map((t) => TempleCard(
-                              temple: t,
-                              showImage: true,
-                              imageHeight: 110,
-                              heroTag: 'fav_${t.id}',
-                              onTap: () => context.push('/temple/${t.id}'),
-                            ))
-                        .toList(),
-                  ).animate().fadeIn(duration: 250.ms),
-                );
+                  itemCount: favTemples.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 12),
+                  itemBuilder: (context, index) {
+                    final t = favTemples[index];
+                    return TempleCard(
+                      temple: t,
+                      showImage: true,
+                      imageHeight: 110,
+                      heroTag: 'fav_${t.id}',
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.push('/temple/${t.id}');
+                      },
+                    );
+                  },
+                ).animate().fadeIn(duration: 250.ms);
               },
               loading: () => const Padding(
                 padding: EdgeInsets.all(16.0),
@@ -122,3 +133,4 @@ class FavoritesScreen extends ConsumerWidget {
     );
   }
 }
+

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../models/models.dart';
@@ -49,9 +50,11 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
   }
 
   void _onFavoriteToggle() {
+    HapticFeedback.lightImpact();
     _favoriteAnimController.forward().then((_) => _favoriteAnimController.reverse());
     ref.read(favoritesProvider.notifier).toggleFavorite(widget.temple.id);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -114,12 +117,10 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                       children: [
                         Text(
                           widget.temple.name,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : const Color(0xFF18181B),
-                            letterSpacing: -0.3,
-                          ),
+                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: -0.3,
+                            ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -131,10 +132,9 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                             Expanded(
                               child: Text(
                                 locationName.isNotEmpty ? locationName : 'Vrindavan',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF71717A),
+                                style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                   fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -288,21 +288,25 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                 children: [
                   Hero(
                     tag: tag,
-                    child: CachedNetworkImage(
-                      imageUrl: widget.temple.thumbnailImage?.isNotEmpty == true
-                          ? widget.temple.thumbnailImage!
-                          : (widget.temple.coverImage.isNotEmpty ? widget.temple.coverImage : 'https://via.placeholder.com/300'),
-                      height: widget.imageHeight,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
+                    child: Semantics(
+                      label: widget.temple.name,
+                      image: true,
+                      child: CachedNetworkImage(
+                        imageUrl: widget.temple.thumbnailImage?.isNotEmpty == true
+                            ? widget.temple.thumbnailImage!
+                            : (widget.temple.coverImage.isNotEmpty ? widget.temple.coverImage : 'https://via.placeholder.com/300'),
                         height: widget.imageHeight,
-                        color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        height: widget.imageHeight,
-                        color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-                        child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: widget.imageHeight,
+                          color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          height: widget.imageHeight,
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                          child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
+                        ),
                       ),
                     ),
                   ),
@@ -344,12 +348,10 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                   children: [
                     Text(
                       widget.temple.name,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : const Color(0xFF18181B),
-                        letterSpacing: -0.3,
-                      ),
+style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -0.3,
+                        ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -361,10 +363,9 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                         Expanded(
                           child: Text(
                             locationName.isNotEmpty ? locationName : 'Vrindavan',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF71717A),
+                            style: Theme.of(context).textTheme.labelSmall!.copyWith(
                               fontWeight: FontWeight.w500,
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
