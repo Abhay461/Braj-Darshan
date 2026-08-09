@@ -7,9 +7,13 @@ export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'x-admin-api-key': import.meta.env.VITE_ADMIN_API_KEY || DEFAULT_ADMIN_KEY,
   },
   timeout: 15000,
+});
+
+apiClient.interceptors.request.use((config) => {
+  config.headers['x-admin-api-key'] = import.meta.env.VITE_ADMIN_API_KEY || DEFAULT_ADMIN_KEY;
+  return config;
 });
 
 apiClient.interceptors.response.use(
