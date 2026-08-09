@@ -9,20 +9,12 @@ import {
   DialogActions,
   Button,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Grid2 as Grid,
 } from '@mui/material';
 import { Category } from '../../types';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Category name is required').max(100),
-  description: z.string().optional(),
-  icon: z.string().optional(),
-  sortOrder: z.coerce.number().optional().default(0),
-  status: z.enum(['active', 'inactive']).default('active'),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -32,7 +24,7 @@ interface CategoryModalProps {
   category: Category | null;
   loading?: boolean;
   onClose: () => void;
-  onSubmit: (data: CategoryFormData) => Promise<void>;
+  onSubmit: (data: Partial<Category>) => Promise<void>;
 }
 
 export const CategoryModal: React.FC<CategoryModalProps> = ({
@@ -51,10 +43,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
-      description: '',
-      icon: 'temple_hindu',
-      sortOrder: 0,
-      status: 'active',
     },
   });
 
@@ -62,29 +50,27 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     if (category) {
       reset({
         name: category.name || '',
-        description: category.description || '',
-        icon: category.icon || 'temple_hindu',
-        sortOrder: category.sortOrder || 0,
-        status: category.status || 'active',
       });
     } else {
       reset({
         name: '',
-        description: '',
-        icon: 'temple_hindu',
-        sortOrder: 0,
-        status: 'active',
       });
     }
   }, [category, reset, open]);
 
   const handleFormSubmit = async (data: CategoryFormData) => {
-    await onSubmit(data);
+    await onSubmit({
+      name: data.name,
+      status: 'active',
+      sortOrder: 0,
+      icon: 'temple_hindu',
+      description: '',
+    });
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}>
       <DialogTitle sx={{ fontWeight: 700 }}>
         {category ? 'Edit Category' : 'Create New Category'}
       </DialogTitle>
@@ -100,55 +86,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     {...field}
                     label="Category Name *"
                     fullWidth
+                    autoFocus
                     error={!!errors.name}
                     helperText={errors.name?.message}
                   />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Description" fullWidth multiline rows={3} />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="icon"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Material Icon Code" fullWidth placeholder="temple_hindu" />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="sortOrder"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} type="number" label="Sort Order" fullWidth />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth size="medium">
-                    <InputLabel>Status</InputLabel>
-                    <Select {...field} label="Status">
-                      <MenuItem value="active">Active</MenuItem>
-                      <MenuItem value="inactive">Inactive</MenuItem>
-                    </Select>
-                  </FormControl>
                 )}
               />
             </Grid>

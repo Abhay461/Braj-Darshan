@@ -439,7 +439,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                   borderRadius: BorderRadius.circular(14),
                                 ),
                               ),
-                              icon: const Icon(Icons.event_available_outlined, size: 18),
+                              icon: const Icon(Icons.event_available_outlined, size: 18, color: Colors.black),
                               label: Text(
                                 AppTranslations.getText(currentLang, 'plan_yatra'),
                                 style: Theme.of(context).textTheme.labelLarge!.copyWith(
@@ -608,14 +608,14 @@ class _PlanYatraBottomSheetContentState extends ConsumerState<_PlanYatraBottomSh
 
             ListTile(
               contentPadding: EdgeInsets.zero,
-              leading: const Icon(Icons.calendar_month, color: AppTheme.saffronHighlight),
+              leading: Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.primary),
               title: Text('Planned Visit Date', style: Theme.of(context).textTheme.titleSmall),
               subtitle: Text(dateStr, style: Theme.of(context).textTheme.titleMedium),
               trailing: TextButton(
                 child: Text(
                   'Change Date',
                   style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: AppTheme.saffronHighlight,
+                    color: Theme.of(context).colorScheme.secondary,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -641,7 +641,7 @@ class _PlanYatraBottomSheetContentState extends ConsumerState<_PlanYatraBottomSh
               title: Text('1 Day Before Evening Reminder', style: Theme.of(context).textTheme.titleSmall),
               subtitle: Text('Get an alert at 8:00 PM the evening before your visit', style: Theme.of(context).textTheme.bodySmall),
               value: _oneDayBefore,
-              activeThumbColor: AppTheme.saffronHighlight,
+              activeTrackColor: Theme.of(context).colorScheme.primary,
               onChanged: (val) {
                 HapticFeedback.selectionClick();
                 setState(() => _oneDayBefore = val);

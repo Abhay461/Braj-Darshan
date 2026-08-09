@@ -59,17 +59,8 @@ export const CategoryList: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: 'name', headerName: 'Category Name', flex: 1, minWidth: 160 },
-    { field: 'slug', headerName: 'Slug', flex: 1, minWidth: 140 },
-    { field: 'description', headerName: 'Description', flex: 1.5, minWidth: 200 },
-    { field: 'icon', headerName: 'Icon Identifier', width: 140 },
-    { field: 'sortOrder', headerName: 'Sort Order', width: 110, align: 'center' },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 120,
-      renderCell: (params) => <StatusChip status={params.row.status} isDeleted={params.row.isDeleted} />,
-    },
+    { field: 'name', headerName: 'Category Name', flex: 1, minWidth: 200 },
+    { field: 'slug', headerName: 'Slug', flex: 1, minWidth: 160 },
     {
       field: 'actions',
       headerName: 'Actions',

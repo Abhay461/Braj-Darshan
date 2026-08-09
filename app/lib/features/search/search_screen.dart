@@ -66,7 +66,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     final searchAsync = ref.watch(searchTemplesProvider);
     final queryText = ref.watch(searchQueryProvider).text;
 
-    return Scaffold(
+    return SafeArea(
+      top: true,
+      child: Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
         elevation: 0,
@@ -201,7 +203,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
 

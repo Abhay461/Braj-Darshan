@@ -40,48 +40,51 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
     final completedPlans = plans.where((p) => p.isCompleted).toList()
       ..sort((a, b) => b.plannedDate.compareTo(a.plannedDate));
 
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            HapticFeedback.lightImpact();
-            context.pop();
-          },
-        ),
-        title: Text(
-          'My Yatra Plan',
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        actions: [
-          IconButton(
-            tooltip: _isCalendarView ? 'Switch to List View' : 'Switch to Calendar View',
-            icon: Icon(_isCalendarView ? Icons.view_list_outlined : Icons.calendar_month_outlined),
+    return SafeArea(
+      top: true,
+      child: Scaffold(
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               HapticFeedback.lightImpact();
-              setState(() => _isCalendarView = !_isCalendarView);
+              context.pop();
             },
           ),
-        ],
-        bottom: TabBar(
+          title: Text(
+            'My Yatra Plan',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          actions: [
+            IconButton(
+              tooltip: _isCalendarView ? 'Switch to List View' : 'Switch to Calendar View',
+              icon: Icon(_isCalendarView ? Icons.view_list_outlined : Icons.calendar_month_outlined),
+              onPressed: () {
+                HapticFeedback.lightImpact();
+                setState(() => _isCalendarView = !_isCalendarView);
+              },
+            ),
+          ],
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: Theme.of(context).colorScheme.primary,
+            labelColor: Theme.of(context).colorScheme.primary,
+            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            tabs: [
+              Tab(text: 'Upcoming (${upcomingPlans.length})'),
+              Tab(text: 'History (${completedPlans.length})'),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: Theme.of(context).colorScheme.primary,
-          labelColor: Theme.of(context).colorScheme.primary,
-          unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          tabs: [
-            Tab(text: 'Upcoming (${upcomingPlans.length})'),
-            Tab(text: 'History (${completedPlans.length})'),
+          children: [
+            _buildUpcomingTab(context, upcomingPlans),
+            _buildHistoryTab(context, completedPlans),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildUpcomingTab(context, upcomingPlans),
-          _buildHistoryTab(context, completedPlans),
-        ],
       ),
     );
   }
@@ -165,8 +168,8 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                     color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
-                  markerDecoration: const BoxDecoration(
-                    color: Colors.redAccent,
+                  markerDecoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.secondary,
                     shape: BoxShape.circle,
                   ),
                 ),

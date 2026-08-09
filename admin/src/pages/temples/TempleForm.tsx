@@ -347,14 +347,6 @@ export const TempleForm: React.FC = () => {
                 type="cover"
                 slug={nameValue ? nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'temple'}
               />
-
-              <Divider sx={{ my: 3 }} />
-
-              <GalleryManager
-                images={galleryImagesValue}
-                onChange={(updated) => setValue('galleryImages', updated)}
-                slug={nameValue ? nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'temple'}
-              />
             </CardContent>
           </Card>
         </Grid>
