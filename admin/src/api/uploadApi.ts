@@ -8,6 +8,7 @@ export const uploadApi = {
     formData.append('slug', slug);
     return apiClient.post('/upload/cover', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000, // 2 minutes timeout for image upload to Cloudinary
     });
   },
 
@@ -19,6 +20,7 @@ export const uploadApi = {
     formData.append('order', order.toString());
     return apiClient.post('/upload/gallery', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     });
   },
 
@@ -28,6 +30,7 @@ export const uploadApi = {
     formData.append('slug', slug);
     return apiClient.post('/upload/gallery-multiple', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     });
   },
 
@@ -37,9 +40,10 @@ export const uploadApi = {
     formData.append('folder', folder);
     return apiClient.post('/upload/image', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
     });
   },
 
   deleteImage: (urlOrPublicId: string): Promise<ApiResponse<null>> =>
-    apiClient.delete('/upload', { data: { publicId: urlOrPublicId, url: urlOrPublicId } }),
+    apiClient.delete('/upload', { data: { publicId: urlOrPublicId, url: urlOrPublicId }, timeout: 60000 }),
 };
