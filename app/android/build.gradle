@@ -11,6 +11,30 @@ subprojects {
 }
 subprojects {
     project.evaluationDependsOn(':app')
+    // Fix namespace for plugins that don't declare one (required by AGP 8+)
+    project.plugins.withId('com.android.library') {
+        if (project.android.namespace == null) {
+            def manifest = file("${project.projectDir}/src/main/AndroidManifest.xml")
+            if (manifest.exists()) {
+                def parsed = new groovy.xml.XmlParser().parse(manifest)
+                def packageName = parsed.attribute('package')
+                if (packageName != null) {
+                    project.android.namespace = packageName
+                }
+            }
+        }
+        // Force consistent JVM target across all library subprojects
+        project.android.compileOptions {
+            sourceCompatibility JavaVersion.VERSION_17
+            targetCompatibility JavaVersion.VERSION_17
+        }
+    }
+    // Force Kotlin JVM target to 17 for all subprojects
+    project.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = '17'
+        }
+    }
 }
 
 tasks.register("clean", Delete) {

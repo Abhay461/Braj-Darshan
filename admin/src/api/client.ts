@@ -6,6 +6,7 @@ export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
+    'x-admin-api-key': import.meta.env.VITE_ADMIN_API_KEY || '',
   },
   timeout: 15000,
 });

@@ -73,10 +73,10 @@ class FestivalsScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: AppTheme.saffronHighlight.withOpacity(0.15),
+                          color: AppTheme.saffronHighlight.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppTheme.saffronHighlight.withOpacity(0.3),
+                            color: AppTheme.saffronHighlight.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -110,7 +110,7 @@ class FestivalsScreen extends ConsumerWidget {
                             Text(
                               descText,
                               style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                                 height: 1.4,
                               ),
                               maxLines: 2,

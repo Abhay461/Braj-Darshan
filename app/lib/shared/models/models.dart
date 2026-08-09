@@ -237,6 +237,9 @@ class Temple {
   final String? darshanTiming;
   final String? phone;
   final String? website;
+  final String? donationUrl;
+  final String? guestHouseBookingUrl;
+  final String? liveDarshanUrl;
   final String? visitDuration;
   final bool parkingAvailable;
   final bool wheelchairAccessible;
@@ -267,6 +270,9 @@ class Temple {
     this.darshanTiming,
     this.phone,
     this.website,
+    this.donationUrl,
+    this.guestHouseBookingUrl,
+    this.liveDarshanUrl,
     this.visitDuration,
     this.parkingAvailable = false,
     this.wheelchairAccessible = false,
@@ -302,6 +308,9 @@ class Temple {
       darshanTiming: json['darshanTiming'],
       phone: json['phone'],
       website: json['website'],
+      donationUrl: json['donationUrl'],
+      guestHouseBookingUrl: json['guestHouseBookingUrl'],
+      liveDarshanUrl: json['liveDarshanUrl'],
       visitDuration: json['visitDuration'],
       parkingAvailable: json['parkingAvailable'] ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] ?? false,

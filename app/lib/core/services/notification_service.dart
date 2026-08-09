@@ -46,14 +46,14 @@ class NotificationService {
     await initialize();
     final baseId = plan.id.hashCode.abs();
 
-    final androidDetails = AndroidNotificationDetails(
+    const androidDetails = AndroidNotificationDetails(
       'braj_yatra_channel',
       'Yatra & Darshan Reminders',
       channelDescription: 'Notifications for planned temple visits and darshan timings',
       importance: Importance.high,
       priority: Priority.high,
     );
-    final details = NotificationDetails(android: androidDetails, iOS: const DarwinNotificationDetails());
+    const details = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
 
     final now = DateTime.now();
 

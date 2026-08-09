@@ -68,12 +68,17 @@ final searchTemplesProvider = FutureProvider<List<Temple>>((ref) async {
       );
 });
 
+// Temple Detail Provider Family
+final templeDetailProvider = FutureProvider.family<Temple?, String>((ref, idOrSlug) async {
+  return ref.watch(templeRepositoryProvider).getTempleByIdOrSlug(idOrSlug);
+});
+
 // Favorites Notifier (Hive Sync)
 class FavoritesNotifier extends StateNotifier<List<String>> {
   FavoritesNotifier() : super(HiveService.getFavoriteIds());
 
-  void toggleFavorite(String templeId) {
-    HiveService.toggleFavorite(templeId);
+  Future<void> toggleFavorite(String templeId) async {
+    await HiveService.toggleFavorite(templeId);
     state = HiveService.getFavoriteIds();
   }
 

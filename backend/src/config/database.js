@@ -9,6 +9,8 @@ const connectDatabase = async () => {
       socketTimeoutMS: 45000,
       serverSelectionTimeoutMS: 5000,
       heartbeatFrequencyMS: 10000,
+      tls: true,
+      tlsAllowInvalidCertificates: false,
     });
 
     logger.info(`MongoDB Connected: ${conn.connection.host}`);

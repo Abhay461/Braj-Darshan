@@ -134,7 +134,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                                 locationName.isNotEmpty ? locationName : 'Vrindavan',
                                 style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                   fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -228,7 +228,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: (isDark ? Colors.black : Colors.white).withOpacity(0.9),
+                        color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.9),
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
@@ -319,7 +319,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                         width: 34,
                         height: 34,
                         decoration: BoxDecoration(
-                          color: (isDark ? Colors.black : Colors.white).withOpacity(0.9),
+                          color: (isDark ? Colors.black : Colors.white).withValues(alpha: 0.9),
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
@@ -365,17 +365,17 @@ style: Theme.of(context).textTheme.titleMedium!.copyWith(
                             locationName.isNotEmpty ? locationName : 'Vrindavan',
                             style: Theme.of(context).textTheme.labelSmall!.copyWith(
                               fontWeight: FontWeight.w500,
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
+              ),
             ],
           ),
         ),

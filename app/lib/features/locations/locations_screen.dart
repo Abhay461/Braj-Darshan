@@ -72,7 +72,7 @@ class LocationsScreen extends ConsumerWidget {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
@@ -94,7 +94,7 @@ class LocationsScreen extends ConsumerWidget {
                                 Text(
                                   locationSubtitle,
                                   style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                   ),
                                 ),
                               ],
@@ -103,7 +103,7 @@ class LocationsScreen extends ConsumerWidget {
                           Icon(
                             Icons.chevron_right,
                             size: 20,
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
                           ),
                         ],
                       ),

@@ -42,7 +42,7 @@ class FavoritesScreen extends ConsumerWidget {
                       child: Icon(
                         Icons.favorite_border,
                         size: 48,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -55,7 +55,7 @@ class FavoritesScreen extends ConsumerWidget {
                       'Tap the heart icon on any temple card to save it here for quick access.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         height: 1.5,
                       ),
                     ),

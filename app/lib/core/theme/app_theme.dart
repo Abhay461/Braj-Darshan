@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Braj Darshan — System Theme & Color Tokens
 class AppTheme {
@@ -23,79 +24,69 @@ class AppTheme {
   // System Design Tokens
   static const double borderRadius = 18.0;
 
-  // Complete Typography Scale (Inter Font Family)
-  static TextTheme appTextTheme(Color defaultTextColor) => TextTheme(
-        headlineLarge: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w800,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        headlineSmall: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        titleSmall: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        labelLarge: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        labelMedium: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
-        ),
-        labelSmall: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          fontFamily: 'Inter',
-          color: defaultTextColor,
+  // Complete Typography Scale (Inter Font Family via Google Fonts)
+  static TextTheme appTextTheme(Color defaultTextColor) => GoogleFonts.interTextTheme(
+        TextTheme(
+          headlineLarge: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: defaultTextColor,
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.w700,
+            color: defaultTextColor,
+          ),
+          headlineSmall: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+            color: defaultTextColor,
+          ),
+          titleLarge: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: defaultTextColor,
+          ),
+          titleMedium: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: defaultTextColor,
+          ),
+          titleSmall: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: defaultTextColor,
+          ),
+          bodyLarge: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
+            color: defaultTextColor,
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: defaultTextColor,
+          ),
+          bodySmall: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: defaultTextColor,
+          ),
+          labelLarge: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: defaultTextColor,
+          ),
+          labelMedium: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: defaultTextColor,
+          ),
+          labelSmall: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: defaultTextColor,
+          ),
         ),
       );
 
@@ -114,13 +105,12 @@ class AppTheme {
       outline: borderLight,
       outlineVariant: borderLight,
     ),
-    fontFamily: 'Inter',
     textTheme: appTextTheme(primaryCharcoal),
     appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
       backgroundColor: canvasLight,
       elevation: 0,
@@ -130,7 +120,6 @@ class AppTheme {
         color: primaryCharcoal,
         fontSize: 18,
         fontWeight: FontWeight.w800,
-        fontFamily: 'Inter',
       ),
     ),
     cardTheme: CardThemeData(
@@ -153,7 +142,6 @@ class AppTheme {
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: primaryCharcoal,
-        fontFamily: 'Inter',
       ),
     ),
     iconButtonTheme: IconButtonThemeData(
@@ -200,7 +188,6 @@ class AppTheme {
       outline: borderDark,
       outlineVariant: borderDark,
     ),
-    fontFamily: 'Inter',
     textTheme: appTextTheme(Colors.white),
     appBarTheme: const AppBarTheme(
       systemOverlayStyle: SystemUiOverlayStyle(
@@ -216,7 +203,6 @@ class AppTheme {
         color: Colors.white,
         fontSize: 18,
         fontWeight: FontWeight.w800,
-        fontFamily: 'Inter',
       ),
     ),
     cardTheme: CardThemeData(
@@ -239,7 +225,6 @@ class AppTheme {
         fontSize: 13,
         fontWeight: FontWeight.w600,
         color: Colors.white,
-        fontFamily: 'Inter',
       ),
     ),
     iconButtonTheme: IconButtonThemeData(

@@ -106,36 +106,40 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                         point: LatLng(temple.latitude, temple.longitude),
                         width: isSelected ? 48.0 : 44.0,
                         height: isSelected ? 48.0 : 44.0,
-                        child: GestureDetector(
-                          onTap: () => _onMarkerTapped(temple),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.surface,
-                              shape: BoxShape.circle,
-                              border: Border.all(
+                        child: Semantics(
+                          label: 'Map Marker for ${temple.name}',
+                          button: true,
+                          child: GestureDetector(
+                            onTap: () => _onMarkerTapped(temple),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
                                 color: isSelected
-                                    ? Theme.of(context).colorScheme.secondary
-                                    : Theme.of(context).colorScheme.outline,
-                                width: isSelected ? 2.5 : 1.5,
-                              ),
-                              boxShadow: const [
-                                BoxShadow(
-                                  color: Color(0x1A000000),
-                                  blurRadius: 6,
-                                  offset: Offset(0, 2),
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Theme.of(context).colorScheme.surface,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).colorScheme.outline,
+                                  width: isSelected ? 2.5 : 1.5,
                                 ),
-                              ],
-                            ),
-                            child: Icon(
-                              Icons.temple_hindu,
-                              size: isSelected ? 22 : 18,
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurface,
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Color(0x1A000000),
+                                    blurRadius: 6,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.temple_hindu,
+                                size: isSelected ? 22 : 18,
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                           ),
                         ),
@@ -192,7 +196,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.shadow.withOpacity(0.15),
+                          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -247,7 +251,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                       Icon(
                                         Icons.location_on_outlined,
                                         size: 13,
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                       ),
                                       const SizedBox(width: 3),
                                       Expanded(
@@ -256,7 +260,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                               ? (_selectedTemple!.location as Location).name
                                               : 'Vrindavan Dham',
                                           style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,

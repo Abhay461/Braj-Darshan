@@ -9,7 +9,6 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentLanguage = ref.watch(appLanguageProvider);
 
     return Scaffold(
@@ -36,56 +35,7 @@ class SettingsScreen extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Dark Mode Switch
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: Row(
-                  children: [
-                    Icon(
-                      isDark ? Icons.dark_mode : Icons.light_mode_outlined,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    const SizedBox(width: 12),
-                    Text(
-                      'Dark Mode',
-                      style: Theme.of(context).textTheme.titleSmall,
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        isDark ? 'ON' : 'OFF',
-                        style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ),
-                    const Spacer(),
-                    Switch(
-                      value: isDark,
-                      activeColor: Theme.of(context).colorScheme.onPrimary,
-                      activeTrackColor: Theme.of(context).colorScheme.primary,
-                      inactiveThumbColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                      inactiveTrackColor: Theme.of(context).colorScheme.outline,
-                      onChanged: (bool enabled) {
-                        HapticFeedback.lightImpact();
-                        ref.read(themeModeProvider.notifier).setTheme(enabled ? ThemeMode.dark : ThemeMode.light);
-                      },
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // 2. Language Selection Header
+              // 1. Language Selection Header
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                 child: Row(
@@ -104,32 +54,30 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ),
 
-              RadioListTile<String>(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                title: Text('English', style: Theme.of(context).textTheme.bodyMedium),
-                value: 'en',
+              RadioGroup<String>(
                 groupValue: currentLanguage,
-                activeColor: Theme.of(context).colorScheme.secondary,
                 onChanged: (val) {
                   if (val != null) {
                     HapticFeedback.selectionClick();
                     ref.read(appLanguageProvider.notifier).setLanguage(val);
                   }
                 },
-              ),
-
-              RadioListTile<String>(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-                title: Text('हिंदी (Hindi)', style: Theme.of(context).textTheme.bodyMedium),
-                value: 'hi',
-                groupValue: currentLanguage,
-                activeColor: Theme.of(context).colorScheme.secondary,
-                onChanged: (val) {
-                  if (val != null) {
-                    HapticFeedback.selectionClick();
-                    ref.read(appLanguageProvider.notifier).setLanguage(val);
-                  }
-                },
+                child: Column(
+                  children: [
+                    RadioListTile<String>(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      title: Text('English', style: Theme.of(context).textTheme.bodyMedium),
+                      value: 'en',
+                      fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
+                    ),
+                    RadioListTile<String>(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      title: Text('हिंदी (Hindi)', style: Theme.of(context).textTheme.bodyMedium),
+                      value: 'hi',
+                      fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(height: 12),
@@ -153,7 +101,7 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       'v${AppConstants.appVersion}',
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

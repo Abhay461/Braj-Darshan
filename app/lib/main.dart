@@ -3,9 +3,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/ad_service.dart';
+import 'core/services/security_check.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'shared/providers/providers.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +24,13 @@ void main() async {
     debugPrint('AdService initialization error: $e');
   }
 
+  // Enforce root/jailbreak detection
+  try {
+    await SecurityCheck.enforceDeviceSecurity();
+  } catch (e) {
+    debugPrint('Security check error: $e');
+  }
+
   runApp(
     const ProviderScope(
       child: BrajDarshanApp(),
@@ -29,16 +38,16 @@ void main() async {
   );
 }
 
-class BrajDarshanApp extends ConsumerWidget {
+class BrajDarshanApp extends StatelessWidget {
   const BrajDarshanApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     const overlayStyle = SystemUiOverlayStyle(
-      statusBarColor: Color(0xFFFAF9F6),
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarColor: Color(0xFFFAF9F6),
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+      statusBarBrightness: Brightness.dark,
+      systemNavigationBarColor: AppTheme.canvasLight,
       systemNavigationBarIconBrightness: Brightness.dark,
     );
 

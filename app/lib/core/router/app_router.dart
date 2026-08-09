@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/temple/temple_detail_screen.dart';
@@ -12,6 +13,33 @@ import '../../features/settings/settings_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
+  errorBuilder: (context, state) => Scaffold(
+    appBar: AppBar(title: const Text('Page Not Found')),
+    body: Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.explore_off_outlined, size: 64, color: Colors.grey),
+          const SizedBox(height: 16),
+          Text(
+            'Shrine / Page Not Found',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'The requested link (${state.uri}) does not exist.',
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.home),
+            label: const Text('Return Home'),
+            onPressed: () => context.go('/'),
+          ),
+        ],
+      ),
+    ),
+  ),
   routes: [
     GoRoute(
       path: '/',
@@ -58,3 +86,4 @@ final appRouter = GoRouter(
     ),
   ],
 );
+

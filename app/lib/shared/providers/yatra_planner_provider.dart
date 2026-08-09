@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/yatra_plan.dart';
+import '../../core/services/hive_service.dart';
 import '../../core/services/notification_service.dart';
 
 class YatraPlannerNotifier extends StateNotifier<List<YatraPlan>> {
-  static const String _prefsKey = 'braj_yatra_plans_v1';
   final NotificationService _notificationService = NotificationService();
 
   YatraPlannerNotifier() : super([]) {
@@ -14,22 +14,23 @@ class YatraPlannerNotifier extends StateNotifier<List<YatraPlan>> {
 
   Future<void> _loadPlans() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonString = prefs.getString(_prefsKey);
-      if (jsonString != null && jsonString.isNotEmpty) {
-        final List<dynamic> decoded = jsonDecode(jsonString);
-        final plans = decoded.map((e) => YatraPlan.fromJson(e as Map<String, dynamic>)).toList();
-        state = plans;
-      }
-    } catch (_) {}
+      final rawList = HiveService.getYatraPlansRaw();
+      final plans = rawList.map((e) => YatraPlan.fromJson(jsonDecode(e) as Map<String, dynamic>)).toList();
+      state = plans;
+    } catch (e) {
+      debugPrint('YatraPlannerNotifier._loadPlans error: $e');
+    }
   }
 
   Future<void> _savePlans() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonString = jsonEncode(state.map((e) => e.toJson()).toList());
-      await prefs.setString(_prefsKey, jsonString);
-    } catch (_) {}
+      await HiveService.clearYatraPlans();
+      for (final plan in state) {
+        await HiveService.saveYatraPlanRaw(plan.id, jsonEncode(plan.toJson()));
+      }
+    } catch (e) {
+      debugPrint('YatraPlannerNotifier._savePlans error: $e');
+    }
   }
 
   Future<void> addPlan(YatraPlan plan) async {

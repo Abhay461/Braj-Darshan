@@ -1,13 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <base-config cleartextTrafficPermitted="true">
+    <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />
         </trust-anchors>
     </base-config>
+    <!-- Development hosts (debug) -->
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">10.0.2.2</domain>
         <domain includeSubdomains="true">localhost</domain>
         <domain includeSubdomains="true">127.0.0.1</domain>
+    </domain-config>
+
+    <!-- Production API with SSL pinning -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">braj-darshan-wdw9.onrender.com</domain>
+        <pin-set expiration="2030-01-01">
+            <!-- TODO: Replace with your SHA-256 hash of the server certificate -->
+            <pin digest="SHA-256">BB7Exp9mdxl7TvHAZ0IRZPSyadon8vUwKSyruwUfwbE=</pin>
+        </pin-set>
     </domain-config>
 </network-security-config>

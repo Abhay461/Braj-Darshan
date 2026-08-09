@@ -1,12 +1,29 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/constants.dart';
 
 class HiveService {
+  static const _secureStorage = FlutterSecureStorage();
+
+  static Future<Uint8List> _getEncryptionKey() async {
+    final existingKey = await _secureStorage.read(key: 'hive_enc_key');
+    if (existingKey != null) {
+      return Uint8List.fromList(base64Url.decode(existingKey));
+    }
+    final key = Hive.generateSecureKey();
+    await _secureStorage.write(key: 'hive_enc_key', value: base64UrlEncode(key));
+    return Uint8List.fromList(key);
+  }
+
   static Future<void> init() async {
     await Hive.initFlutter();
-    await Hive.openBox<String>(AppConstants.favoritesBox);
-    await Hive.openBox<String>(AppConstants.recentSearchesBox);
-    await Hive.openBox<dynamic>(AppConstants.settingsBox);
+    final encryptionKey = await _getEncryptionKey();
+    await Hive.openBox<String>(AppConstants.favoritesBox, encryptionCipher: HiveAesCipher(encryptionKey));
+    await Hive.openBox<String>(AppConstants.recentSearchesBox, encryptionCipher: HiveAesCipher(encryptionKey));
+    await Hive.openBox<dynamic>(AppConstants.settingsBox, encryptionCipher: HiveAesCipher(encryptionKey));
+    await Hive.openBox<String>(AppConstants.yatraPlansBox, encryptionCipher: HiveAesCipher(encryptionKey));
   }
 
   // Favorites Storage
@@ -45,5 +62,24 @@ class HiveService {
 
   static Future<void> setLanguage(String lang) async {
     await settingsBox.put('language', lang);
+  }
+
+  // Yatra Plans Storage
+  static Box<String> get yatraPlansBox => Hive.box<String>(AppConstants.yatraPlansBox);
+
+  static List<String> getYatraPlansRaw() {
+    return yatraPlansBox.values.toList();
+  }
+
+  static Future<void> saveYatraPlanRaw(String planId, String jsonString) async {
+    await yatraPlansBox.put(planId, jsonString);
+  }
+
+  static Future<void> deleteYatraPlanRaw(String planId) async {
+    await yatraPlansBox.delete(planId);
+  }
+
+  static Future<void> clearYatraPlans() async {
+    await yatraPlansBox.clear();
   }
 }

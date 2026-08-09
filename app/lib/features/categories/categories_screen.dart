@@ -33,99 +33,112 @@ class CategoriesScreen extends ConsumerWidget {
               ),
             );
           }
-          return GridView.builder(
-            padding: const EdgeInsets.all(16.0),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
-              childAspectRatio: 1.3,
-            ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              final cat = categories[index];
-              final hasDescription = cat.description?.isNotEmpty ?? false;
-              final displayDesc = hasDescription ? cat.description! : 'Explore Shrines';
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final crossAxisCount = width > 900 ? 4 : (width > 600 ? 3 : 2);
 
-              return Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surface,
-                  borderRadius: BorderRadius.circular(18),
-                  border: Border.all(
-                    color: Theme.of(context).colorScheme.outline,
-                  ),
+              return GridView.builder(
+                padding: const EdgeInsets.all(16.0),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: crossAxisCount,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.3,
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(18),
-                  child: InkWell(
-                    onTap: () {
-                      HapticFeedback.lightImpact();
-                      ref.read(searchQueryProvider.notifier).state = SearchQuery(
-                        categoryId: cat.id,
-                      );
-                      context.push('/search');
-                    },
-                    borderRadius: BorderRadius.circular(18),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(
-                              Icons.temple_hindu_outlined,
-                              size: 24,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                          ),
-                          Column(
+                itemCount: categories.length,
+                itemBuilder: (context, index) {
+                  final cat = categories[index];
+                  final hasDescription = cat.description?.isNotEmpty ?? false;
+                  final displayDesc = hasDescription ? cat.description! : 'Explore Shrines';
+
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(18),
+                      child: InkWell(
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          ref.read(searchQueryProvider.notifier).state = SearchQuery(
+                            categoryId: cat.id,
+                          );
+                          context.push('/search');
+                        },
+                        borderRadius: BorderRadius.circular(18),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                cat.name,
-                                style: Theme.of(context).textTheme.titleMedium,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                displayDesc,
-                                style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
+                                child: Icon(
+                                  Icons.temple_hindu_outlined,
+                                  size: 24,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    cat.name,
+                                    style: Theme.of(context).textTheme.titleMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    displayDesc,
+                                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              );
+                  );
+                },
+              ).animate().fadeIn(duration: 300.ms);
             },
-          ).animate().fadeIn(duration: 300.ms);
+          );
         },
-        loading: () => GridView.count(
-          padding: const EdgeInsets.all(16),
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.3,
-          children: const [
-            LoadingSkeleton(height: 100),
-            LoadingSkeleton(height: 100),
-            LoadingSkeleton(height: 100),
-            LoadingSkeleton(height: 100),
-          ],
+        loading: () => LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final crossAxisCount = width > 900 ? 4 : (width > 600 ? 3 : 2);
+            return GridView.count(
+              padding: const EdgeInsets.all(16),
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.3,
+              children: const [
+                LoadingSkeleton(height: 100),
+                LoadingSkeleton(height: 100),
+                LoadingSkeleton(height: 100),
+                LoadingSkeleton(height: 100),
+              ],
+            );
+          },
         ),
         error: (err, _) => ErrorView(
           message: 'Failed to load categories',

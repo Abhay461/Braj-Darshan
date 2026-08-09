@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 class AppConstants {
@@ -22,14 +21,16 @@ class AppConstants {
   static const String favoritesBox = 'braj_favorites_box';
   static const String recentSearchesBox = 'braj_recent_searches_box';
   static const String settingsBox = 'braj_settings_box';
+  static const String yatraPlansBox = 'braj_yatra_plans_box';
 
   // AdMob Production & Test Unit IDs
+  // TODO: Replace with your real production AdMob ad unit IDs before Play Store release
   static const bool _isProductionAd = kReleaseMode;
   static String get bannerAdUnitId => _isProductionAd
-      ? 'ca-app-pub-3940256099942544/6300978111'
-      : 'ca-app-pub-3940256099942544/6300978111';
+      ? 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX' // TODO: Production Banner ID
+      : 'ca-app-pub-3940256099942544/6300978111'; // Google Test Banner
 
   static String get interstitialAdUnitId => _isProductionAd
-      ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-3940256099942544/1033173712';
+      ? 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX' // TODO: Production Interstitial ID
+      : 'ca-app-pub-3940256099942544/1033173712'; // Google Test Interstitial
 }

@@ -74,14 +74,14 @@ class YatraPlan {
       id: json['id'] ?? '',
       templeId: json['templeId'] ?? '',
       templeName: json['templeName'] ?? '',
-      plannedDate: DateTime.parse(json['plannedDate']),
+      plannedDate: DateTime.tryParse(json['plannedDate']?.toString() ?? '') ?? DateTime.now(),
       openingTime: json['openingTime'] ?? '',
       closingTime: json['closingTime'] ?? '',
       notes: json['notes'] ?? '',
       reminderOption: json['reminderOption'] ?? '30_mins',
       oneDayBeforeReminder: json['oneDayBeforeReminder'] ?? true,
       isCompleted: json['isCompleted'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt: DateTime.tryParse(json['createdAt']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 }

@@ -4,6 +4,7 @@ const router = express.Router();
 const templeController = require('../controllers/templeController');
 const templeValidator = require('../validators/templeValidator');
 const validateRequest = require('../middleware/validateRequest');
+const adminAuth = require('../middleware/adminAuth');
 
 /**
  * @swagger
@@ -109,13 +110,13 @@ router.get('/category/:categoryId', templeController.getTemplesByCategory);
 router.get('/location/:locationId', templeController.getTemplesByLocation);
 
 // Restore soft-deleted temple
-router.patch('/:id/restore', templeValidator.idParam, validateRequest, templeController.restoreTemple);
+router.patch('/:id/restore', templeValidator.idParam, validateRequest, adminAuth, templeController.restoreTemple);
 
 // CRUD
 router.get('/', templeValidator.listQuery, validateRequest, templeController.getTemples);
 router.get('/:idOrSlug', templeController.getTemple);
-router.post('/', templeValidator.create, validateRequest, templeController.createTemple);
-router.put('/:id', templeValidator.update, validateRequest, templeController.updateTemple);
-router.delete('/:id', templeValidator.idParam, validateRequest, templeController.deleteTemple);
+router.post('/', templeValidator.create, validateRequest, adminAuth, templeController.createTemple);
+router.put('/:id', templeValidator.update, validateRequest, adminAuth, templeController.updateTemple);
+router.delete('/:id', templeValidator.idParam, validateRequest, adminAuth, templeController.deleteTemple);
 
 module.exports = router;

@@ -110,6 +110,21 @@ const templeSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    donationUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    guestHouseBookingUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    liveDarshanUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     visitDuration: {
       type: String,
       trim: true,

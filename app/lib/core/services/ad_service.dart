@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import '../config/constants.dart';
 
@@ -6,47 +7,47 @@ class AdService {
   static InterstitialAd? _interstitialAd;
 
   static Future<void> init() async {
-    await MobileAds.instance.initialize();
-    _loadInterstitialAd();
+    try {
+      await MobileAds.instance.initialize();
+      _loadInterstitialAd();
+    } catch (e) {
+      debugPrint('AdService.init error: $e');
+    }
   }
 
   static void _loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AppConstants.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          _interstitialAd = ad;
-        },
-        onAdFailedToLoad: (error) {
-          _interstitialAd = null;
-        },
-      ),
-    );
+    try {
+      InterstitialAd.load(
+        adUnitId: AppConstants.interstitialAdUnitId,
+        request: const AdRequest(),
+        adLoadCallback: InterstitialAdLoadCallback(
+          onAdLoaded: (ad) {
+            _interstitialAd = ad;
+          },
+          onAdFailedToLoad: (error) {
+            debugPrint('InterstitialAd failed to load: $error');
+            _interstitialAd = null;
+          },
+        ),
+      );
+    } catch (e) {
+      debugPrint('AdService._loadInterstitialAd error: $e');
+    }
   }
 
-  // Increment view counter and show interstitial after 6 views
   static void incrementTempleViewAndCheckAd() {
     _templeViewCount++;
     if (_templeViewCount >= 6) {
       _templeViewCount = 0;
       if (_interstitialAd != null) {
-        _interstitialAd!.show();
-        _loadInterstitialAd();
+        try {
+          _interstitialAd!.show();
+          _loadInterstitialAd();
+        } catch (e) {
+          debugPrint('AdService.showInterstitialAd error: $e');
+        }
       }
     }
   }
-
-  static BannerAd createBannerAd() {
-    return BannerAd(
-      adUnitId: AppConstants.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
-      ),
-    )..load();
-  }
 }
+
