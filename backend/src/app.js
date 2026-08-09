@@ -58,27 +58,9 @@ app.use(cors({
 // ─── Security ──────────────────────────────────────────
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      useDefaults: true,
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        styleSrcElem: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
-        imgSrc: ["'self'", "data:", "https:"],
-        connectSrc: ["'self'", "https:"],
-        objectSrc: ["'none'"],
-        frameAncestors: ["'none'"]
-      }
-    },
+    contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: 'cross-origin' },
     crossOriginOpenerPolicy: false,
-    hsts: {
-      maxAge: 31536000,
-      includeSubDomains: true,
-      preload: true
-    }
   })
 );
 
@@ -102,15 +84,8 @@ app.use(mongoSanitize({
   replaceWith: '_',
 }));
 
-// ─── Cookie Parser & CSRF Protection ────────────────────────
+// ─── Cookie Parser ────────────────────────
 app.use(cookieParser());
-const csrfProtection = csurf({ cookie: true });
-app.use((req, res, next) => {
-  if (req.headers['x-admin-api-key'] || req.headers['authorization'] || req.path.startsWith('/api/v1/health')) {
-    return next();
-  }
-  csrfProtection(req, res, next);
-});
 
 // ─── Logging (Morgan + Winston + Request ID) ───────────
 morgan.token('req-id', (req) => req.id || '-');
