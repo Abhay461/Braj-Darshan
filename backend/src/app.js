@@ -31,18 +31,27 @@ app.use((req, res, next) => {
 });
 
 // ─── Strict CORS (whitelist) ────────────────────────
-const allowedOrigins = process.env.CORS_ORIGIN?.split(',') || ['https://braj-darshan-wdw9.onrender.com'];
+const defaultOrigins = [
+  'https://braj-darshan-wdw9.onrender.com',
+  'https://braj-mandel-admin.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:4173',
+];
+const envOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',').map((o) => o.trim()) : [];
+const allowedOrigins = [...new Set([...defaultOrigins, ...envOrigins])];
+
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (mobile apps, curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
   },
   methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'],
-  allowedHeaders: ['Content-Type','Authorization','x-request-id','X-API-Key','X-CSRF-Token'],
+  allowedHeaders: ['Content-Type','Authorization','x-request-id','X-API-Key','x-admin-api-key','X-CSRF-Token'],
   credentials: true,
 }));
 
@@ -53,11 +62,11 @@ app.use(
       useDefaults: true,
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: ["'self'", "https:"],
-        fontSrc: ["'self'", "https:", "data:"],
         objectSrc: ["'none'"],
         frameAncestors: ["'none'"]
       }
