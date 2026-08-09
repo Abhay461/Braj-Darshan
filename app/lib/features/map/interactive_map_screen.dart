@@ -196,7 +196,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.15),
+                          color: Theme.of(context).colorScheme.shadow.withOpacity( 0.15),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -251,7 +251,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                       Icon(
                                         Icons.location_on_outlined,
                                         size: 13,
-                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                                       ),
                                       const SizedBox(width: 3),
                                       Expanded(
@@ -260,7 +260,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                               ? (_selectedTemple!.location as Location).name
                                               : 'Vrindavan Dham',
                                           style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,

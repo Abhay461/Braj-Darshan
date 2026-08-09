@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/services/hive_service.dart';
 import 'core/services/ad_service.dart';
 import 'core/services/security_check.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
 import 'core/router/app_router.dart';
 import 'shared/providers/providers.dart';
@@ -22,6 +23,12 @@ void main() async {
     await AdService.init();
   } catch (e) {
     debugPrint('AdService initialization error: $e');
+  }
+
+  try {
+    await NotificationService().initialize();
+  } catch (e) {
+    debugPrint('NotificationService initialization error: $e');
   }
 
   // Enforce root/jailbreak detection

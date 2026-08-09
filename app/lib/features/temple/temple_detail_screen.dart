@@ -345,13 +345,13 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                     Icon(
                                       Icons.location_on_outlined,
                                       size: 15,
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       locationName,
                                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                        color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                                       ),
                                     ),
                                   ],

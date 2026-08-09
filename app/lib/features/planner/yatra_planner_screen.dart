@@ -71,7 +71,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
             controller: _tabController,
             indicatorColor: Theme.of(context).colorScheme.primary,
             labelColor: Theme.of(context).colorScheme.primary,
-            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            unselectedLabelColor: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
             tabs: [
               Tab(text: 'Upcoming (${upcomingPlans.length})'),
               Tab(text: 'History (${completedPlans.length})'),
@@ -107,7 +107,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                 child: Icon(
                   Icons.event_note_outlined,
                   size: 40,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.5),
                 ),
               ),
               const SizedBox(height: 16),
@@ -120,7 +120,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                 'Open any temple screen and tap "+ Plan Yatra Visit" to set scheduled alerts and darshan reminders.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                 ),
               ),
             ],
@@ -207,7 +207,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
               Icon(
                 Icons.history_outlined,
                 size: 40,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.5),
               ),
               const SizedBox(height: 12),
               Text(
@@ -219,7 +219,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                 'Mark your planned visits as completed after Darshan to save them in history.',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                 ),
               ),
             ],
@@ -259,7 +259,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
               Container(
                 padding: const EdgeInsets.all(9),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                  color: Theme.of(context).colorScheme.outlineVariant.withOpacity( 0.3),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -283,13 +283,13 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                         Icon(
                           Icons.event_outlined,
                           size: 13,
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                         ),
                         const SizedBox(width: 4),
                         Text(
                           'Visit Date: $dateStr',
                           style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                           ),
                         ),
                       ],
@@ -303,7 +303,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                   isHistory ? Icons.check_circle : Icons.radio_button_unchecked,
                   color: isHistory
                       ? Theme.of(context).colorScheme.secondary
-                      : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+                      : Theme.of(context).colorScheme.onSurface.withOpacity( 0.4),
                 ),
                 onPressed: () {
                   HapticFeedback.lightImpact();
@@ -314,7 +314,7 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                 tooltip: 'Delete Plan',
                 icon: Icon(
                   Icons.delete_outline,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                   size: 20,
                 ),
                 onPressed: () {
@@ -331,13 +331,13 @@ class _YatraPlannerScreenState extends ConsumerState<YatraPlannerScreen> with Si
                 Icon(
                   Icons.notifications_active_outlined,
                   size: 13,
-                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   'Alerts Active: ${plan.oneDayBeforeReminder ? "1-Day Evening" : ""}${plan.reminderOption != "none" ? " • ${plan.reminderOption == "1_hour" ? "1 Hr" : "30m"} Pre-Darshan" : ""}',
                   style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                   ),
                 ),
               ],

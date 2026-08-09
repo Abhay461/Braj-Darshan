@@ -74,7 +74,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
+                        color: const Color(0xFFD4AF37).withOpacity( 0.4),
                         width: 1.5,
                       ),
                     ),
@@ -85,7 +85,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
+                          color: const Color(0xFFD4AF37).withOpacity( 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
@@ -237,7 +237,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         subtitle: Text(
                           currentLang == 'hi' ? 'हिंदी (Hindi)' : 'English',
                           style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                           ),
                         ),
                         children: [
@@ -277,7 +277,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         subtitle: Text(
                           'v2.0 • Braj Darshan',
                           style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                           ),
                         ),
                         onTap: () {
@@ -494,7 +494,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             child: Text(
                               'No temples found',
                               style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                               ),
                             ),
                           ),

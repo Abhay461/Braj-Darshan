@@ -101,7 +101,7 @@ class SettingsScreen extends ConsumerWidget {
                     Text(
                       'v${AppConstants.appVersion}',
                       style: Theme.of(context).textTheme.labelSmall!.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

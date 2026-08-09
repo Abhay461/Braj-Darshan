@@ -34,6 +34,7 @@ const templeSchema = z.object({
   nameHindi: z.string().optional().default(''),
   history: z.string().optional().default(''),
   historyHindi: z.string().optional().default(''),
+  darshanTiming: z.string().optional().default(''),
   donationUrl: z.string().optional().default(''),
   guestHouseBookingUrl: z.string().optional().default(''),
   liveDarshanUrl: z.string().optional().default(''),
@@ -76,6 +77,7 @@ export const TempleForm: React.FC = () => {
       nameHindi: '',
       history: '',
       historyHindi: '',
+      darshanTiming: '',
       donationUrl: '',
       guestHouseBookingUrl: '',
       liveDarshanUrl: '',
@@ -104,6 +106,7 @@ export const TempleForm: React.FC = () => {
         nameHindi: (templeData as any).nameHindi || '',
         history: templeData.history || '',
         historyHindi: (templeData as any).historyHindi || '',
+        darshanTiming: templeData.darshanTiming || '',
         donationUrl: templeData.donationUrl || '',
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
         liveDarshanUrl: templeData.liveDarshanUrl || '',
@@ -247,6 +250,23 @@ export const TempleForm: React.FC = () => {
                         fullWidth
                         multiline
                         rows={3}
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Darshan & Aarti Open/Close Timings */}
+                <Grid size={{ xs: 12 }}>
+                  <Controller
+                    name="darshanTiming"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Darshan Open & Close Timings (दर्शन एवं आरती समय)"
+                        placeholder="Morning: 05:00 AM – 12:00 PM | Evening: 04:00 PM – 09:00 PM"
+                        fullWidth
+                        helperText="Mandir khulne aur band hone ka samay (e.g. Morning: 05:00 AM - 12:00 PM, Evening: 04:00 PM - 09:00 PM)"
                       />
                     )}
                   />

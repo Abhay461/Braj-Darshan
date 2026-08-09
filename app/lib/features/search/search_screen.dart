@@ -139,13 +139,13 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                           Icon(
                             Icons.search_off_outlined,
                             size: 48,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.5),
                           ),
                           const SizedBox(height: 12),
                           Text(
                             'No shrines matching "$queryText"',
                             style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.7),
                             ),
                           ),
                         ],

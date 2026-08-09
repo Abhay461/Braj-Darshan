@@ -81,7 +81,7 @@ class CategoriesScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3),
+                                  color: Theme.of(context).colorScheme.outlineVariant.withOpacity( 0.3),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Icon(
@@ -103,7 +103,7 @@ class CategoriesScreen extends ConsumerWidget {
                                   Text(
                                     displayDesc,
                                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                                      color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,

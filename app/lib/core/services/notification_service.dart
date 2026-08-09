@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -14,22 +15,27 @@ class NotificationService {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    tz.initializeTimeZones();
+    try {
+      tz.initializeTimeZones();
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const iosSettings = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
-    );
+      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const iosSettings = DarwinInitializationSettings(
+        requestAlertPermission: true,
+        requestBadgePermission: true,
+        requestSoundPermission: true,
+      );
 
-    const initSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iosSettings,
-    );
+      const initSettings = InitializationSettings(
+        android: androidSettings,
+        iOS: iosSettings,
+      );
 
-    await _notificationsPlugin.initialize(initSettings);
-    _isInitialized = true;
+      await _notificationsPlugin.initialize(initSettings);
+      _isInitialized = true;
+      await requestPermissions();
+    } catch (e) {
+      debugPrint('NotificationService.initialize error: $e');
+    }
   }
 
   Future<bool> requestPermissions() async {
@@ -40,6 +46,29 @@ class NotificationService {
       return granted ?? false;
     }
     return true;
+  }
+
+  Future<void> showInstantNotification({required String title, required String body}) async {
+    await initialize();
+    const androidDetails = AndroidNotificationDetails(
+      'braj_yatra_channel',
+      'Yatra & Darshan Reminders',
+      channelDescription: 'Notifications for planned temple visits and darshan timings',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const details = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
+
+    try {
+      await _notificationsPlugin.show(
+        DateTime.now().millisecondsSinceEpoch.remainder(100000),
+        title,
+        body,
+        details,
+      );
+    } catch (e) {
+      debugPrint('showInstantNotification error: $e');
+    }
   }
 
   Future<void> scheduleYatraNotifications(YatraPlan plan) async {
@@ -57,6 +86,12 @@ class NotificationService {
 
     final now = DateTime.now();
 
+    // Instant confirmation pop-up alert when plan is created
+    await showInstantNotification(
+      title: '🚩 Yatra Visit Scheduled!',
+      body: 'Darshan reminders set for ${plan.templeName} on ${plan.plannedDate.day}/${plan.plannedDate.month}/${plan.plannedDate.year}.',
+    );
+
     // 1. One Day Before Evening Reminder (8:00 PM evening prior to visit)
     if (plan.oneDayBeforeReminder) {
       final oneDayBefore = DateTime(
@@ -68,14 +103,12 @@ class NotificationService {
       );
 
       if (oneDayBefore.isAfter(now)) {
-        await _notificationsPlugin.zonedSchedule(
-          baseId,
-          '🚩 Tomorrow Yatra Alert!',
-          'Tomorrow is your planned visit to ${plan.templeName}. Pack your essentials for Darshan!',
-          tz.TZDateTime.from(oneDayBefore, tz.local),
-          details,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        await _safeZonedSchedule(
+          id: baseId,
+          title: '🚩 Tomorrow Yatra Alert!',
+          body: 'Tomorrow is your planned visit to ${plan.templeName}. Pack your essentials for Darshan!',
+          scheduledDate: tz.TZDateTime.from(oneDayBefore, tz.local),
+          details: details,
         );
       }
     }
@@ -90,14 +123,12 @@ class NotificationService {
     );
 
     if (morningReminderDate.isAfter(now)) {
-      await _notificationsPlugin.zonedSchedule(
-        baseId + 1,
-        '🌸 Jay Shri Krishna! Today Yatra Day',
-        'Today is your planned visit to ${plan.templeName}. Wish you a divine Darshan!',
-        tz.TZDateTime.from(morningReminderDate, tz.local),
-        details,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      await _safeZonedSchedule(
+        id: baseId + 1,
+        title: '🌸 Jay Shri Krishna! Today Yatra Day',
+        body: 'Today is your planned visit to ${plan.templeName}. Wish you a divine Darshan!',
+        scheduledDate: tz.TZDateTime.from(morningReminderDate, tz.local),
+        details: details,
       );
     }
 
@@ -109,14 +140,12 @@ class NotificationService {
         final alertTime = openingDt.subtract(Duration(minutes: minsBefore));
 
         if (alertTime.isAfter(now)) {
-          await _notificationsPlugin.zonedSchedule(
-            baseId + 2,
-            '🔔 Darshan Opening Reminder',
-            '${plan.templeName} opens for Darshan in $minsBefore minutes (${plan.openingTime})!',
-            tz.TZDateTime.from(alertTime, tz.local),
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          await _safeZonedSchedule(
+            id: baseId + 2,
+            title: '🔔 Darshan Opening Reminder',
+            body: '${plan.templeName} opens for Darshan in $minsBefore minutes (${plan.openingTime})!',
+            scheduledDate: tz.TZDateTime.from(alertTime, tz.local),
+            details: details,
           );
         }
       }
@@ -129,16 +158,48 @@ class NotificationService {
         final alertTime = closingDt.subtract(const Duration(minutes: 30));
 
         if (alertTime.isAfter(now)) {
-          await _notificationsPlugin.zonedSchedule(
-            baseId + 3,
-            '⏳ Rajbhog Closing Reminder',
-            '${plan.templeName} closes soon in 30 minutes for Rajbhog (${plan.closingTime})!',
-            tz.TZDateTime.from(alertTime, tz.local),
-            details,
-            androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          await _safeZonedSchedule(
+            id: baseId + 3,
+            title: '⏳ Rajbhog Closing Reminder',
+            body: '${plan.templeName} closes soon in 30 minutes for Rajbhog (${plan.closingTime})!',
+            scheduledDate: tz.TZDateTime.from(alertTime, tz.local),
+            details: details,
           );
         }
+      }
+    }
+  }
+
+  Future<void> _safeZonedSchedule({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime scheduledDate,
+    required NotificationDetails details,
+  }) async {
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        details,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      try {
+        await _notificationsPlugin.zonedSchedule(
+          id,
+          title,
+          body,
+          scheduledDate,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        );
+      } catch (err) {
+        debugPrint('Notification schedule error: $err');
       }
     }
   }
@@ -154,7 +215,6 @@ class NotificationService {
 
   DateTime? _parseTimeToDateTime(DateTime baseDate, String timeStr) {
     try {
-      // Expecting formats like "07:45 AM" or "7:45 AM" or "12:00 PM"
       final clean = timeStr.trim().toUpperCase();
       final isPm = clean.endsWith('PM');
       final isAm = clean.endsWith('AM');
