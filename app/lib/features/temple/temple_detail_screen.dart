@@ -48,8 +48,11 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     super.dispose();
   }
 
-  void _openGoogleMaps(double lat, double lng, String name) async {
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+  void _openGoogleMaps(Temple temple, double lat, double lng) async {
+    final targetUrl = (temple.directionsUrl != null && temple.directionsUrl!.isNotEmpty)
+        ? temple.directionsUrl!
+        : 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+    final Uri url = Uri.parse(targetUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
@@ -468,7 +471,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                               ),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                _openGoogleMaps(temple.latitude, temple.longitude, temple.name);
+                                _openGoogleMaps(temple, temple.latitude, temple.longitude);
                               },
                             ),
                           ),

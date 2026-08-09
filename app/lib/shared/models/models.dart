@@ -240,6 +240,7 @@ class Temple {
   final String? donationUrl;
   final String? guestHouseBookingUrl;
   final String? liveDarshanUrl;
+  final String? directionsUrl;
   final String? visitDuration;
   final bool parkingAvailable;
   final bool wheelchairAccessible;
@@ -273,6 +274,7 @@ class Temple {
     this.donationUrl,
     this.guestHouseBookingUrl,
     this.liveDarshanUrl,
+    this.directionsUrl,
     this.visitDuration,
     this.parkingAvailable = false,
     this.wheelchairAccessible = false,
@@ -311,6 +313,7 @@ class Temple {
       donationUrl: json['donationUrl'],
       guestHouseBookingUrl: json['guestHouseBookingUrl'],
       liveDarshanUrl: json['liveDarshanUrl'],
+      directionsUrl: json['directionsUrl'],
       visitDuration: json['visitDuration'],
       parkingAvailable: json['parkingAvailable'] ?? false,
       wheelchairAccessible: json['wheelchairAccessible'] ?? false,

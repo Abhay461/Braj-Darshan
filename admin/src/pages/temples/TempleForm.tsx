@@ -37,6 +37,7 @@ const templeSchema = z.object({
   donationUrl: z.string().optional().default(''),
   guestHouseBookingUrl: z.string().optional().default(''),
   liveDarshanUrl: z.string().optional().default(''),
+  directionsUrl: z.string().optional().default(''),
   categoryId: z.string().min(1, 'Category is required'),
   locationId: z.string().min(1, 'Location is required'),
   coverImage: z.string().min(1, 'Cover image is required'),
@@ -78,6 +79,7 @@ export const TempleForm: React.FC = () => {
       donationUrl: '',
       guestHouseBookingUrl: '',
       liveDarshanUrl: '',
+      directionsUrl: '',
       categoryId: '',
       locationId: '',
       coverImage: '',
@@ -105,6 +107,7 @@ export const TempleForm: React.FC = () => {
         donationUrl: templeData.donationUrl || '',
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
         liveDarshanUrl: templeData.liveDarshanUrl || '',
+        directionsUrl: templeData.directionsUrl || '',
         categoryId: catId || '',
         locationId: locId || '',
         coverImage: templeData.coverImage || '',
@@ -305,6 +308,22 @@ export const TempleForm: React.FC = () => {
                         {...field}
                         label="Guest House / Dharamshala Booking Link"
                         placeholder="https://..."
+                        fullWidth
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Custom Directions / Google Maps URL */}
+                <Grid size={{ xs: 12 }}>
+                  <Controller
+                    name="directionsUrl"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Custom Directions / Google Maps Link (Optional)"
+                        placeholder="https://maps.google.com/..."
                         fullWidth
                       />
                     )}

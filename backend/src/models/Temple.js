@@ -125,6 +125,11 @@ const templeSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    directionsUrl: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     visitDuration: {
       type: String,
       trim: true,
