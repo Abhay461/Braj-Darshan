@@ -16,6 +16,11 @@ const errorHandler = (err, req, res, _next) => {
     error = ApiError.badRequest(`Invalid ${err.path}: ${err.value}`);
   }
 
+  // CSRF token error
+  if (err.code === 'EBADCSRFTOKEN') {
+    error = ApiError.forbidden('Invalid or missing CSRF token');
+  }
+
   // Mongoose duplicate key
   if (err.code === 11000) {
     const field = Object.keys(err.keyValue).join(', ');
