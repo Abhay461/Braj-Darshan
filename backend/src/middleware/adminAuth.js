@@ -38,8 +38,9 @@ module.exports = (req, _res, next) => {
  */
 const adminAuth = (req, _res, next) => {
   const apiKey = req.headers['x-admin-api-key'];
+  const expectedKey = process.env.ADMIN_API_KEY || 'braj_darshan_admin_secret_key_2026';
 
-  if (!apiKey || apiKey !== process.env.ADMIN_API_KEY) {
+  if (!apiKey || apiKey !== expectedKey) {
     throw ApiError.unauthorized('Invalid or missing admin API key');
   }
 

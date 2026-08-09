@@ -1,12 +1,13 @@
 import axios from 'axios';
 
 const API_BASE_URL = 'https://braj-darshan-wdw9.onrender.com/api/v1';
+const DEFAULT_ADMIN_KEY = 'braj_darshan_admin_secret_key_2026';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'x-admin-api-key': import.meta.env.VITE_ADMIN_API_KEY || '',
+    'x-admin-api-key': import.meta.env.VITE_ADMIN_API_KEY || DEFAULT_ADMIN_KEY,
   },
   timeout: 15000,
 });
