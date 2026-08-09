@@ -34,6 +34,9 @@ const templeSchema = z.object({
   nameHindi: z.string().optional().default(''),
   history: z.string().optional().default(''),
   historyHindi: z.string().optional().default(''),
+  donationUrl: z.string().optional().default(''),
+  guestHouseBookingUrl: z.string().optional().default(''),
+  liveDarshanUrl: z.string().optional().default(''),
   categoryId: z.string().min(1, 'Category is required'),
   locationId: z.string().min(1, 'Location is required'),
   coverImage: z.string().min(1, 'Cover image is required'),
@@ -72,6 +75,9 @@ export const TempleForm: React.FC = () => {
       nameHindi: '',
       history: '',
       historyHindi: '',
+      donationUrl: '',
+      guestHouseBookingUrl: '',
+      liveDarshanUrl: '',
       categoryId: '',
       locationId: '',
       coverImage: '',
@@ -96,6 +102,9 @@ export const TempleForm: React.FC = () => {
         nameHindi: (templeData as any).nameHindi || '',
         history: templeData.history || '',
         historyHindi: (templeData as any).historyHindi || '',
+        donationUrl: templeData.donationUrl || '',
+        guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
+        liveDarshanUrl: templeData.liveDarshanUrl || '',
         categoryId: catId || '',
         locationId: locId || '',
         coverImage: templeData.coverImage || '',
@@ -235,6 +244,68 @@ export const TempleForm: React.FC = () => {
                         fullWidth
                         multiline
                         rows={3}
+                      />
+                    )}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Special External Action Links */}
+          <Card sx={{ p: 1, mb: 3 }}>
+            <CardContent>
+              <Typography variant="h4" sx={{ mb: 1, fontWeight: 700 }}>
+                Special Action Links (Live Darshan, Donation, Guest House)
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2.5, color: 'text.secondary' }}>
+                Note: In the app's 3-dot menu, buttons for Live Darshan, Donate, or Guest House will ONLY appear when you enter a valid URL below.
+              </Typography>
+
+              <Grid container spacing={2.5}>
+                {/* Live Darshan URL */}
+                <Grid size={{ xs: 12 }}>
+                  <Controller
+                    name="liveDarshanUrl"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Live Darshan Link (YouTube / Live Stream URL)"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                        fullWidth
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Donation URL */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="donationUrl"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Donation / Seva Link"
+                        placeholder="https://..."
+                        fullWidth
+                      />
+                    )}
+                  />
+                </Grid>
+
+                {/* Guest House Booking URL */}
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="guestHouseBookingUrl"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Guest House / Dharamshala Booking Link"
+                        placeholder="https://..."
+                        fullWidth
                       />
                     )}
                   />

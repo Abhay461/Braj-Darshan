@@ -116,6 +116,9 @@ export interface Temple {
   darshanTiming?: string;
   phone?: string;
   website?: string;
+  donationUrl?: string;
+  guestHouseBookingUrl?: string;
+  liveDarshanUrl?: string;
   visitDuration?: string;
   parkingAvailable?: boolean;
   wheelchairAccessible?: boolean;
