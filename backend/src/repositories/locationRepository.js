@@ -37,10 +37,10 @@ class LocationRepository {
   }
 
   async updateById(id, updateData) {
-    return Location.findOneAndUpdate({ _id: id, isDeleted: false }, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const location = await Location.findOne({ _id: id, isDeleted: false });
+    if (!location) return null;
+    Object.assign(location, updateData);
+    return location.save();
   }
 
   async softDelete(id) {

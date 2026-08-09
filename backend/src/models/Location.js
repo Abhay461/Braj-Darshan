@@ -7,12 +7,10 @@ const locationSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Location name is required'],
       trim: true,
-      unique: true,
       maxlength: [100, 'Location name cannot exceed 100 characters'],
     },
     slug: {
       type: String,
-      unique: true,
       lowercase: true,
       index: true,
     },
@@ -83,9 +81,17 @@ const locationSchema = new mongoose.Schema(
 locationSchema.index({ isDeleted: 1, status: 1, sortOrder: 1 });
 locationSchema.index({ name: 'text', description: 'text', district: 'text' });
 
-locationSchema.pre('save', function (next) {
+locationSchema.pre('save', async function (next) {
   if (this.isModified('name') || this.isNew) {
-    this.slug = slugify(this.name, { lower: true, strict: true });
+    let baseSlug = slugify(this.name, { lower: true, strict: true }) || 'location';
+    let slug = baseSlug;
+    let counter = 1;
+    const Location = this.constructor;
+    while (await Location.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
   }
   next();
 });

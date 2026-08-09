@@ -37,10 +37,10 @@ class CategoryRepository {
   }
 
   async updateById(id, updateData) {
-    return Category.findOneAndUpdate({ _id: id, isDeleted: false }, updateData, {
-      new: true,
-      runValidators: true,
-    });
+    const category = await Category.findOne({ _id: id, isDeleted: false });
+    if (!category) return null;
+    Object.assign(category, updateData);
+    return category.save();
   }
 
   async softDelete(id) {

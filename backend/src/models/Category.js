@@ -7,12 +7,10 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: [true, 'Category name is required'],
       trim: true,
-      unique: true,
       maxlength: [100, 'Category name cannot exceed 100 characters'],
     },
     slug: {
       type: String,
-      unique: true,
       lowercase: true,
       index: true,
     },
@@ -60,10 +58,18 @@ const categorySchema = new mongoose.Schema(
 categorySchema.index({ isDeleted: 1, status: 1, sortOrder: 1 });
 categorySchema.index({ name: 'text', description: 'text' });
 
-// Auto-generate slug
-categorySchema.pre('save', function (next) {
+// Auto-generate unique slug
+categorySchema.pre('save', async function (next) {
   if (this.isModified('name') || this.isNew) {
-    this.slug = slugify(this.name, { lower: true, strict: true });
+    let baseSlug = slugify(this.name, { lower: true, strict: true }) || 'category';
+    let slug = baseSlug;
+    let counter = 1;
+    const Category = this.constructor;
+    while (await Category.findOne({ slug, _id: { $ne: this._id } })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+    this.slug = slug;
   }
   next();
 });
