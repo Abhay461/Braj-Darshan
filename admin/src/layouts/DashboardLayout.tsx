@@ -39,7 +39,6 @@ const navItems = [
   { label: 'Temples', path: '/temples', icon: <TempleIcon /> },
   { label: 'Categories', path: '/categories', icon: <CategoryIcon /> },
   { label: 'Locations', path: '/locations', icon: <LocationIcon /> },
-  { label: 'Facilities', path: '/facilities', icon: <FacilityIcon /> },
   { label: 'Festivals', path: '/festivals', icon: <FestivalIcon /> },
   { label: 'Media Library', path: '/media', icon: <MediaIcon /> },
   { label: 'Backup & Import', path: '/backup', icon: <BackupIcon /> },

@@ -109,7 +109,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}>
+    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth PaperProps={{ sx: { borderRadius: '18px', p: 1 } }}>
       <DialogTitle sx={{ fontWeight: 700 }}>
         {location ? 'Edit Location' : 'Create New Location'}
       </DialogTitle>
@@ -125,102 +125,11 @@ export const LocationModal: React.FC<LocationModalProps> = ({
                     {...field}
                     label="Location Name *"
                     fullWidth
+                    autoFocus
+                    placeholder="e.g. Vrindavan, Radha Kund..."
                     error={!!errors.name}
                     helperText={errors.name?.message}
                   />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <ImageUploader
-                label="Cover Image"
-                value={coverImageValue}
-                onChange={(url) => setValue('coverImage', url)}
-                folder="locations"
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12 }}>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField {...field} label="Description" fullWidth multiline rows={2} />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="district"
-                control={control}
-                render={({ field }) => <TextField {...field} label="District" fullWidth />}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="state"
-                control={control}
-                render={({ field }) => <TextField {...field} label="State" fullWidth />}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="latitude"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    label="Latitude *"
-                    fullWidth
-                    error={!!errors.latitude}
-                    helperText={errors.latitude?.message}
-                  />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="longitude"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    type="number"
-                    label="Longitude *"
-                    fullWidth
-                    error={!!errors.longitude}
-                    helperText={errors.longitude?.message}
-                  />
-                )}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="sortOrder"
-                control={control}
-                render={({ field }) => <TextField {...field} type="number" label="Sort Order" fullWidth />}
-              />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Controller
-                name="status"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth size="medium">
-                    <InputLabel>Status</InputLabel>
-                    <Select {...field} label="Status">
-                      <MenuItem value="active">Active</MenuItem>
-                      <MenuItem value="inactive">Inactive</MenuItem>
-                    </Select>
-                  </FormControl>
                 )}
               />
             </Grid>
@@ -231,7 +140,7 @@ export const LocationModal: React.FC<LocationModalProps> = ({
             Cancel
           </Button>
           <Button type="submit" disabled={loading} variant="contained">
-            {loading ? 'Saving...' : location ? 'Update Location' : 'Create Location'}
+            {loading ? 'Saving...' : location ? 'Update Location' : 'Save Location'}
           </Button>
         </DialogActions>
       </form>

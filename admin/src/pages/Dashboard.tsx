@@ -125,9 +125,6 @@ export const Dashboard: React.FC = () => {
           <StatCard title="Locations" value={locations.length} subtitle="Sacred Braj towns" icon={<LocationIcon />} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <StatCard title="Facilities" value={facilities.length} subtitle="Visitor amenities" icon={<FacilityIcon />} />
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <StatCard title="Festivals" value={festivals.length} subtitle="Upcoming events" icon={<FestivalIcon />} />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
