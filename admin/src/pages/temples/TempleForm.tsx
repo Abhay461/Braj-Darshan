@@ -96,16 +96,22 @@ export const TempleForm: React.FC = () => {
   const coverImageValue = watch('coverImage');
   const galleryImagesValue = (watch('galleryImages') || []) as GalleryImage[];
 
+  const [isFormInitialized, setIsFormInitialized] = useState(false);
+
   useEffect(() => {
-    if (templeData && isEdit) {
+    setIsFormInitialized(false);
+  }, [id]);
+
+  useEffect(() => {
+    if (templeData && isEdit && !isFormInitialized) {
       const catId = typeof templeData.categoryId === 'object' ? (templeData.categoryId as Category)._id : templeData.categoryId;
       const locId = typeof templeData.locationId === 'object' ? (templeData.locationId as Location)._id : templeData.locationId;
 
       reset({
         name: templeData.name || '',
-        nameHindi: templeData.nameHindi || '',
+        nameHindi: templeData.nameHindi || (templeData as any).nameHindi || '',
         history: templeData.history || '',
-        historyHindi: templeData.historyHindi || '',
+        historyHindi: templeData.historyHindi || (templeData as any).historyHindi || '',
         darshanTiming: templeData.darshanTiming || '',
         donationUrl: templeData.donationUrl || '',
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
@@ -118,8 +124,11 @@ export const TempleForm: React.FC = () => {
         galleryImages: templeData.galleryImages || [],
         status: templeData.status || 'active',
       });
+      if (templeData.name) {
+        setIsFormInitialized(true);
+      }
     }
-  }, [templeData?._id]);
+  }, [templeData, isEdit, isFormInitialized, reset]);
 
   const handleFormSubmit = async (data: TempleFormData) => {
     const payload: Partial<Temple> = {

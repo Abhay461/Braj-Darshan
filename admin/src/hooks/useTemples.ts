@@ -47,6 +47,7 @@ export const useTempleMutations = () => {
     mutationFn: (data: Partial<Temple>) => templeApi.createTemple(data),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['temples'] });
+      queryClient.invalidateQueries({ queryKey: ['temple'] });
       enqueueSnackbar(res.message || 'Temple created successfully', { variant: 'success' });
     },
     onError: (err: Error) => {
@@ -58,6 +59,7 @@ export const useTempleMutations = () => {
     mutationFn: ({ id, data }: { id: string; data: Partial<Temple> }) => templeApi.updateTemple(id, data),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['temples'] });
+      queryClient.invalidateQueries({ queryKey: ['temple'] });
       enqueueSnackbar(res.message || 'Temple updated successfully', { variant: 'success' });
     },
     onError: (err: Error) => {

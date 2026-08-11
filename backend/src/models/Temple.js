@@ -241,8 +241,10 @@ templeSchema.index({ isDeleted: 1, latitude: 1, longitude: 1 });
 templeSchema.index(
   {
     name: 'text',
+    nameHindi: 'text',
     shortDescription: 'text',
     history: 'text',
+    historyHindi: 'text',
     importance: 'text',
     'address.area': 'text',
     'address.city': 'text',
@@ -252,10 +254,12 @@ templeSchema.index(
   {
     weights: {
       name: 10,
+      nameHindi: 10,
       tags: 5,
       keywords: 5,
       shortDescription: 3,
       history: 2,
+      historyHindi: 2,
       importance: 2,
       'address.city': 2,
       'address.area': 2,
