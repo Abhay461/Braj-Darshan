@@ -34,12 +34,6 @@ const locations = [
   { name: 'Barsana', description: 'Birthplace and eternal home of Shri Radha Rani', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.6483, longitude: 77.3786, sortOrder: 4, status: 'active' },
   { name: 'Nandgaon', description: 'Village of Nanda Maharaj where Krishna spent his childhood', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.6714, longitude: 77.3667, sortOrder: 5, status: 'active' },
   { name: 'Gokul', description: 'Sacred place where infant Krishna was brought by Vasudeva', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.4383, longitude: 77.7167, sortOrder: 6, status: 'active' },
-  { name: 'Radha Kund', description: 'The sacred lake created by Shri Radha Rani and Lord Krishna', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.5256, longitude: 77.4878, sortOrder: 7, status: 'active' },
-  { name: 'Mahavan', description: 'Ancient Gokul where Lord Krishna spent his early childhood', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.4333, longitude: 77.7500, sortOrder: 8, status: 'active' },
-  { name: 'Baldeo (Dauji)', description: 'Sacred town of Lord Balarama (Dauji Maharaj)', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.4000, longitude: 77.8167, sortOrder: 9, status: 'active' },
-  { name: 'Rawal', description: 'Birthplace of Shri Radha Rani on the bank of river Yamuna', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.4833, longitude: 77.7333, sortOrder: 10, status: 'active' },
-  { name: 'Bhandirvan', description: 'Sacred forest of divine marriage of Shri Radha Krishna', district: 'Mathura', state: 'Uttar Pradesh', country: 'India', latitude: 27.6167, longitude: 77.7500, sortOrder: 11, status: 'active' },
-  { name: 'Kamyavan', description: 'One of the twelve sacred forests of Braj Mandal', district: 'Bharatpur', state: 'Rajasthan', country: 'India', latitude: 27.6560, longitude: 77.0140, sortOrder: 12, status: 'active' },
 ];
 
 // ─── Facilities ────────────────────────────────────────
