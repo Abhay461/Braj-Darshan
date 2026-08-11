@@ -157,25 +157,6 @@ export const GalleryManager: React.FC<GalleryManagerProps> = ({
             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
               Automatic WebP compression & thumbnail generation
             </Typography>
-            <Box
-              sx={{
-                mt: 1.5,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: 0.5,
-                backgroundColor: '#EFF6FF',
-                color: '#1D4ED8',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: '8px',
-                fontWeight: 700,
-                fontSize: '0.8rem',
-                border: '1px solid #BFDBFE',
-              }}
-            >
-              <AspectRatioIcon style={{ fontSize: 16 }} />
-              <span>{recommendation}</span>
-            </Box>
           </Box>
         )}
       </Box>
