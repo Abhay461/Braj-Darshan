@@ -48,8 +48,8 @@ export const TempleList: React.FC = () => {
   const [restoreId, setRestoreId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
 
-  const { data: categoriesRes } = useCategories();
-  const { data: locationsRes } = useLocations();
+  const { data: categoriesRes } = useCategories({ limit: 100 });
+  const { data: locationsRes } = useLocations({ limit: 100 });
 
   const queryParams = {
     page,

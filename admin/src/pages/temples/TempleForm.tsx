@@ -55,8 +55,8 @@ export const TempleForm: React.FC = () => {
   const isEdit = Boolean(id);
 
   const { data: templeRes, isLoading: loadingTemple } = useTemple(id || '');
-  const { data: categoriesRes } = useCategories();
-  const { data: locationsRes } = useLocations();
+  const { data: categoriesRes } = useCategories({ limit: 100 });
+  const { data: locationsRes } = useLocations({ limit: 100 });
 
   const { createTemple, updateTemple, isCreating, isUpdating } = useTempleMutations();
 

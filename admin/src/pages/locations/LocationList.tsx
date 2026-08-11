@@ -28,7 +28,7 @@ export const LocationList: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const { data: locationsRes, isLoading } = useLocations({ search: search || undefined });
+  const { data: locationsRes, isLoading } = useLocations({ search: search || undefined, limit: 100 });
   const { createLocation, updateLocation, deleteLocation, isCreating, isUpdating } = useLocationMutations();
 
   const locations = locationsRes?.data || [];
