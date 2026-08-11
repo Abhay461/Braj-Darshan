@@ -124,7 +124,7 @@ export const TempleForm: React.FC = () => {
   const handleFormSubmit = async (data: TempleFormData) => {
     const payload: Partial<Temple> = {
       ...data,
-      shortDescription: data.history || data.name,
+      shortDescription: (data.history || data.name).slice(0, 490),
       latitude: 27.5830,
       longitude: 77.7000,
       isFeatured: true,

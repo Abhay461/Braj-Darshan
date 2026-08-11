@@ -32,7 +32,7 @@ const templeSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Short description is required'],
       trim: true,
-      maxlength: [500, 'Short description cannot exceed 500 characters'],
+      maxlength: [2000, 'Short description cannot exceed 2000 characters'],
     },
     history: {
       type: String,

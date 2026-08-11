@@ -13,8 +13,8 @@ const create = [
     .withMessage('Short description is required')
     .isString()
     .trim()
-    .isLength({ max: 500 })
-    .withMessage('Short description cannot exceed 500 characters'),
+    .isLength({ max: 2000 })
+    .withMessage('Short description cannot exceed 2000 characters'),
   body('categoryId')
     .notEmpty()
     .withMessage('Category ID is required')
@@ -69,7 +69,7 @@ const create = [
 const update = [
   param('id').isMongoId().withMessage('Invalid Temple ID'),
   body('name').optional().isString().trim().isLength({ max: 200 }),
-  body('shortDescription').optional().isString().trim().isLength({ max: 500 }),
+  body('shortDescription').optional().isString().trim().isLength({ max: 2000 }),
   body('categoryId').optional().isMongoId().withMessage('Invalid Category ID'),
   body('locationId').optional().isMongoId().withMessage('Invalid Location ID'),
   body('coverImage').optional().isString(),
