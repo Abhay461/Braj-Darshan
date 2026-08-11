@@ -347,11 +347,13 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      widget.temple.name,
-style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: -0.3,
-                        ),
+                      widget.temple.nameHindi?.isNotEmpty == true
+                          ? '${widget.temple.name} (${widget.temple.nameHindi})'
+                          : widget.temple.name,
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.3,
+                          ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),

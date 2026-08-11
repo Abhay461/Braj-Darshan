@@ -339,6 +339,16 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                   temple.name,
                                   style: Theme.of(context).textTheme.headlineMedium,
                                 ),
+                                if (temple.nameHindi?.isNotEmpty == true) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    temple.nameHindi!,
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 6),
                                 Row(
                                   children: [
