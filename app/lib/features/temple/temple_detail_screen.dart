@@ -380,16 +380,35 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
 
                       const SizedBox(height: 16),
 
-                      if (temple.history?.isNotEmpty == true)
+                      if (temple.history?.isNotEmpty == true || temple.historyHindi?.isNotEmpty == true)
                         _buildSectionCard(
                           context: context,
                           icon: Icons.auto_stories_outlined,
                           title: AppTranslations.getText(currentLang, 'history'),
-                          child: Text(
-                            temple.history!,
-                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                              height: 1.6,
-                            ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (temple.history?.isNotEmpty == true)
+                                Text(
+                                  temple.history!,
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    height: 1.6,
+                                  ),
+                                ),
+                              if (temple.history?.isNotEmpty == true && temple.historyHindi?.isNotEmpty == true)
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 12.0),
+                                  child: Divider(),
+                                ),
+                              if (temple.historyHindi?.isNotEmpty == true)
+                                Text(
+                                  temple.historyHindi!,
+                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                    height: 1.6,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
 

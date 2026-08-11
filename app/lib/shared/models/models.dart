@@ -222,9 +222,11 @@ class Festival {
 class Temple {
   final String id;
   final String name;
+  final String? nameHindi;
   final String slug;
   final String shortDescription;
   final String? history;
+  final String? historyHindi;
   final String? importance;
   final dynamic category;
   final dynamic location;
@@ -256,9 +258,11 @@ class Temple {
   Temple({
     required this.id,
     required this.name,
+    this.nameHindi,
     required this.slug,
     required this.shortDescription,
     this.history,
+    this.historyHindi,
     this.importance,
     this.category,
     this.location,
@@ -295,9 +299,11 @@ class Temple {
     return Temple(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
+      nameHindi: json['nameHindi'],
       slug: json['slug'] ?? '',
       shortDescription: json['shortDescription'] ?? '',
       history: json['history'],
+      historyHindi: json['historyHindi'],
       importance: json['importance'],
       category: json['categoryId'] is Map ? Category.fromJson(json['categoryId']) : json['categoryId'],
       location: json['locationId'] is Map ? Location.fromJson(json['locationId']) : json['locationId'],

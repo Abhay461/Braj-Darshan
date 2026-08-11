@@ -97,15 +97,15 @@ export const TempleForm: React.FC = () => {
   const galleryImagesValue = (watch('galleryImages') || []) as GalleryImage[];
 
   useEffect(() => {
-    if (templeData) {
+    if (templeData && isEdit) {
       const catId = typeof templeData.categoryId === 'object' ? (templeData.categoryId as Category)._id : templeData.categoryId;
       const locId = typeof templeData.locationId === 'object' ? (templeData.locationId as Location)._id : templeData.locationId;
 
       reset({
         name: templeData.name || '',
-        nameHindi: (templeData as any).nameHindi || '',
+        nameHindi: templeData.nameHindi || '',
         history: templeData.history || '',
-        historyHindi: (templeData as any).historyHindi || '',
+        historyHindi: templeData.historyHindi || '',
         darshanTiming: templeData.darshanTiming || '',
         donationUrl: templeData.donationUrl || '',
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
@@ -119,7 +119,7 @@ export const TempleForm: React.FC = () => {
         status: templeData.status || 'active',
       });
     }
-  }, [templeData, reset]);
+  }, [templeData?._id]);
 
   const handleFormSubmit = async (data: TempleFormData) => {
     const payload: Partial<Temple> = {
@@ -128,7 +128,7 @@ export const TempleForm: React.FC = () => {
       latitude: 27.5830,
       longitude: 77.7000,
       isFeatured: true,
-      isPopular: false,
+      isPopular: true,
       parkingAvailable: false,
       wheelchairAccessible: false,
       facilities: [],

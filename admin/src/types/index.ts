@@ -101,9 +101,11 @@ export interface Temple {
   _id: string;
   id?: string;
   name: string;
+  nameHindi?: string;
   slug: string;
   shortDescription: string;
   history?: string;
+  historyHindi?: string;
   importance?: string;
   categoryId: string | Category;
   locationId: string | Location;
