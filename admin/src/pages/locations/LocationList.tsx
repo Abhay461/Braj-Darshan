@@ -59,37 +59,7 @@ export const LocationList: React.FC = () => {
   };
 
   const columns: GridColDef[] = [
-    {
-      field: 'coverImage',
-      headerName: 'Cover',
-      width: 70,
-      sortable: false,
-      renderCell: (params) => (
-        <Box
-          component="img"
-          src={params.row.coverImage || 'https://res.cloudinary.com/demo/image/upload/v1/braj-darshan/misc/cover.jpg'}
-          alt={params.row.name}
-          sx={{ width: 36, height: 36, borderRadius: '8px', objectFit: 'cover', border: '1px solid #E4E4E7', my: 1 }}
-        />
-      ),
-    },
-    { field: 'name', headerName: 'Town / Location', flex: 1, minWidth: 160 },
-    { field: 'district', headerName: 'District', width: 130 },
-    { field: 'state', headerName: 'State', width: 140 },
-    {
-      field: 'coordinates',
-      headerName: 'Coordinates (Lat, Lng)',
-      flex: 1,
-      minWidth: 180,
-      valueGetter: (_, row) => `${row.latitude}, ${row.longitude}`,
-    },
-    { field: 'sortOrder', headerName: 'Sort Order', width: 110, align: 'center' },
-    {
-      field: 'status',
-      headerName: 'Status',
-      width: 120,
-      renderCell: (params) => <StatusChip status={params.row.status} isDeleted={params.row.isDeleted} />,
-    },
+    { field: 'name', headerName: 'Location Name', flex: 1, minWidth: 200 },
     {
       field: 'actions',
       headerName: 'Actions',
