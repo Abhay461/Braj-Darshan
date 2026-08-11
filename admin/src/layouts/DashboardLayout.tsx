@@ -20,6 +20,8 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/DashboardOutlined';
 import TempleIcon from '@mui/icons-material/AccountBalanceOutlined';
 import CategoryIcon from '@mui/icons-material/CategoryOutlined';
+import LocationIcon from '@mui/icons-material/LocationOnOutlined';
+import FacilityIcon from '@mui/icons-material/HomeRepairServiceOutlined';
 import FestivalIcon from '@mui/icons-material/EventOutlined';
 import MediaIcon from '@mui/icons-material/PermMediaOutlined';
 import BackupIcon from '@mui/icons-material/BackupOutlined';
@@ -36,7 +38,10 @@ const navItems = [
   { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
   { label: 'Temples', path: '/temples', icon: <TempleIcon /> },
   { label: 'Categories', path: '/categories', icon: <CategoryIcon /> },
+  { label: 'Locations', path: '/locations', icon: <LocationIcon /> },
+  { label: 'Facilities', path: '/facilities', icon: <FacilityIcon /> },
   { label: 'Festivals', path: '/festivals', icon: <FestivalIcon /> },
+  { label: 'Media Library', path: '/media', icon: <MediaIcon /> },
   { label: 'Backup & Import', path: '/backup', icon: <BackupIcon /> },
 ];
 
