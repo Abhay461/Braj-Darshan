@@ -39,7 +39,9 @@ const create = [
     .withMessage('Longitude is required')
     .isFloat({ min: -180, max: 180 })
     .withMessage('Longitude must be between -180 and 180'),
+  body('nameHindi').optional().isString().trim(),
   body('history').optional().isString().trim(),
+  body('historyHindi').optional().isString().trim(),
   body('importance').optional().isString().trim(),
   body('darshanTiming').optional().isString().trim(),
   body('phone').optional().isString().trim(),
@@ -75,7 +77,9 @@ const update = [
   body('coverImage').optional().isString(),
   body('latitude').optional().isFloat({ min: -90, max: 90 }),
   body('longitude').optional().isFloat({ min: -180, max: 180 }),
+  body('nameHindi').optional().isString().trim(),
   body('history').optional().isString().trim(),
+  body('historyHindi').optional().isString().trim(),
   body('importance').optional().isString().trim(),
   body('darshanTiming').optional().isString().trim(),
   body('phone').optional().isString().trim(),

@@ -14,7 +14,7 @@ class AppTranslations {
       'about_app': 'About App',
       'search_shrines': 'Search Shrines',
       'darshan_timing': 'Darshan Timing',
-      'history': 'History & Legend',
+      'history': 'History',
       'plan_yatra': '+ Plan Yatra',
       'directions': 'Directions',
       'view_details': 'View Details',

@@ -34,7 +34,17 @@ const templeSchema = new mongoose.Schema(
       trim: true,
       maxlength: [2000, 'Short description cannot exceed 2000 characters'],
     },
+    nameHindi: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     history: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    historyHindi: {
       type: String,
       trim: true,
       default: '',
