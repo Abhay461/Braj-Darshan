@@ -28,6 +28,7 @@ class TempleDetailScreen extends ConsumerStatefulWidget {
 class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _showScrollToTop = false;
+  String? _selectedHistoryLang;
 
   @override
   void initState() {
@@ -175,6 +176,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     final favorites = ref.watch(favoritesProvider);
     final isFav = favorites.contains(widget.templeId);
     final currentLang = ref.watch(appLanguageProvider);
+    _selectedHistoryLang ??= (currentLang == 'hi' ? 'hi' : 'en');
 
     return templeAsync.when(
       data: (temple) {
@@ -398,26 +400,127 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (temple.history?.isNotEmpty == true)
-                                Text(
-                                  temple.history!,
-                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    height: 1.6,
+                              Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.3),
                                   ),
                                 ),
-                              if (temple.history?.isNotEmpty == true && temple.historyHindi?.isNotEmpty == true)
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 12.0),
-                                  child: Divider(),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _selectedHistoryLang = 'en');
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                          decoration: BoxDecoration(
+                                            color: _selectedHistoryLang == 'en'
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'History',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: _selectedHistoryLang == 'en'
+                                                    ? Theme.of(context).colorScheme.onPrimary
+                                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          HapticFeedback.selectionClick();
+                                          setState(() => _selectedHistoryLang = 'hi');
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(milliseconds: 200),
+                                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                                          decoration: BoxDecoration(
+                                            color: _selectedHistoryLang == 'hi'
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Colors.transparent,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'इतिहास',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w600,
+                                                color: _selectedHistoryLang == 'hi'
+                                                    ? Theme.of(context).colorScheme.onPrimary
+                                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              if (temple.historyHindi?.isNotEmpty == true)
-                                Text(
-                                  temple.historyHindi!,
-                                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                                    height: 1.6,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
+                              ),
+                              const SizedBox(height: 14),
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                child: _selectedHistoryLang == 'hi'
+                                    ? (temple.historyHindi?.isNotEmpty == true
+                                        ? Text(
+                                            temple.historyHindi!,
+                                            key: const ValueKey('hi_history'),
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  height: 1.6,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                          )
+                                        : Text(
+                                            temple.history?.isNotEmpty == true
+                                                ? temple.history!
+                                                : 'इस मंदिर का इतिहास अभी उपलब्ध नहीं है।',
+                                            key: const ValueKey('hi_fallback_history'),
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  height: 1.6,
+                                                  color: temple.historyHindi?.isNotEmpty == true
+                                                      ? Theme.of(context).colorScheme.onSurface
+                                                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                                ),
+                                          ))
+                                    : (temple.history?.isNotEmpty == true
+                                        ? Text(
+                                            temple.history!,
+                                            key: const ValueKey('en_history'),
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  height: 1.6,
+                                                ),
+                                          )
+                                        : Text(
+                                            temple.historyHindi?.isNotEmpty == true
+                                                ? temple.historyHindi!
+                                                : 'History for this temple is not available yet.',
+                                            key: const ValueKey('en_fallback_history'),
+                                            style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                                                  height: 1.6,
+                                                  color: temple.history?.isNotEmpty == true
+                                                      ? Theme.of(context).colorScheme.onSurface
+                                                      : Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                                                ),
+                                          )),
+                              ),
                             ],
                           ),
                         ),

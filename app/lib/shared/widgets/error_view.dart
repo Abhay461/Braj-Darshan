@@ -13,7 +13,7 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mutedColor = theme.colorScheme.onSurface.withValues( 0.6);
+    final mutedColor = theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     return Center(
       child: Padding(
