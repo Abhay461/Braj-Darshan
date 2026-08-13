@@ -428,7 +428,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'History',
+                                              'About this temple',
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,
@@ -459,7 +459,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                           ),
                                           child: Center(
                                             child: Text(
-                                              'इतिहास',
+                                              'इस मंदिर के बारे में',
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w600,

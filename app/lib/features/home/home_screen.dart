@@ -48,6 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final currentLang = ref.watch(appLanguageProvider);
     final featuredAsync = ref.watch(featuredTemplesProvider);
+    final popularAsync = ref.watch(popularTemplesProvider);
     final allTemplesAsync = ref.watch(allTemplesProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
 
@@ -374,87 +375,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
                 const SizedBox(height: 20),
 
-                // 2. Category Chips Bar (>= 48dp touch targets)
-                categoriesAsync.when(
-                  data: (categories) => SizedBox(
-                    height: 48,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: categories.length + 1,
-                      separatorBuilder: (_, __) => const SizedBox(width: 8),
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          final isSelected = _selectedCategoryId == null;
-                          return FilterChip(
-                            selected: isSelected,
-                            showCheckmark: false,
-                            avatar: Icon(
-                              _getCategoryIcon('All'),
-                              size: 18,
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                            label: const Text('All Temples'),
-                            selectedColor: Theme.of(context).colorScheme.primary,
-                            backgroundColor: Theme.of(context).colorScheme.surface,
-                            side: BorderSide(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.primary
-                                  : Theme.of(context).colorScheme.outline,
-                              width: 1,
-                            ),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                            labelStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.onPrimary
-                                  : Theme.of(context).colorScheme.onSurface,
-                            ),
-                            onSelected: (_) {
-                              HapticFeedback.selectionClick();
-                              setState(() => _selectedCategoryId = null);
-                            },
-                          );
-                        }
-                        final cat = categories[index - 1];
-                        final isSelected = _selectedCategoryId == cat.id;
-                        return FilterChip(
-                          selected: isSelected,
-                          showCheckmark: false,
-                          avatar: Icon(
-                            _getCategoryIcon(cat.name),
-                            size: 18,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
-                          label: Text(cat.name),
-                          selectedColor: Theme.of(context).colorScheme.primary,
-                          backgroundColor: Theme.of(context).colorScheme.surface,
-                          side: BorderSide(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.outline,
-                            width: 1,
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                          labelStyle: Theme.of(context).textTheme.labelMedium!.copyWith(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.onPrimary
-                                : Theme.of(context).colorScheme.onSurface,
-                          ),
-                          onSelected: (_) {
-                            HapticFeedback.selectionClick();
-                            setState(() => _selectedCategoryId = cat.id);
-                          },
-                        );
-                      },
-                    ),
+                // 2. Top Destinations Section (Horizontal Cards)
+                popularAsync.when(
+                  data: (popularList) => TopDestinationsSection(
+                    temples: popularList,
+                    onTap: (temple) {
+                      HapticFeedback.lightImpact();
+                      context.push('/temple/${temple.id}');
+                    },
+                    onViewAll: () {
+                      HapticFeedback.lightImpact();
+                      context.push('/search');
+                    },
                   ),
                   loading: () => const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: LoadingSkeleton(height: 48),
+                    child: LoadingSkeleton(height: 136),
                   ),
                   error: (_, __) => const SizedBox.shrink(),
                 ),
@@ -482,7 +418,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         filteredList = temples.where((t) {
                           final catId = t.category is Category
                               ? (t.category as Category).id
-                              : (t.category is Map ? t.category['_id'] ?? '' : t.category?.toString() ?? '');
+                              : (t.category is Map ? (t.category['_id'] ?? t.category['id'] ?? '') : t.category?.toString() ?? '');
                           return catId == _selectedCategoryId;
                         }).toList();
                       }
@@ -681,3 +617,178 @@ class _FeaturedTemplesCarouselState extends State<FeaturedTemplesCarousel> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Top Destinations Section — Horizontal Card Scroll
+// ---------------------------------------------------------------------------
+class TopDestinationsSection extends StatelessWidget {
+  final List<Temple> temples;
+  final Function(Temple) onTap;
+  final VoidCallback onViewAll;
+
+  const TopDestinationsSection({
+    super.key,
+    required this.temples,
+    required this.onTap,
+    required this.onViewAll,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (temples.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header Row: Top Destinations  View All
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                'Top Destinations',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 19,
+                      letterSpacing: -0.2,
+                    ),
+              ),
+              InkWell(
+                onTap: () {
+                  HapticFeedback.lightImpact();
+                  onViewAll();
+                },
+                borderRadius: BorderRadius.circular(6),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(
+                      color: Color(0xFFE65100),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Horizontal List View
+        SizedBox(
+          height: 136,
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            scrollDirection: Axis.horizontal,
+            itemCount: temples.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final temple = temples[index];
+              final locationName = temple.location is Location
+                  ? (temple.location as Location).name
+                  : (temple.location is Map ? temple.location['name'] ?? '' : 'Vrindavan');
+
+              return Container(
+                width: 130,
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1A1A1E) : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF27272A) : const Color(0xFFEFEFEF),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark ? const Color(0x20000000) : const Color(0x0A000000),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => onTap(temple),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Top Image
+                        CachedNetworkImage(
+                          imageUrl: temple.thumbnailImage?.isNotEmpty == true
+                              ? temple.thumbnailImage!
+                              : (temple.coverImage.isNotEmpty ? temple.coverImage : 'https://via.placeholder.com/300'),
+                          height: 86,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 86,
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 86,
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                            child: const Icon(Icons.temple_hindu_outlined, size: 28, color: Color(0xFF71717A)),
+                          ),
+                        ),
+
+                        // Bottom Metadata (Title + Location - Snug Fit)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 7.0, vertical: 5.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                temple.name,
+                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13,
+                                      height: 1.15,
+                                    ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.location_on_outlined,
+                                    size: 12,
+                                    color: Color(0xFFE65100),
+                                  ),
+                                  const SizedBox(width: 2),
+                                  Expanded(
+                                    child: Text(
+                                      locationName.isNotEmpty ? locationName : 'Vrindavan',
+                                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                            color: isDark ? const Color(0xFFA1A1AA) : const Color(0xFF71717A),
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 11,
+                                          ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}

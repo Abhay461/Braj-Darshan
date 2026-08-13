@@ -15,19 +15,22 @@ import {
   Select,
   MenuItem,
   Grid2 as Grid,
+  FormControlLabel,
+  Switch,
   Divider,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import StarIcon from '@mui/icons-material/StarOutlined';
+import ImageIcon from '@mui/icons-material/ImageOutlined';
 
 import { PageHeader } from '../../components/common/PageHeader';
 import { ImageUploader } from '../../components/forms/ImageUploader';
-import { GalleryManager } from '../../components/forms/GalleryManager';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 import { useTemple, useTempleMutations } from '../../hooks/useTemples';
 import { useCategories } from '../../hooks/useCategories';
 import { useLocations } from '../../hooks/useLocations';
-import { GalleryImage, Category, Location, Temple } from '../../types';
+import { Category, Location, Temple } from '../../types';
 
 const templeSchema = z.object({
   name: z.string().min(1, 'Temple name is required').max(200),
@@ -42,8 +45,9 @@ const templeSchema = z.object({
   categoryId: z.string().min(1, 'Category is required'),
   locationId: z.string().min(1, 'Location is required'),
   coverImage: z.string().min(1, 'Cover image is required'),
-  thumbnailImage: z.string().optional(),
-  galleryImages: z.array(z.any()).optional().default([]),
+  thumbnailImage: z.string().optional().default(''),
+  isFeatured: z.boolean().default(true),
+  isPopular: z.boolean().default(true),
   status: z.enum(['active', 'inactive', 'draft']).default('active'),
 });
 
@@ -86,7 +90,8 @@ export const TempleForm: React.FC = () => {
       locationId: '',
       coverImage: '',
       thumbnailImage: '',
-      galleryImages: [],
+      isFeatured: true,
+      isPopular: true,
       status: 'active',
     },
   });
@@ -94,7 +99,7 @@ export const TempleForm: React.FC = () => {
   const templeData = templeRes?.data;
   const nameValue = watch('name');
   const coverImageValue = watch('coverImage');
-  const galleryImagesValue = (watch('galleryImages') || []) as GalleryImage[];
+  const thumbnailImageValue = watch('thumbnailImage');
 
   const [isFormInitialized, setIsFormInitialized] = useState(false);
 
@@ -121,7 +126,8 @@ export const TempleForm: React.FC = () => {
         locationId: locId || '',
         coverImage: templeData.coverImage || '',
         thumbnailImage: templeData.thumbnailImage || '',
-        galleryImages: templeData.galleryImages || [],
+        isFeatured: templeData.isFeatured ?? true,
+        isPopular: templeData.isPopular ?? true,
         status: templeData.status || 'active',
       });
       if (templeData.name) {
@@ -136,8 +142,8 @@ export const TempleForm: React.FC = () => {
       shortDescription: (data.history || data.name).slice(0, 490),
       latitude: 27.5830,
       longitude: 77.7000,
-      isFeatured: true,
-      isPopular: true,
+      isFeatured: data.isFeatured,
+      isPopular: data.isPopular,
       parkingAvailable: false,
       wheelchairAccessible: false,
       facilities: [],
@@ -164,7 +170,7 @@ export const TempleForm: React.FC = () => {
     <Box component="form" onSubmit={handleSubmit(handleFormSubmit)}>
       <PageHeader
         title={isEdit ? `Edit Temple: ${templeData?.name || ''}` : 'Add New Temple'}
-        subtitle="Manage English & Hindi shrine details and Cloudinary media"
+        subtitle="Manage English & Hindi shrine details, Cloudinary media and Featured Images"
         breadcrumbs={[
           { label: 'Dashboard', path: '/' },
           { label: 'Temples', path: '/temples' },
@@ -362,19 +368,56 @@ export const TempleForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Media & Gallery Manager */}
+          {/* 1. Main Cover Image Format */}
           <Card sx={{ p: 1, mb: 3 }}>
             <CardContent>
-              <Typography variant="h4" sx={{ mb: 2.5, fontWeight: 700 }}>
-                Media & Cloudinary Images
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <ImageIcon color="primary" />
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  Main Cover Image (मुख्य मंदिर फोटो) *
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ mb: 2.5, color: 'text.secondary' }}>
+                यह मंदिर की मुख्य फोटो है जो मंदिर के लिस्ट कार्ड्स और डिटेल पेज पर प्रदर्शित होगी।
               </Typography>
 
               <ImageUploader
-                label="Cover Image *"
+                label="Main Cover Image (मुख्य फोटो) *"
                 value={coverImageValue}
                 onChange={(url) => setValue('coverImage', url)}
                 type="cover"
                 slug={nameValue ? nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'temple'}
+              />
+            </CardContent>
+          </Card>
+
+          {/* 2. DEDICATED FEATURED TEMPLE IMAGE FORMAT */}
+          <Card
+            sx={{
+              p: 1,
+              mb: 3,
+              border: '1.5px solid #FF8F00',
+              borderRadius: 2,
+              backgroundColor: '#FFFDF6',
+            }}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <StarIcon sx={{ color: '#E65100', fontSize: 28 }} />
+                <Typography variant="h4" sx={{ fontWeight: 800, color: '#E65100' }}>
+                  Featured Temple Image (प्रमुख मंदिर फोटो / Banner Image)
+                </Typography>
+              </Box>
+              <Typography variant="body2" sx={{ mb: 2.5, color: '#5D4037', lineHeight: 1.6 }}>
+                यह फोटो मोबाइल ऐप के होम स्क्रीन पर सबसे ऊपर <strong>"Featured Temples Carousel"</strong> और <strong>"Top Destinations"</strong> कार्ड में उपयोग होगी। (यदि यहाँ फोटो अपलोड नहीं करेंगे तो मुख्य Cover Image का उपयोग होगा)।
+              </Typography>
+
+              <ImageUploader
+                label="Featured Banner Image (बैनर / कैरोसेल फोटो)"
+                value={thumbnailImageValue}
+                onChange={(url) => setValue('thumbnailImage', url)}
+                type="thumbnail"
+                slug={nameValue ? `${nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-')}-featured` : 'featured-temple'}
               />
             </CardContent>
           </Card>
@@ -435,6 +478,46 @@ export const TempleForm: React.FC = () => {
                       ))}
                     </Select>
                   </FormControl>
+                )}
+              />
+
+              <Divider sx={{ my: 2 }} />
+
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: '#E65100' }}>
+                App Homepage Placement Controls:
+              </Typography>
+
+              <Controller
+                name="isFeatured"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={Boolean(value)}
+                        onChange={(e) => onChange(e.target.checked)}
+                        color="warning"
+                      />
+                    }
+                    label="Show in Featured Carousel (प्रमुख कैरोसेल)"
+                  />
+                )}
+              />
+
+              <Controller
+                name="isPopular"
+                control={control}
+                render={({ field: { value, onChange } }) => (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={Boolean(value)}
+                        onChange={(e) => onChange(e.target.checked)}
+                        color="warning"
+                      />
+                    }
+                    label="Show in Top Destinations (प्रमुख स्थान)"
+                  />
                 )}
               />
             </CardContent>

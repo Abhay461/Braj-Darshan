@@ -7,15 +7,9 @@ class TempleRepository {
 
   TempleRepository({required this.dioClient});
 
-  List<Temple> _cachedTemples = [];
-  List<Temple> _cachedFeatured = [];
-  List<Category> _cachedCategories = [];
-  List<Location> _cachedLocations = [];
-  List<Festival> _cachedFestivals = [];
-
   Future<List<Temple>> getTemples({
     int page = 1,
-    int limit = 10,
+    int limit = 50,
     String? search,
     String? categoryId,
     String? locationId,
@@ -34,28 +28,12 @@ class TempleRepository {
       final response = await dioClient.dio.get('/temples', queryParameters: queryParams);
       if (response.data['success'] == true && response.data['data'] != null) {
         final List rawList = response.data['data'];
-        final list = rawList.map((item) => Temple.fromJson(item)).toList();
-        if (list.isNotEmpty && (search == null || search.isEmpty) && categoryId == null && locationId == null) {
-          _cachedTemples = list;
-        }
-        return list;
+        return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getTemples error: $e');
+      debugPrint('TempleRepository.getTemples API Error: $e');
     }
-
-    var result = _cachedTemples;
-    if (search != null && search.isNotEmpty) {
-      final q = search.toLowerCase();
-      result = result.where((t) => t.name.toLowerCase().contains(q) || t.shortDescription.toLowerCase().contains(q)).toList();
-    }
-    if (categoryId != null && categoryId.isNotEmpty) {
-      result = result.where((t) {
-        final catId = t.category is Category ? (t.category as Category).id : t.category?.toString();
-        return catId == categoryId;
-      }).toList();
-    }
-    return result;
+    return [];
   }
 
   Future<Temple?> getTempleByIdOrSlug(String idOrSlug) async {
@@ -65,14 +43,9 @@ class TempleRepository {
         return Temple.fromJson(response.data['data']);
       }
     } catch (e) {
-      debugPrint('TempleRepository.getTempleByIdOrSlug Network error: $e');
+      debugPrint('TempleRepository.getTempleByIdOrSlug API Error: $e');
     }
-    try {
-      return _cachedTemples.firstWhere((t) => t.id == idOrSlug || t.slug == idOrSlug);
-    } catch (e) {
-      debugPrint('TempleRepository.getTempleByIdOrSlug Cache fallback notice: $e');
-      return null;
-    }
+    return null;
   }
 
   Future<List<Temple>> getFeaturedTemples({int limit = 10}) async {
@@ -80,14 +53,12 @@ class TempleRepository {
       final response = await dioClient.dio.get('/temples/featured', queryParameters: {'limit': limit});
       if (response.data['success'] == true && response.data['data'] != null) {
         final List rawList = response.data['data'];
-        final list = rawList.map((item) => Temple.fromJson(item)).toList();
-        if (list.isNotEmpty) _cachedFeatured = list;
-        return list;
+        return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getFeaturedTemples error: $e');
+      debugPrint('TempleRepository.getFeaturedTemples API Error: $e');
     }
-    return _cachedFeatured.isNotEmpty ? _cachedFeatured : _cachedTemples;
+    return [];
   }
 
   Future<List<Temple>> getPopularTemples({int limit = 10}) async {
@@ -98,9 +69,9 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getPopularTemples error: $e');
+      debugPrint('TempleRepository.getPopularTemples API Error: $e');
     }
-    return _cachedTemples;
+    return [];
   }
 
   Future<List<Temple>> getRecentTemples({int limit = 10}) async {
@@ -111,9 +82,9 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getRecentTemples error: $e');
+      debugPrint('TempleRepository.getRecentTemples API Error: $e');
     }
-    return _cachedTemples;
+    return [];
   }
 
   Future<List<Temple>> getNearbyTemples({
@@ -134,9 +105,9 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getNearbyTemples error: $e');
+      debugPrint('TempleRepository.getNearbyTemples API Error: $e');
     }
-    return _cachedTemples;
+    return [];
   }
 
   Future<List<Category>> getCategories() async {
@@ -144,14 +115,12 @@ class TempleRepository {
       final response = await dioClient.dio.get('/categories');
       if (response.data['success'] == true && response.data['data'] != null) {
         final List rawList = response.data['data'];
-        final list = rawList.map((item) => Category.fromJson(item)).toList();
-        if (list.isNotEmpty) _cachedCategories = list;
-        return list;
+        return rawList.map((item) => Category.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getCategories error: $e');
+      debugPrint('TempleRepository.getCategories API Error: $e');
     }
-    return _cachedCategories;
+    return [];
   }
 
   Future<List<Location>> getLocations() async {
@@ -159,14 +128,12 @@ class TempleRepository {
       final response = await dioClient.dio.get('/locations');
       if (response.data['success'] == true && response.data['data'] != null) {
         final List rawList = response.data['data'];
-        final list = rawList.map((item) => Location.fromJson(item)).toList();
-        if (list.isNotEmpty) _cachedLocations = list;
-        return list;
+        return rawList.map((item) => Location.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getLocations error: $e');
+      debugPrint('TempleRepository.getLocations API Error: $e');
     }
-    return _cachedLocations;
+    return [];
   }
 
   Future<List<Festival>> getFestivals() async {
@@ -174,14 +141,11 @@ class TempleRepository {
       final response = await dioClient.dio.get('/festivals');
       if (response.data['success'] == true && response.data['data'] != null) {
         final List rawList = response.data['data'];
-        final list = rawList.map((item) => Festival.fromJson(item)).toList();
-        if (list.isNotEmpty) _cachedFestivals = list;
-        return list;
+        return rawList.map((item) => Festival.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getFestivals error: $e');
+      debugPrint('TempleRepository.getFestivals API Error: $e');
     }
-    return _cachedFestivals;
+    return [];
   }
 }
-

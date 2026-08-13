@@ -71,10 +71,10 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
     // -------------------------------------------------------------------------
     if (!widget.showImage) {
       return Container(
-        margin: const EdgeInsets.only(bottom: 8.0),
+        margin: const EdgeInsets.only(bottom: 6.0),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF141417) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           border: Border.all(
             color: isDark ? const Color(0xFF27272A) : const Color(0xFFE5E7EB),
             width: 1,
@@ -82,49 +82,50 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
           boxShadow: [
             BoxShadow(
               color: isDark ? const Color(0x20000000) : const Color(0x06000000),
-              blurRadius: 8,
+              blurRadius: 6,
               offset: const Offset(0, 2),
             ),
           ],
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(14),
           child: InkWell(
             onTap: widget.onTap,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
               child: Row(
                 children: [
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: 32,
+                    height: 32,
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       Icons.temple_hindu_outlined,
-                      size: 20,
+                      size: 18,
                       color: isDark ? Colors.white : const Color(0xFF18181B),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           widget.temple.name,
-                        style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.3,
-                            ),
+                          style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.3,
+                              ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 3),
+                        const SizedBox(height: 1),
                         Row(
                           children: [
                             const Icon(Icons.location_on_outlined, size: 12, color: Color(0xFF71717A)),
@@ -149,11 +150,11 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                   ScaleTransition(
                     scale: _scaleAnimation,
                     child: IconButton(
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                       padding: EdgeInsets.zero,
                       icon: Icon(
                         isFav ? Icons.favorite : Icons.favorite_border,
-                        size: 20,
+                        size: 18,
                         color: isFav ? const Color(0xFFDC2626) : const Color(0xFF71717A),
                       ),
                       onPressed: _onFavoriteToggle,
@@ -341,7 +342,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
               ),
               // Name & Location Metadata
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
