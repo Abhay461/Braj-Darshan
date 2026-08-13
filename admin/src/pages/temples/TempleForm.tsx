@@ -368,7 +368,7 @@ export const TempleForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* 1. Main Cover Image Format */}
+          {/* 1. Main Cover Image Upload Format */}
           <Card sx={{ p: 1, mb: 3 }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -377,8 +377,8 @@ export const TempleForm: React.FC = () => {
                   Main Cover Image (मुख्य मंदिर फोटो) *
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ mb: 2.5, color: 'text.secondary' }}>
-                यह मंदिर की मुख्य फोटो है जो मंदिर के लिस्ट कार्ड्स और डिटेल पेज पर प्रदर्शित होगी।
+              <Typography variant="body2" sx={{ mb: 2.5, color: 'text.secondary', lineHeight: 1.6 }}>
+                यह मंदिर की मुख्य फोटो है। जब भी आप यहाँ फोटो अपलोड करेंगे, तो यह फोटो <strong>Top Destinations कार्ड्स</strong>, मंदिर लिस्ट कार्ड्स और <strong>डिटेल पेज (About Page)</strong> पर बिना कटे (Uncropped & Fitted) अपने आप सेट हो जाएगी। (Recommended Size: <strong>800 × 600 px</strong>).
               </Typography>
 
               <ImageUploader
@@ -391,7 +391,7 @@ export const TempleForm: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* 2. DEDICATED FEATURED TEMPLE IMAGE FORMAT */}
+          {/* 2. Featured Temple Image Upload Format */}
           <Card
             sx={{
               p: 1,
@@ -405,15 +405,16 @@ export const TempleForm: React.FC = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <StarIcon sx={{ color: '#E65100', fontSize: 28 }} />
                 <Typography variant="h4" sx={{ fontWeight: 800, color: '#E65100' }}>
-                  Featured Temple Image (प्रमुख मंदिर फोटो / Banner Image)
+                  Featured Temple Image (प्रमुख मंदिर कैरोसेल फोटो)
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mb: 2.5, color: '#5D4037', lineHeight: 1.6 }}>
-                यह फोटो मोबाइल ऐप के होम स्क्रीन पर सबसे ऊपर <strong>"Featured Temples Carousel"</strong> और <strong>"Top Destinations"</strong> कार्ड में उपयोग होगी। (यदि यहाँ फोटो अपलोड नहीं करेंगे तो मुख्य Cover Image का उपयोग होगा)।
+                यह फोटो मोबाइल ऐप के होम स्क्रीन पर सबसे ऊपर बड़े <strong>"Featured Temples Carousel (बैनर)"</strong> में प्रदर्शित होगी। <br />
+                <strong style={{ color: '#D84315' }}>Recommended Image Size: 1200 × 600 px (16:9 Landscape Widescreen)</strong>
               </Typography>
 
               <ImageUploader
-                label="Featured Banner Image (बैनर / कैरोसेल फोटो)"
+                label="Featured Banner Image (बैनर फोटो - Recommended Size: 1200 × 600 px)"
                 value={thumbnailImageValue}
                 onChange={(url) => setValue('thumbnailImage', url)}
                 type="thumbnail"

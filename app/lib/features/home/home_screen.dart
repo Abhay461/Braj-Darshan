@@ -332,22 +332,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
-        bottomNavigationBar: SafeArea(
-          child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: const AdBannerWidget(),
-          ),
-        ),
         body: RefreshIndicator(
           color: Theme.of(context).colorScheme.secondary,
           onRefresh: () async {
             ref.refresh(featuredTemplesProvider);
+            ref.refresh(popularTemplesProvider);
             ref.refresh(allTemplesProvider);
             ref.refresh(categoriesProvider);
           },
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.only(top: 8.0, bottom: 80.0),
+            padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -571,9 +566,9 @@ class _FeaturedTemplesCarouselState extends State<FeaturedTemplesCarousel> {
                       label: temple.name,
                       image: true,
                       child: CachedNetworkImage(
-                        imageUrl: temple.coverImage.isNotEmpty
-                            ? temple.coverImage
-                            : (temple.thumbnailImage ?? 'https://via.placeholder.com/600'),
+                        imageUrl: (temple.featuredImage != null && temple.featuredImage!.isNotEmpty)
+                            ? temple.featuredImage!
+                            : (temple.coverImage.isNotEmpty ? temple.coverImage : 'https://via.placeholder.com/600'),
                         height: 195,
                         width: double.infinity,
                         fit: BoxFit.cover,
@@ -720,9 +715,9 @@ class TopDestinationsSection extends StatelessWidget {
                       children: [
                         // Top Image
                         CachedNetworkImage(
-                          imageUrl: temple.thumbnailImage?.isNotEmpty == true
-                              ? temple.thumbnailImage!
-                              : (temple.coverImage.isNotEmpty ? temple.coverImage : 'https://via.placeholder.com/300'),
+                          imageUrl: temple.coverImage.isNotEmpty
+                              ? temple.coverImage
+                              : (temple.thumbnailImage?.isNotEmpty == true ? temple.thumbnailImage! : 'https://via.placeholder.com/300'),
                           height: 86,
                           width: double.infinity,
                           fit: BoxFit.cover,

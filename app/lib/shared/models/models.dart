@@ -232,6 +232,7 @@ class Temple {
   final dynamic location;
   final String coverImage;
   final String? thumbnailImage;
+  final String? featuredImage;
   final List<GalleryImage> galleryImages;
   final TempleAddress? address;
   final double latitude;
@@ -268,6 +269,7 @@ class Temple {
     this.location,
     required this.coverImage,
     this.thumbnailImage,
+    this.featuredImage,
     this.galleryImages = const [],
     this.address,
     required this.latitude,
@@ -309,6 +311,7 @@ class Temple {
       location: json['locationId'] is Map ? Location.fromJson(json['locationId']) : json['locationId'],
       coverImage: json['coverImage'] ?? '',
       thumbnailImage: json['thumbnailImage'] ?? json['coverImage'] ?? '',
+      featuredImage: json['featuredImage'] ?? json['thumbnailImage'] ?? json['coverImage'] ?? '',
       galleryImages: galleryList,
       address: json['address'] is Map ? TempleAddress.fromJson(json['address']) : null,
       latitude: (json['latitude'] as num?)?.toDouble() ?? 27.5830,
