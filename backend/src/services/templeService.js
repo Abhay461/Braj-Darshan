@@ -1,6 +1,9 @@
 const templeRepository = require('../repositories/templeRepository');
 const ApiError = require('../utils/ApiError');
 
+const https = require('https');
+const http = require('http');
+
 function extractCoordsFromUrl(url) {
   if (!url || typeof url !== 'string') return null;
   const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -15,6 +18,56 @@ function extractCoordsFromUrl(url) {
   const pairMatch = url.match(/(-?\d{1,2}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})/);
   if (pairMatch) return { latitude: parseFloat(pairMatch[1]), longitude: parseFloat(pairMatch[2]) };
 
+  return null;
+}
+
+async function resolveShortUrl(url, maxRedirects = 5) {
+  if (!url || maxRedirects <= 0) return null;
+  return new Promise((resolve) => {
+    try {
+      const u = new URL(url);
+      const client = url.startsWith('https') ? https : http;
+      const options = {
+        hostname: u.hostname,
+        path: u.pathname + u.search,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+          'Accept-Encoding': 'identity',
+        },
+      };
+      const req = client.get(options, (res) => {
+        if (res.headers.location) {
+          const coords = extractCoordsFromUrl(res.headers.location);
+          if (coords) return resolve(coords);
+          const nextUrl = res.headers.location.startsWith('http') ? res.headers.location : `${u.protocol}//${u.hostname}${res.headers.location}`;
+          return resolve(resolveShortUrl(nextUrl, maxRedirects - 1));
+        }
+
+        let body = '';
+        res.on('data', (chunk) => { body += chunk; });
+        res.on('end', () => {
+          const coords = extractCoordsFromUrl(body);
+          resolve(coords);
+        });
+      });
+      req.on('error', () => resolve(null));
+      req.setTimeout(5000, () => {
+        req.destroy();
+        resolve(null);
+      });
+    } catch (e) {
+      resolve(null);
+    }
+  });
+}
+
+async function getCoordsFromUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const direct = extractCoordsFromUrl(url);
+  if (direct) return direct;
+  if (url.includes('goo.gl') || url.includes('maps.google') || url.includes('google.com/maps')) {
+    return await resolveShortUrl(url);
+  }
   return null;
 }
 
@@ -54,7 +107,7 @@ class TempleService {
    */
   async createTemple(data) {
     if (data.directionsUrl) {
-      const extracted = extractCoordsFromUrl(data.directionsUrl);
+      const extracted = await getCoordsFromUrl(data.directionsUrl);
       if (extracted) {
         if (!data.latitude || data.latitude === 27.5830) data.latitude = extracted.latitude;
         if (!data.longitude || data.longitude === 77.7000) data.longitude = extracted.longitude;
@@ -69,7 +122,7 @@ class TempleService {
    */
   async updateTemple(id, data) {
     if (data.directionsUrl) {
-      const extracted = extractCoordsFromUrl(data.directionsUrl);
+      const extracted = await getCoordsFromUrl(data.directionsUrl);
       if (extracted) {
         data.latitude = extracted.latitude;
         data.longitude = extracted.longitude;

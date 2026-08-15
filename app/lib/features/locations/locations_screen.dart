@@ -76,9 +76,9 @@ class LocationsScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
-                              Icons.location_on_outlined,
+                              Icons.location_on,
                               size: 26,
-                              color: Theme.of(context).colorScheme.onSurface,
+                              color: const Color(0xFFEA4335),
                             ),
                           ),
                           const SizedBox(width: 14),

@@ -33,13 +33,109 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
   void _onMarkerTapped(Temple temple) {
     HapticFeedback.lightImpact();
     setState(() => _selectedTemple = temple);
-    _mapController.move(LatLng(temple.latitude, temple.longitude), 15.0);
+    _mapController.move(_getEffectiveLatLng(temple), 15.0);
   }
 
   void _resetToCenter() {
     HapticFeedback.lightImpact();
     setState(() => _selectedTemple = null);
     _mapController.move(_vrindavanCenter, 13.0);
+  }
+
+  /// Get effective location for a temple: try directionsUrl extraction first,
+  /// then fall back to temple's own lat/lng, then location's lat/lng.
+  LatLng _getEffectiveLatLng(Temple temple) {
+    // 1. Try extracting from directionsUrl
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
+      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
+      if (parsed != null) return parsed;
+    }
+    // 2. Use temple's own coordinates if not hardcoded default
+    final isDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (!isDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
+      return LatLng(temple.latitude, temple.longitude);
+    }
+    // 3. Use location's coordinates if available
+    if (temple.location is Location) {
+      final loc = temple.location as Location;
+      if (loc.latitude != 0.0 && loc.longitude != 0.0 &&
+          !(loc.latitude == 27.5830 && loc.longitude == 77.7000)) {
+        return LatLng(loc.latitude, loc.longitude);
+      }
+    }
+    // 4. Fallback to temple's stored coordinates
+    return LatLng(temple.latitude, temple.longitude);
+  }
+
+  bool _hasValidLocation(Temple temple) {
+    final effective = _getEffectiveLatLng(temple);
+    // Filter out temples that are still at the hardcoded default
+    return !(effective.latitude == 27.5830 && effective.longitude == 77.7000);
+  }
+
+  LatLng? _extractLatLngFromUrl(String text) {
+    if (text.isEmpty) return null;
+    try {
+      var decoded = text.replaceAll('%2C', ',').replaceAll('%2c', ',');
+      try { decoded = Uri.decodeFull(decoded); } catch (_) {}
+
+      // 1. !3d=lat !4d=lng
+      final d3d4d = RegExp(r'!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)').firstMatch(decoded);
+      if (d3d4d != null) {
+        final lat = double.tryParse(d3d4d.group(1)!);
+        final lng = double.tryParse(d3d4d.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 2. !2d=lng !3d=lat
+      final d2d3d = RegExp(r'!2d(-?\d+\.\d+)!3d(-?\d+\.\d+)').firstMatch(decoded);
+      if (d2d3d != null) {
+        final lng = double.tryParse(d2d3d.group(1)!);
+        final lat = double.tryParse(d2d3d.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 3. @lat,lng
+      final atMatch = RegExp(r'@(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(decoded);
+      if (atMatch != null) {
+        final lat = double.tryParse(atMatch.group(1)!);
+        final lng = double.tryParse(atMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 4. query/q/ll/center/destination param
+      final paramMatch = RegExp(r'(?:query|q|ll|center|destination|loc:)=(-?\d+\.\d+)[,\+ ]+(-?\d+\.\d+)').firstMatch(decoded);
+      if (paramMatch != null) {
+        final lat = double.tryParse(paramMatch.group(1)!);
+        final lng = double.tryParse(paramMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 5. /lat,lng in path
+      final dirMatch = RegExp(r'/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)').firstMatch(decoded);
+      if (dirMatch != null) {
+        final lat = double.tryParse(dirMatch.group(1)!);
+        final lng = double.tryParse(dirMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 6. India-range coordinate pair
+      final indiaMatches = RegExp(r'(2[0-9]\.\d{3,})[,\s]+(7[0-9]\.\d{3,})').allMatches(decoded);
+      for (final m in indiaMatches) {
+        final lat = double.tryParse(m.group(1)!);
+        final lng = double.tryParse(m.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+      // 7. General 4+ decimal pair
+      final pairMatches = RegExp(r'(-?\d{1,2}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})').allMatches(decoded);
+      for (final m in pairMatches) {
+        final lat = double.tryParse(m.group(1)!);
+        final lng = double.tryParse(m.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) return LatLng(lat, lng);
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  bool _isValidLatLng(double lat, double lng) {
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return false;
+    if (lat == 0.0 && lng == 0.0) return false;
+    return true;
   }
 
   @override
@@ -100,45 +196,51 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                   ),
 
                   MarkerLayer(
-                    markers: temples.map((temple) {
+                    markers: temples.where(_hasValidLocation).map((temple) {
                       final isSelected = _selectedTemple?.id == temple.id;
+                      final effectivePos = _getEffectiveLatLng(temple);
                       return Marker(
-                        point: LatLng(temple.latitude, temple.longitude),
-                        width: isSelected ? 48.0 : 44.0,
-                        height: isSelected ? 48.0 : 44.0,
+                        point: effectivePos,
+                        width: isSelected ? 52.0 : 44.0,
+                        height: isSelected ? 52.0 : 44.0,
+                        alignment: Alignment.topCenter,
                         child: Semantics(
                           label: 'Map Marker for ${temple.name}',
                           button: true,
                           child: GestureDetector(
                             onTap: () => _onMarkerTapped(temple),
-                            child: AnimatedContainer(
+                            child: AnimatedScale(
+                              scale: isSelected ? 1.2 : 1.0,
                               duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Theme.of(context).colorScheme.surface,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : Theme.of(context).colorScheme.outline,
-                                  width: isSelected ? 2.5 : 1.5,
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Color(0x1A000000),
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.location_on,
+                                    size: isSelected ? 48 : 40,
+                                    color: isSelected
+                                        ? const Color(0xFFD32F2F)
+                                        : const Color(0xFFEA4335),
+                                    shadows: const [
+                                      Shadow(
+                                        color: Color(0x40000000),
+                                        blurRadius: 6,
+                                        offset: Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  Positioned(
+                                    top: isSelected ? 10 : 8,
+                                    child: Container(
+                                      width: isSelected ? 14 : 12,
+                                      height: isSelected ? 14 : 12,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
                                   ),
                                 ],
-                              ),
-                              child: Icon(
-                                Icons.temple_hindu,
-                                size: isSelected ? 22 : 18,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                           ),
@@ -249,9 +351,9 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                   Row(
                                     children: [
                                       Icon(
-                                        Icons.location_on_outlined,
-                                        size: 13,
-                                        color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
+                                        Icons.location_on,
+                                        size: 14,
+                                        color: const Color(0xFFEA4335),
                                       ),
                                       const SizedBox(width: 3),
                                       Expanded(

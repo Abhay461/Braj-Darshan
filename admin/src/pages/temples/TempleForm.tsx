@@ -18,11 +18,13 @@ import {
   FormControlLabel,
   Switch,
   Divider,
+  Alert,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import StarIcon from '@mui/icons-material/StarOutlined';
 import ImageIcon from '@mui/icons-material/ImageOutlined';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 import { PageHeader } from '../../components/common/PageHeader';
 import { ImageUploader } from '../../components/forms/ImageUploader';
@@ -31,6 +33,65 @@ import { useTemple, useTempleMutations } from '../../hooks/useTemples';
 import { useCategories } from '../../hooks/useCategories';
 import { useLocations } from '../../hooks/useLocations';
 import { Category, Location, Temple } from '../../types';
+
+// ─── Extract lat/lng from Google Maps URL ─────────────────────────
+function extractLatLngFromUrl(text: string): { lat: number; lng: number } | null {
+  if (!text || !text.trim()) return null;
+  try {
+    let decoded = text.replace(/%2C/gi, ',');
+    try { decoded = decodeURIComponent(decoded); } catch {}
+
+    // 1. Protobuf !3d=lat !4d=lng
+    const d3d4d = decoded.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (d3d4d) {
+      const lat = parseFloat(d3d4d[1]), lng = parseFloat(d3d4d[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 2. Protobuf !2d=lng !3d=lat
+    const d2d3d = decoded.match(/!2d(-?\d+\.\d+)!3d(-?\d+\.\d+)/);
+    if (d2d3d) {
+      const lng = parseFloat(d2d3d[1]), lat = parseFloat(d2d3d[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 3. @lat,lng
+    const atMatch = decoded.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (atMatch) {
+      const lat = parseFloat(atMatch[1]), lng = parseFloat(atMatch[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 4. query=lat,lng or q=lat,lng
+    const paramMatch = decoded.match(/(?:query|q|ll|center|destination)=(-?\d+\.\d+)[,+ ]+(-?\d+\.\d+)/);
+    if (paramMatch) {
+      const lat = parseFloat(paramMatch[1]), lng = parseFloat(paramMatch[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 5. /lat,lng in path
+    const dirMatch = decoded.match(/\/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/);
+    if (dirMatch) {
+      const lat = parseFloat(dirMatch[1]), lng = parseFloat(dirMatch[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 6. India-range coordinate pair
+    const indiaMatch = decoded.match(/(2[0-9]\.\d{3,})[,\s]+(7[0-9]\.\d{3,})/);
+    if (indiaMatch) {
+      const lat = parseFloat(indiaMatch[1]), lng = parseFloat(indiaMatch[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+    // 7. General 4+ decimal pair
+    const pairMatch = decoded.match(/(-?\d{1,2}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})/);
+    if (pairMatch) {
+      const lat = parseFloat(pairMatch[1]), lng = parseFloat(pairMatch[2]);
+      if (isValidCoord(lat, lng)) return { lat, lng };
+    }
+  } catch {}
+  return null;
+}
+
+function isValidCoord(lat: number, lng: number): boolean {
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return false;
+  if (lat === 0 && lng === 0) return false;
+  return true;
+}
 
 const templeSchema = z.object({
   name: z.string().min(1, 'Temple name is required').max(200),
@@ -42,6 +103,8 @@ const templeSchema = z.object({
   guestHouseBookingUrl: z.string().optional().default(''),
   liveDarshanUrl: z.string().optional().default(''),
   directionsUrl: z.string().optional().default(''),
+  latitude: z.coerce.number().min(-90).max(90).default(27.5830),
+  longitude: z.coerce.number().min(-180).max(180).default(77.7000),
   categoryId: z.string().min(1, 'Category is required'),
   locationId: z.string().min(1, 'Location is required'),
   coverImage: z.string().min(1, 'Cover image is required'),
@@ -86,6 +149,8 @@ export const TempleForm: React.FC = () => {
       guestHouseBookingUrl: '',
       liveDarshanUrl: '',
       directionsUrl: '',
+      latitude: 27.5830,
+      longitude: 77.7000,
       categoryId: '',
       locationId: '',
       coverImage: '',
@@ -100,8 +165,12 @@ export const TempleForm: React.FC = () => {
   const nameValue = watch('name');
   const coverImageValue = watch('coverImage');
   const thumbnailImageValue = watch('thumbnailImage');
+  const directionsUrlValue = watch('directionsUrl');
+  const latitudeValue = watch('latitude');
+  const longitudeValue = watch('longitude');
 
   const [isFormInitialized, setIsFormInitialized] = useState(false);
+  const [coordAutoExtracted, setCoordAutoExtracted] = useState(false);
 
   useEffect(() => {
     setIsFormInitialized(false);
@@ -122,6 +191,8 @@ export const TempleForm: React.FC = () => {
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
         liveDarshanUrl: templeData.liveDarshanUrl || '',
         directionsUrl: templeData.directionsUrl || '',
+        latitude: templeData.latitude || 27.5830,
+        longitude: templeData.longitude || 77.7000,
         categoryId: catId || '',
         locationId: locId || '',
         coverImage: templeData.coverImage || '',
@@ -136,12 +207,30 @@ export const TempleForm: React.FC = () => {
     }
   }, [templeData, isEdit, isFormInitialized, reset]);
 
+  // Auto-extract coordinates from directionsUrl when it changes
+  useEffect(() => {
+    if (directionsUrlValue && directionsUrlValue.trim()) {
+      const coords = extractLatLngFromUrl(directionsUrlValue);
+      if (coords) {
+        setValue('latitude', coords.lat);
+        setValue('longitude', coords.lng);
+        setCoordAutoExtracted(true);
+      } else {
+        setCoordAutoExtracted(false);
+      }
+    } else {
+      setCoordAutoExtracted(false);
+    }
+  }, [directionsUrlValue, setValue]);
+
+  const isDefaultCoord = latitudeValue === 27.5830 && longitudeValue === 77.7000;
+
   const handleFormSubmit = async (data: TempleFormData) => {
     const payload: Partial<Temple> = {
       ...data,
       shortDescription: (data.history || data.name).slice(0, 490),
-      latitude: 27.5830,
-      longitude: 77.7000,
+      latitude: data.latitude,
+      longitude: data.longitude,
       isFeatured: data.isFeatured,
       isPopular: data.isPopular,
       parkingAvailable: false,
@@ -357,9 +446,74 @@ export const TempleForm: React.FC = () => {
                     render={({ field }) => (
                       <TextField
                         {...field}
-                        label="Custom Directions / Google Maps Link (Optional)"
-                        placeholder="https://maps.google.com/..."
+                        label="Google Maps Link (मंदिर का Google Maps लिंक) *"
+                        placeholder="https://maps.google.com/... या goo.gl/maps/... लिंक पेस्ट करें"
                         fullWidth
+                        helperText="Google Maps से मंदिर का लिंक यहाँ पेस्ट करें — Latitude/Longitude अपने आप भर जाएगा"
+                      />
+                    )}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+
+          {/* Temple Location Coordinates */}
+          <Card sx={{ p: 1, mb: 3, border: coordAutoExtracted ? '1.5px solid #2E7D32' : (isDefaultCoord ? '1.5px solid #ED6C02' : '1px solid #E0E0E0') }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <MyLocationIcon color={coordAutoExtracted ? 'success' : 'warning'} />
+                <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                  Temple Location Coordinates (मंदिर के निर्देशांक)
+                </Typography>
+              </Box>
+
+              {coordAutoExtracted && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  ✅ Coordinates auto-extracted from Google Maps link! (Google Maps लिंक से निर्देशांक अपने आप सेट हो गए)
+                </Alert>
+              )}
+
+              {isDefaultCoord && !coordAutoExtracted && (
+                <Alert severity="warning" sx={{ mb: 2 }}>
+                  ⚠️ Default coordinates detected! Please paste a Google Maps link above or enter real lat/lng manually.
+                  (अभी डिफ़ॉल्ट location सेट है — कृपया Google Maps लिंक पेस्ट करें या सही lat/lng भरें)
+                </Alert>
+              )}
+
+              <Grid container spacing={2.5}>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="latitude"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Latitude (अक्षांश) *"
+                        placeholder="e.g. 27.5692"
+                        fullWidth
+                        type="number"
+                        inputProps={{ step: 'any' }}
+                        error={!!errors.latitude}
+                        helperText={errors.latitude?.message || 'Google Maps link paste karne par auto-fill ho jayega'}
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6 }}>
+                  <Controller
+                    name="longitude"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Longitude (देशांतर) *"
+                        placeholder="e.g. 77.6980"
+                        fullWidth
+                        type="number"
+                        inputProps={{ step: 'any' }}
+                        error={!!errors.longitude}
+                        helperText={errors.longitude?.message || 'Google Maps link paste karne par auto-fill ho jayega'}
                       />
                     )}
                   />

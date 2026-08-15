@@ -761,9 +761,9 @@ class TopDestinationsSection extends StatelessWidget {
                               Row(
                                 children: [
                                   const Icon(
-                                    Icons.location_on_outlined,
-                                    size: 12,
-                                    color: Color(0xFFE65100),
+                                    Icons.location_on,
+                                    size: 13,
+                                    color: Color(0xFFEA4335),
                                   ),
                                   const SizedBox(width: 2),
                                   Expanded(

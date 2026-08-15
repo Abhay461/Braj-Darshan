@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -29,8 +31,11 @@ class TempleDetailScreen extends ConsumerStatefulWidget {
 
 class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   final ScrollController _scrollController = ScrollController();
+  final MapController _mapController = MapController();
   bool _showScrollToTop = false;
   String? _selectedHistoryLang;
+  LatLng? _resolvedShortUrlLatLng;
+  String? _lastResolvedUrl;
 
   @override
   void initState() {
@@ -46,8 +51,18 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   @override
+  void didUpdateWidget(TempleDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.templeId != widget.templeId) {
+      _resolvedShortUrlLatLng = null;
+      _lastResolvedUrl = null;
+    }
+  }
+
+  @override
   void dispose() {
     _scrollController.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -70,50 +85,189 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   LatLng _getEffectiveLocation(Temple temple) {
+    if (_resolvedShortUrlLatLng != null) {
+      return _resolvedShortUrlLatLng!;
+    }
     if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
       final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
       if (parsed != null) return parsed;
     }
-    if (temple.latitude != 0.0 && temple.longitude != 0.0) {
+    final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
       return LatLng(temple.latitude, temple.longitude);
     }
     if (temple.location is Location) {
       final loc = temple.location as Location;
-      if (loc.latitude != 0.0 && loc.longitude != 0.0) {
+      if (loc.latitude != 0.0 && loc.longitude != 0.0 && !(loc.latitude == 27.5830 && loc.longitude == 77.7000)) {
         return LatLng(loc.latitude, loc.longitude);
       }
     }
     return LatLng(temple.latitude, temple.longitude);
   }
 
-  LatLng? _extractLatLngFromUrl(String url) {
+  void _checkAndResolveShortUrl(Temple temple) async {
+    final url = temple.directionsUrl?.trim();
+    if (url == null || url.isEmpty || url == _lastResolvedUrl) return;
+
+    _lastResolvedUrl = url;
+
+    final direct = _extractLatLngFromUrl(url);
+    if (direct != null) {
+      if (mounted && _resolvedShortUrlLatLng != direct) {
+        setState(() {
+          _resolvedShortUrlLatLng = direct;
+        });
+        try {
+          _mapController.move(direct, 15.0);
+        } catch (_) {}
+      }
+      return;
+    }
+
+    final resolved = await _resolveRedirectUrl(url);
+    if (resolved != null && mounted) {
+      setState(() {
+        _resolvedShortUrlLatLng = resolved;
+      });
+      try {
+        _mapController.move(resolved, 15.0);
+      } catch (e) {
+        debugPrint('Error moving mapController: $e');
+      }
+    }
+  }
+
+  Future<LatLng?> _resolveRedirectUrl(String url) async {
     try {
-      final atMatch = RegExp(r'@(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(url);
+      final client = HttpClient();
+      client.connectionTimeout = const Duration(seconds: 8);
+      
+      final request = await client.getUrl(Uri.parse(url));
+      request.headers.set('User-Agent', 'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36');
+      request.headers.set('Accept-Encoding', 'identity');
+      request.followRedirects = true;
+      request.maxRedirects = 10;
+      
+      final response = await request.close();
+
+      for (final redirect in response.redirects) {
+        final loc = redirect.location.toString();
+        final coords = _extractLatLngFromUrl(loc);
+        if (coords != null) return coords;
+      }
+
+      var coords = _extractLatLngFromUrl(url);
+      if (coords != null) return coords;
+
+      final bytes = await response.fold<List<int>>([], (previous, element) => previous..addAll(element));
+      String bodyText;
+      if (response.headers.value('content-encoding')?.contains('gzip') == true) {
+        bodyText = utf8.decode(gzip.decode(bytes), allowMalformed: true);
+      } else {
+        bodyText = utf8.decode(bytes, allowMalformed: true);
+      }
+
+      coords = _extractLatLngFromUrl(bodyText);
+      if (coords != null) return coords;
+    } catch (e) {
+      debugPrint('Error resolving redirect URL $url: $e');
+    }
+    return null;
+  }
+
+  bool _isValidLatLng(double lat, double lng) {
+    if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return false;
+    if (lat == 0.0 && lng == 0.0) return false;
+    if (lat == 17.0 || lat == 15.0 || lat == 18.0 || lat == 1.0 || lat == 2.0 || lat == 3.0 || lat == 4.0 || lat == 5.0) return false;
+    return true;
+  }
+
+  LatLng? _extractLatLngFromUrl(String text) {
+    if (text.isEmpty) return null;
+    try {
+      var decoded = text.replaceAll('%2C', ',').replaceAll('%2c', ',');
+      try {
+        decoded = Uri.decodeFull(decoded);
+      } catch (_) {}
+
+      // 1. Google Maps Protobuf 3d=lat, 4d=lng (e.g. !3d27.569212!4d77.698015)
+      final d3d4dMatch = RegExp(r'!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)').firstMatch(decoded);
+      if (d3d4dMatch != null) {
+        final lat = double.tryParse(d3d4dMatch.group(1)!);
+        final lng = double.tryParse(d3d4dMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
+      }
+
+      // 2. Google Maps Protobuf 2d=lng, 3d=lat (e.g. !2d77.698015!3d27.572412)
+      final d2d3dMatch = RegExp(r'!2d(-?\d+\.\d+)!3d(-?\d+\.\d+)').firstMatch(decoded);
+      if (d2d3dMatch != null) {
+        final lng = double.tryParse(d2d3dMatch.group(1)!);
+        final lat = double.tryParse(d2d3dMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
+      }
+
+      // 3. Google Maps Protobuf 3d=lat, 2d=lng (e.g. !3d27.569212!2d77.698015)
+      final d3d2dMatch = RegExp(r'!3d(-?\d+\.\d+)!2d(-?\d+\.\d+)').firstMatch(decoded);
+      if (d3d2dMatch != null) {
+        final lat = double.tryParse(d3d2dMatch.group(1)!);
+        final lng = double.tryParse(d3d2dMatch.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
+      }
+
+      // 4. Match @27.569212,77.698015
+      final atMatch = RegExp(r'@(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(decoded);
       if (atMatch != null) {
         final lat = double.tryParse(atMatch.group(1)!);
         final lng = double.tryParse(atMatch.group(2)!);
-        if (lat != null && lng != null) return LatLng(lat, lng);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
       }
 
-      final paramMatch = RegExp(r'(?:query|q|ll|destination)=(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(url);
+      // 5. Match query=27.5692,77.6980 or q=27.5692,77.6980 or ll=27.5692,77.6980 or center=27.5692,77.6980 or loc:27.5692,77.6980
+      final paramMatch = RegExp(r'(?:query|q|ll|center|destination|loc:)=(-?\d+\.\d+)[,\+ ]+(-?\d+\.\d+)').firstMatch(decoded);
       if (paramMatch != null) {
         final lat = double.tryParse(paramMatch.group(1)!);
         final lng = double.tryParse(paramMatch.group(2)!);
-        if (lat != null && lng != null) return LatLng(lat, lng);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
       }
 
-      final dirMatch = RegExp(r'/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)').firstMatch(url);
+      // 6. Match /dir//27.5692,77.6980 or /27.5692,77.6980
+      final dirMatch = RegExp(r'/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)').firstMatch(decoded);
       if (dirMatch != null) {
         final lat = double.tryParse(dirMatch.group(1)!);
         final lng = double.tryParse(dirMatch.group(2)!);
-        if (lat != null && lng != null) return LatLng(lat, lng);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
       }
 
-      final pairMatch = RegExp(r'(-?\d{1,2}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})').firstMatch(url);
-      if (pairMatch != null) {
-        final lat = double.tryParse(pairMatch.group(1)!);
-        final lng = double.tryParse(pairMatch.group(2)!);
-        if (lat != null && lng != null) return LatLng(lat, lng);
+      // 7. Match Braj / India latitude (20.0 to 35.0) and longitude (70.0 to 95.0) specifically
+      final indiaMatches = RegExp(r'(2[0-9]\.\d{3,})[,\s]+(7[0-9]\.\d{3,})').allMatches(decoded);
+      for (final m in indiaMatches) {
+        final lat = double.tryParse(m.group(1)!);
+        final lng = double.tryParse(m.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
+      }
+
+      // 8. General coordinate pair match with at least 4 decimal digits
+      final pairMatches = RegExp(r'(-?\d{1,2}\.\d{4,})[,\s]+(-?\d{1,3}\.\d{4,})').allMatches(decoded);
+      for (final m in pairMatches) {
+        final lat = double.tryParse(m.group(1)!);
+        final lng = double.tryParse(m.group(2)!);
+        if (lat != null && lng != null && _isValidLatLng(lat, lng)) {
+          return LatLng(lat, lng);
+        }
       }
     } catch (e) {
       debugPrint('Error extracting coordinates: $e');
@@ -267,6 +421,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
             ? (temple.location as Location).name
             : (temple.location is Map ? temple.location['name'] ?? '' : 'Vrindavan');
 
+        _checkAndResolveShortUrl(temple);
         final effectiveLatLng = _getEffectiveLocation(temple);
 
         return SafeArea(
@@ -431,9 +586,9 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                 Row(
                                   children: [
                                     Icon(
-                                      Icons.location_on_outlined,
-                                      size: 15,
-                                      color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
+                                      Icons.location_on,
+                                      size: 16,
+                                      color: const Color(0xFFEA4335),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
@@ -620,6 +775,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                             child: Stack(
                               children: [
                                 FlutterMap(
+                                  mapController: _mapController,
                                   options: MapOptions(
                                     initialCenter: effectiveLatLng,
                                     initialZoom: 15.0,
