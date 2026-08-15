@@ -386,6 +386,7 @@ export const TempleForm: React.FC = () => {
                 value={coverImageValue}
                 onChange={(url) => setValue('coverImage', url)}
                 type="cover"
+                recommendation="Recommended Size: 800 × 600 px (4:3 Aspect Ratio)"
                 slug={nameValue ? nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-') : 'temple'}
               />
             </CardContent>
@@ -409,15 +410,15 @@ export const TempleForm: React.FC = () => {
                 </Typography>
               </Box>
               <Typography variant="body2" sx={{ mb: 2.5, color: '#5D4037', lineHeight: 1.6 }}>
-                यह फोटो मोबाइल ऐप के होम स्क्रीन पर सबसे ऊपर बड़े <strong>"Featured Temples Carousel (बैनर)"</strong> में प्रदर्शित होगी। <br />
-                <strong style={{ color: '#D84315' }}>Recommended Image Size: 1200 × 600 px (16:9 Landscape Widescreen)</strong>
+                यह फोटो मोबाइल ऐप के होम स्क्रीन पर सबसे ऊपर बड़े <strong>"Featured Temples Carousel (बैनर)"</strong> में प्रदर्शित होगी।
               </Typography>
 
               <ImageUploader
-                label="Featured Banner Image (बैनर फोटो - Recommended Size: 1200 × 600 px)"
+                label="Featured Banner Image (बैनर फोटो)"
                 value={thumbnailImageValue}
                 onChange={(url) => setValue('thumbnailImage', url)}
                 type="thumbnail"
+                recommendation="Recommended Size: 1200 × 600 px (16:9 Landscape Widescreen)"
                 slug={nameValue ? `${nameValue.toLowerCase().replace(/[^a-z0-9]/g, '-')}-featured` : 'featured-temple'}
               />
             </CardContent>

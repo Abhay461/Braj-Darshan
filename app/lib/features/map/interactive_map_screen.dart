@@ -82,7 +82,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                 ),
                 children: [
                   TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    urlTemplate: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
                     userAgentPackageName: 'com.brajdarshan.app',
                     tileBuilder: isDark
                         ? (context, tileWidget, tile) {

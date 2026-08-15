@@ -1,6 +1,23 @@
 const templeRepository = require('../repositories/templeRepository');
 const ApiError = require('../utils/ApiError');
 
+function extractCoordsFromUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (atMatch) return { latitude: parseFloat(atMatch[1]), longitude: parseFloat(atMatch[2]) };
+
+  const paramMatch = url.match(/(?:query|q|ll|destination)=(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (paramMatch) return { latitude: parseFloat(paramMatch[1]), longitude: parseFloat(paramMatch[2]) };
+
+  const dirMatch = url.match(/\/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/);
+  if (dirMatch) return { latitude: parseFloat(dirMatch[1]), longitude: parseFloat(dirMatch[2]) };
+
+  const pairMatch = url.match(/(-?\d{1,2}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})/);
+  if (pairMatch) return { latitude: parseFloat(pairMatch[1]), longitude: parseFloat(pairMatch[2]) };
+
+  return null;
+}
+
 /**
  * Temple Service — pure business logic layer.
  * Manages temple discovery, search, filtering, soft-delete, and restoration.
@@ -36,6 +53,13 @@ class TempleService {
    * Create a new temple.
    */
   async createTemple(data) {
+    if (data.directionsUrl) {
+      const extracted = extractCoordsFromUrl(data.directionsUrl);
+      if (extracted) {
+        if (!data.latitude || data.latitude === 27.5830) data.latitude = extracted.latitude;
+        if (!data.longitude || data.longitude === 77.7000) data.longitude = extracted.longitude;
+      }
+    }
     const temple = await templeRepository.create(data);
     return templeRepository.findById(temple._id);
   }
@@ -44,6 +68,13 @@ class TempleService {
    * Update temple by ID.
    */
   async updateTemple(id, data) {
+    if (data.directionsUrl) {
+      const extracted = extractCoordsFromUrl(data.directionsUrl);
+      if (extracted) {
+        data.latitude = extracted.latitude;
+        data.longitude = extracted.longitude;
+      }
+    }
     const updated = await templeRepository.updateById(id, data);
     if (!updated) {
       throw ApiError.notFound('Temple not found');

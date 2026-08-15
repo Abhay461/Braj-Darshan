@@ -14,7 +14,7 @@ interface ImageUploaderProps {
   onChange: (url: string) => void;
   folder?: string;
   slug?: string;
-  type?: 'cover' | 'generic';
+  type?: 'cover' | 'thumbnail' | 'generic';
   recommendation?: string;
 }
 
@@ -31,8 +31,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
   const { enqueueSnackbar } = useSnackbar();
 
   const defaultRecommendation =
-    type === 'cover'
-      ? 'Recommended Size: 1200 x 675 px (16:9 Aspect Ratio)'
+    type === 'thumbnail'
+      ? 'Recommended Size: 1200 x 600 px (16:9 Widescreen)'
       : 'Recommended Size: 800 x 600 px (4:3 Aspect Ratio)';
 
   const displayRecommendation = recommendation || defaultRecommendation;

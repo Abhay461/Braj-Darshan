@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -18,7 +18,7 @@ class NotificationService {
     try {
       tz.initializeTimeZones();
 
-      const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+      const androidSettings = AndroidInitializationSettings('ic_notification');
       const iosSettings = DarwinInitializationSettings(
         requestAlertPermission: true,
         requestBadgePermission: true,
@@ -50,14 +50,16 @@ class NotificationService {
 
   Future<void> showInstantNotification({required String title, required String body}) async {
     await initialize();
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'braj_yatra_channel',
       'Yatra & Darshan Reminders',
       channelDescription: 'Notifications for planned temple visits and darshan timings',
       importance: Importance.max,
       priority: Priority.high,
+      icon: 'ic_notification',
+      color: const Color(0xFFE65100),
     );
-    const details = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
+    final details = NotificationDetails(android: androidDetails, iOS: const DarwinNotificationDetails());
 
     try {
       await _notificationsPlugin.show(
@@ -75,14 +77,16 @@ class NotificationService {
     await initialize();
     final baseId = plan.id.hashCode.abs();
 
-    const androidDetails = AndroidNotificationDetails(
+    final androidDetails = AndroidNotificationDetails(
       'braj_yatra_channel',
       'Yatra & Darshan Reminders',
       channelDescription: 'Notifications for planned temple visits and darshan timings',
       importance: Importance.high,
       priority: Priority.high,
+      icon: 'ic_notification',
+      color: const Color(0xFFE65100),
     );
-    const details = NotificationDetails(android: androidDetails, iOS: DarwinNotificationDetails());
+    final details = NotificationDetails(android: androidDetails, iOS: const DarwinNotificationDetails());
 
     final now = DateTime.now();
 

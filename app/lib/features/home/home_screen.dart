@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/temple_card.dart';
@@ -98,9 +99,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       const SizedBox(height: 12),
                       Text(
                         'Braj Darshan',
-                        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-                          fontWeight: FontWeight.w800,
+                        style: GoogleFonts.rozhaOne(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
                           letterSpacing: 0.5,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -318,7 +321,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           title: Text(
             AppTranslations.getText(currentLang, 'app_title'),
-            style: Theme.of(context).textTheme.headlineSmall,
+            style: GoogleFonts.rozhaOne(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.6,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
           ),
           actions: [
             IconButton(

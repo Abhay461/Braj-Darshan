@@ -6,6 +6,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../../shared/models/models.dart';
 import '../../shared/models/yatra_plan.dart';
 import '../../shared/providers/providers.dart';
@@ -50,13 +52,73 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   void _openGoogleMaps(Temple temple, double lat, double lng) async {
-    final targetUrl = (temple.directionsUrl != null && temple.directionsUrl!.isNotEmpty)
-        ? temple.directionsUrl!
-        : 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+    final effectivePos = _getEffectiveLocation(temple);
+    final hasValidMapLink = temple.directionsUrl != null &&
+        temple.directionsUrl!.trim().isNotEmpty &&
+        (_extractLatLngFromUrl(temple.directionsUrl!) != null ||
+            temple.directionsUrl!.contains('maps.google') ||
+            temple.directionsUrl!.contains('google.com/maps') ||
+            temple.directionsUrl!.contains('goo.gl/maps'));
+
+    final targetUrl = hasValidMapLink
+        ? temple.directionsUrl!.trim()
+        : 'https://www.google.com/maps/search/?api=1&query=${effectivePos.latitude},${effectivePos.longitude}';
     final Uri url = Uri.parse(targetUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
     }
+  }
+
+  LatLng _getEffectiveLocation(Temple temple) {
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
+      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
+      if (parsed != null) return parsed;
+    }
+    if (temple.latitude != 0.0 && temple.longitude != 0.0) {
+      return LatLng(temple.latitude, temple.longitude);
+    }
+    if (temple.location is Location) {
+      final loc = temple.location as Location;
+      if (loc.latitude != 0.0 && loc.longitude != 0.0) {
+        return LatLng(loc.latitude, loc.longitude);
+      }
+    }
+    return LatLng(temple.latitude, temple.longitude);
+  }
+
+  LatLng? _extractLatLngFromUrl(String url) {
+    try {
+      final atMatch = RegExp(r'@(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(url);
+      if (atMatch != null) {
+        final lat = double.tryParse(atMatch.group(1)!);
+        final lng = double.tryParse(atMatch.group(2)!);
+        if (lat != null && lng != null) return LatLng(lat, lng);
+      }
+
+      final paramMatch = RegExp(r'(?:query|q|ll|destination)=(-?\d+\.\d+),(-?\d+\.\d+)').firstMatch(url);
+      if (paramMatch != null) {
+        final lat = double.tryParse(paramMatch.group(1)!);
+        final lng = double.tryParse(paramMatch.group(2)!);
+        if (lat != null && lng != null) return LatLng(lat, lng);
+      }
+
+      final dirMatch = RegExp(r'/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)').firstMatch(url);
+      if (dirMatch != null) {
+        final lat = double.tryParse(dirMatch.group(1)!);
+        final lng = double.tryParse(dirMatch.group(2)!);
+        if (lat != null && lng != null) return LatLng(lat, lng);
+      }
+
+      final pairMatch = RegExp(r'(-?\d{1,2}\.\d{3,}),\s*(-?\d{1,3}\.\d{3,})').firstMatch(url);
+      if (pairMatch != null) {
+        final lat = double.tryParse(pairMatch.group(1)!);
+        final lng = double.tryParse(pairMatch.group(2)!);
+        if (lat != null && lng != null) return LatLng(lat, lng);
+      }
+    } catch (e) {
+      debugPrint('Error extracting coordinates: $e');
+    }
+    return null;
   }
 
   void _shareTemple(Temple temple) {
@@ -205,6 +267,8 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
             ? (temple.location as Location).name
             : (temple.location is Map ? temple.location['name'] ?? '' : 'Vrindavan');
 
+        final effectiveLatLng = _getEffectiveLocation(temple);
+
         return SafeArea(
           top: true,
           child: Scaffold(
@@ -230,7 +294,9 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                   icon: Icon(Icons.more_vert, color: Theme.of(context).colorScheme.onSurface),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   onSelected: (value) {
-                    if (value == 'live_darshan') {
+                    if (value == 'plan_yatra') {
+                      _openPlanYatraBottomSheet(temple);
+                    } else if (value == 'live_darshan') {
                       _openLiveDarshan(temple);
                     } else if (value == 'donate') {
                       _openDonateDialog(temple);
@@ -246,6 +312,16 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                     final hasGuestHouse = temple.guestHouseBookingUrl != null && temple.guestHouseBookingUrl!.trim().isNotEmpty;
 
                     return [
+                      PopupMenuItem(
+                        value: 'plan_yatra',
+                        child: Row(
+                          children: [
+                            const Icon(Icons.event_available_outlined, size: 20),
+                            const SizedBox(width: 12),
+                            Text(AppTranslations.getText(currentLang, 'plan_yatra')),
+                          ],
+                        ),
+                      ),
                       if (hasLiveDarshan)
                         const PopupMenuItem(
                           value: 'live_darshan',
@@ -525,16 +601,139 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                           ),
                         ),
 
+                      const SizedBox(height: 16),
+
+                      _buildSectionCard(
+                        context: context,
+                        icon: Icons.map_outlined,
+                        title: currentLang == 'hi' ? 'मंदिर का स्थान (Map)' : 'Temple Location',
+                        child: Container(
+                          height: 220,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5),
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Stack(
+                              children: [
+                                FlutterMap(
+                                  options: MapOptions(
+                                    initialCenter: effectiveLatLng,
+                                    initialZoom: 15.0,
+                                    minZoom: 8.0,
+                                    maxZoom: 18.0,
+                                    interactionOptions: const InteractionOptions(
+                                      flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+                                    ),
+                                  ),
+                                  children: [
+                                    TileLayer(
+                                      urlTemplate: 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
+                                      userAgentPackageName: 'com.brajdarshan.app',
+                                      tileBuilder: Theme.of(context).brightness == Brightness.dark
+                                          ? (context, tileWidget, tile) {
+                                              return ColorFiltered(
+                                                colorFilter: const ColorFilter.matrix([
+                                                  -0.2126, -0.7152, -0.0722, 0, 255,
+                                                  -0.2126, -0.7152, -0.0722, 0, 255,
+                                                  -0.2126, -0.7152, -0.0722, 0, 255,
+                                                  0,       0,       0,       1, 0,
+                                                ]),
+                                                child: tileWidget,
+                                              );
+                                            }
+                                          : null,
+                                    ),
+                                    MarkerLayer(
+                                      markers: [
+                                        Marker(
+                                          point: effectiveLatLng,
+                                          width: 44,
+                                          height: 44,
+                                          alignment: Alignment.topCenter,
+                                          child: Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              const Icon(
+                                                Icons.location_on,
+                                                color: Color(0xFFEA4335),
+                                                size: 44,
+                                              ),
+                                              Positioned(
+                                                top: 9,
+                                                child: Container(
+                                                  width: 12,
+                                                  height: 12,
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.white,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Positioned(
+                                  bottom: 10,
+                                  right: 10,
+                                  child: Material(
+                                    color: Theme.of(context).colorScheme.primaryContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                    elevation: 4,
+                                    child: InkWell(
+                                      borderRadius: BorderRadius.circular(12),
+                                      onTap: () {
+                                        HapticFeedback.lightImpact();
+                                        _openGoogleMaps(temple, temple.latitude, temple.longitude);
+                                      },
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.open_in_new,
+                                              size: 16,
+                                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              currentLang == 'hi' ? 'Google Maps में खोलें' : 'Open in Google Maps',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                                color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 24),
                       const AdBannerWidget(),
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 40),
                     ],
                   ),
                 ),
 
                 if (_showScrollToTop)
                   Positioned(
-                    bottom: 100,
+                    bottom: 30,
                     right: 16,
                     child: FloatingActionButton.small(
                       backgroundColor: Theme.of(context).colorScheme.primary,
@@ -550,68 +749,6 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                       child: const Icon(Icons.arrow_upward, size: 18),
                     ),
                   ).animate().scale(duration: 200.ms),
-
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    child: SafeArea(
-                      top: false,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppTheme.saffronHighlight,
-                                foregroundColor: Colors.black,
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              icon: const Icon(Icons.event_available_outlined, size: 18, color: Colors.black),
-                              label: Text(
-                                AppTranslations.getText(currentLang, 'plan_yatra'),
-                                style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              onPressed: () => _openPlanYatraBottomSheet(temple),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Theme.of(context).colorScheme.primary,
-                                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                                minimumSize: const Size(0, 48),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                              ),
-                              icon: const Icon(Icons.directions_outlined, size: 18),
-                              label: Text(
-                                AppTranslations.getText(currentLang, 'directions'),
-                                style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                                  color: Theme.of(context).colorScheme.onPrimary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                _openGoogleMaps(temple, temple.latitude, temple.longitude);
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
