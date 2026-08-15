@@ -19,6 +19,7 @@ import {
   Switch,
   Divider,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/SaveOutlined';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
@@ -33,6 +34,7 @@ import { useTemple, useTempleMutations } from '../../hooks/useTemples';
 import { useCategories } from '../../hooks/useCategories';
 import { useLocations } from '../../hooks/useLocations';
 import { Category, Location, Temple } from '../../types';
+import { apiClient } from '../../api/client';
 
 // ─── Extract lat/lng from Google Maps URL ─────────────────────────
 function extractLatLngFromUrl(text: string): { lat: number; lng: number } | null {
@@ -171,6 +173,42 @@ export const TempleForm: React.FC = () => {
 
   const [isFormInitialized, setIsFormInitialized] = useState(false);
   const [coordAutoExtracted, setCoordAutoExtracted] = useState(false);
+  const [isResolvingCoords, setIsResolvingCoords] = useState(false);
+  const [resolveError, setResolveError] = useState<string | null>(null);
+
+  const resolveMapUrlCoordinates = async (mapUrl: string) => {
+    if (!mapUrl || !mapUrl.trim()) return;
+    setResolveError(null);
+
+    // 1. Try direct regex parsing first
+    const directCoords = extractLatLngFromUrl(mapUrl);
+    if (directCoords) {
+      setValue('latitude', directCoords.lat);
+      setValue('longitude', directCoords.lng);
+      setCoordAutoExtracted(true);
+      return;
+    }
+
+    // 2. If direct parsing fails, call backend API to follow redirects and resolve short link
+    setIsResolvingCoords(true);
+    try {
+      const response = await apiClient.post<{ success: boolean; data?: { latitude: number; longitude: number }; message?: string }>('/utils/resolve-coordinates', { mapUrl: mapUrl.trim() });
+      if (response.success && response.data) {
+        setValue('latitude', response.data.latitude);
+        setValue('longitude', response.data.longitude);
+        setCoordAutoExtracted(true);
+        setResolveError(null);
+      } else {
+        setCoordAutoExtracted(false);
+        setResolveError(response.message || 'Could not resolve coordinates from this link. Please enter lat/lng manually.');
+      }
+    } catch (err: any) {
+      setCoordAutoExtracted(false);
+      setResolveError(err.message || 'Error connecting to server to resolve coordinates.');
+    } finally {
+      setIsResolvingCoords(false);
+    }
+  };
 
   useEffect(() => {
     setIsFormInitialized(false);
@@ -210,16 +248,23 @@ export const TempleForm: React.FC = () => {
   // Auto-extract coordinates from directionsUrl when it changes
   useEffect(() => {
     if (directionsUrlValue && directionsUrlValue.trim()) {
-      const coords = extractLatLngFromUrl(directionsUrlValue);
-      if (coords) {
-        setValue('latitude', coords.lat);
-        setValue('longitude', coords.lng);
+      const direct = extractLatLngFromUrl(directionsUrlValue);
+      if (direct) {
+        setValue('latitude', direct.lat);
+        setValue('longitude', direct.lng);
         setCoordAutoExtracted(true);
+        setResolveError(null);
+      } else if (directionsUrlValue.trim().startsWith('http')) {
+        const timer = setTimeout(() => {
+          resolveMapUrlCoordinates(directionsUrlValue);
+        }, 800);
+        return () => clearTimeout(timer);
       } else {
         setCoordAutoExtracted(false);
       }
     } else {
       setCoordAutoExtracted(false);
+      setResolveError(null);
     }
   }, [directionsUrlValue, setValue]);
 
@@ -468,18 +513,42 @@ export const TempleForm: React.FC = () => {
                 </Typography>
               </Box>
 
-              {coordAutoExtracted && (
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  ✅ Coordinates auto-extracted from Google Maps link! (Google Maps लिंक से निर्देशांक अपने आप सेट हो गए)
+              {isResolvingCoords && (
+                <Alert severity="info" icon={<CircularProgress size={20} />} sx={{ mb: 2 }}>
+                  🔍 Fetching real coordinates from Google Maps link... (Google Maps लिंक से निर्देशांक निकाले जा रहे हैं...)
                 </Alert>
               )}
 
-              {isDefaultCoord && !coordAutoExtracted && (
+              {resolveError && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                  ❌ {resolveError}
+                </Alert>
+              )}
+
+              {coordAutoExtracted && !isResolvingCoords && (
+                <Alert severity="success" sx={{ mb: 2 }}>
+                  ✅ Coordinates auto-extracted from Google Maps link! (Google Maps लिंक से सही निर्देशांक सेट हो गए)
+                </Alert>
+              )}
+
+              {isDefaultCoord && !coordAutoExtracted && !isResolvingCoords && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
                   ⚠️ Default coordinates detected! Please paste a Google Maps link above or enter real lat/lng manually.
                   (अभी डिफ़ॉल्ट location सेट है — कृपया Google Maps लिंक पेस्ट करें या सही lat/lng भरें)
                 </Alert>
               )}
+
+              <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  startIcon={isResolvingCoords ? <CircularProgress size={16} /> : <MyLocationIcon />}
+                  disabled={isResolvingCoords || !directionsUrlValue?.trim()}
+                  onClick={() => resolveMapUrlCoordinates(directionsUrlValue)}
+                >
+                  {isResolvingCoords ? 'Fetching Coords...' : 'Fetch Coordinates from Link (लिंक से Coordinates निकालें)'}
+                </Button>
+              </Box>
 
               <Grid container spacing={2.5}>
                 <Grid size={{ xs: 12, sm: 6 }}>
