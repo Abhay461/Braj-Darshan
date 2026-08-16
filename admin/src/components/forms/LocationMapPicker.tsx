@@ -1,8 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { Box, Typography, Button, Paper } from '@mui/material';
+import React, { useEffect, useRef, useState } from 'react';
+import { Box, Typography, Button, Paper, CircularProgress } from '@mui/material';
 import CenterFocusWeakIcon from '@mui/icons-material/CenterFocusWeak';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 
 interface LocationMapPickerProps {
   latitude: number;
@@ -10,37 +8,21 @@ interface LocationMapPickerProps {
   onChange: (coords: { latitude: number; longitude: number }) => void;
 }
 
-// Custom Red Location Pin with exact bottom-center anchor point
-const redPinIcon = L.divIcon({
-  className: 'custom-admin-map-pin',
-  html: `
-    <div style="position: relative; width: 36px; height: 36px; display: flex; justify-content: center; align-items: flex-end;">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#C5221F" width="36" height="36" style="filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.4));">
-        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-      </svg>
-      <div style="position: absolute; bottom: 15px; width: 8px; height: 8px; background-color: white; border-radius: 50%;"></div>
-    </div>
-  `,
-  iconSize: [36, 36],
-  iconAnchor: [18, 36], // Bottom tip of the icon is the GPS coordinate point
-});
-
 export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   latitude,
   longitude,
   onChange,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markerInstanceRef = useRef<L.Marker | null>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markerInstanceRef = useRef<any>(null);
   const onChangeRef = useRef(onChange);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Keep latest onChange in ref to avoid re-binding map event listeners
   useEffect(() => {
     onChangeRef.current = onChange;
   }, [onChange]);
 
-  // Valid coordinate check
   const isValid =
     typeof latitude === 'number' &&
     typeof longitude === 'number' &&
@@ -55,9 +37,47 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   const safeLat = isValid ? latitude : 27.5830;
   const safeLng = isValid ? longitude : 77.7000;
 
-  // Initialize Map
+  // Dynamically load Leaflet JS & CSS from unpkg CDN
   useEffect(() => {
-    if (!mapContainerRef.current) return;
+    if ((window as any).L) {
+      setIsLoaded(true);
+      return;
+    }
+
+    // CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link');
+      link.id = 'leaflet-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(link);
+    }
+
+    // JS
+    if (!document.getElementById('leaflet-js')) {
+      const script = document.createElement('script');
+      script.id = 'leaflet-js';
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => {
+        setIsLoaded(true);
+      };
+      document.body.appendChild(script);
+    } else {
+      const checkInterval = setInterval(() => {
+        if ((window as any).L) {
+          setIsLoaded(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+      return () => clearInterval(checkInterval);
+    }
+  }, []);
+
+  // Initialize Map once Leaflet is loaded
+  useEffect(() => {
+    if (!isLoaded || !mapContainerRef.current) return;
+    const L = (window as any).L;
+    if (!L) return;
 
     if (!mapInstanceRef.current) {
       const map = L.map(mapContainerRef.current, {
@@ -72,14 +92,27 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         attribution: '&copy; Google Maps',
       }).addTo(map);
 
-      // Create Draggable Marker
+      // Custom Red Location Pin
+      const redPinIcon = L.divIcon({
+        className: 'custom-admin-map-pin',
+        html: `
+          <div style="position: relative; width: 36px; height: 36px; display: flex; justify-content: center; align-items: flex-end;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#C5221F" width="36" height="36" style="filter: drop-shadow(0px 2px 5px rgba(0,0,0,0.4));">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <div style="position: absolute; bottom: 15px; width: 8px; height: 8px; background-color: white; border-radius: 50%;"></div>
+          </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+      });
+
       const marker = L.marker([safeLat, safeLng], {
         icon: redPinIcon,
         draggable: true,
         title: 'Drag marker to update temple location',
       }).addTo(map);
 
-      // Handle Marker Drag End
       marker.on('dragend', () => {
         const position = marker.getLatLng();
         const newLat = Number(position.lat.toFixed(7));
@@ -87,8 +120,7 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         onChangeRef.current({ latitude: newLat, longitude: newLng });
       });
 
-      // Handle Map Click
-      map.on('click', (e: L.LeafletMouseEvent) => {
+      map.on('click', (e: any) => {
         const newLat = Number(e.latlng.lat.toFixed(7));
         const newLng = Number(e.latlng.lng.toFixed(7));
         marker.setLatLng([newLat, newLng]);
@@ -106,16 +138,15 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         markerInstanceRef.current = null;
       }
     };
-  }, []); // Run once on mount
+  }, [isLoaded]);
 
-  // Sync Map & Marker when parent latitude/longitude changes (e.g. via text input or URL auto-fill)
+  // Sync Map & Marker when parent latitude/longitude changes
   useEffect(() => {
     if (mapInstanceRef.current && markerInstanceRef.current && isValid) {
       const currentMarkerPos = markerInstanceRef.current.getLatLng();
       const latDiff = Math.abs(currentMarkerPos.lat - safeLat);
       const lngDiff = Math.abs(currentMarkerPos.lng - safeLng);
 
-      // Only update if difference is noticeable (> 1 meter)
       if (latDiff > 0.00001 || lngDiff > 0.00001) {
         markerInstanceRef.current.setLatLng([safeLat, safeLng]);
         mapInstanceRef.current.panTo([safeLat, safeLng], { animate: true });
@@ -172,13 +203,25 @@ export const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
           width: '100%',
           height: 320,
           zIndex: 1,
+          position: 'relative',
+          display: 'flex',
+          justify: 'center',
+          alignItems: 'center',
+          backgroundColor: '#EFEFEF',
           '& .leaflet-container': {
             width: '100%',
             height: '100%',
             fontFamily: 'inherit',
           },
         }}
-      />
+      >
+        {!isLoaded && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, color: 'text.secondary' }}>
+            <CircularProgress size={24} />
+            <Typography variant="body2">Loading Interactive Map...</Typography>
+          </Box>
+        )}
+      </Box>
 
       <Box
         sx={{
