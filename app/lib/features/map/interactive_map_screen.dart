@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -45,15 +46,15 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
   /// Get effective location for a temple: try directionsUrl extraction first,
   /// then fall back to temple's own lat/lng, then location's lat/lng.
   LatLng _getEffectiveLatLng(Temple temple) {
-    // 1. Use temple's stored database coordinates FIRST if valid and not hardcoded default
-    final isDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
-    if (!isDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
-      return LatLng(temple.latitude, temple.longitude);
-    }
-    // 2. Try extracting from directionsUrl if available
+    // 1. Try extracting from directionsUrl if available
     if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
       final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
       if (parsed != null) return parsed;
+    }
+    // 2. Use temple's stored database coordinates if valid and not hardcoded default
+    final isDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (!isDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
+      return LatLng(temple.latitude, temple.longitude);
     }
     // 3. Use location model coordinates if available
     if (temple.location is Location) {
@@ -163,6 +164,43 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
         data: (temples) {
           return Stack(
             children: [
+              // DEBUG: Coordinate display for selected temple (only in debug mode)
+              if (kDebugMode && _selectedTemple != null)
+                Positioned(
+                  top: 80,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _selectedTemple!.name,
+                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Lat: ${_getEffectiveLatLng(_selectedTemple!).latitude.toStringAsFixed(6)}, Lng: ${_getEffectiveLatLng(_selectedTemple!).longitude.toStringAsFixed(6)}',
+                          style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace'),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          'Camera: ${_mapController.camera.center.latitude.toStringAsFixed(6)}, ${_mapController.camera.center.longitude.toStringAsFixed(6)}',
+                          style: const TextStyle(color: Colors.yellow, fontSize: 10, fontFamily: 'monospace'),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               FlutterMap(
                 mapController: _mapController,
                 options: MapOptions(
@@ -201,8 +239,8 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                       final effectivePos = _getEffectiveLatLng(temple);
                       return Marker(
                         point: effectivePos,
-                        width: isSelected ? 240.0 : 200.0,
-                        height: isSelected ? 80.0 : 72.0,
+                        width: 220.0,
+                        height: 90.0,
                         alignment: Alignment.bottomCenter,
                         child: Semantics(
                           label: 'Map Marker for ${temple.name}',
@@ -210,6 +248,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                           child: GestureDetector(
                             onTap: () => _onMarkerTapped(temple),
                             child: AnimatedScale(
+                              alignment: Alignment.bottomCenter,
                               scale: isSelected ? 1.15 : 1.0,
                               duration: const Duration(milliseconds: 200),
                               child: Column(
@@ -241,36 +280,41 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 2),
-                                  Stack(
-                                    alignment: Alignment.bottomCenter,
-                                    children: [
-                                      Icon(
-                                        Icons.location_on,
-                                        size: isSelected ? 42 : 36,
-                                        color: isSelected
-                                            ? const Color(0xFFB91C1C)
-                                            : const Color(0xFFC5221F),
-                                        shadows: const [
-                                          Shadow(
-                                            color: Color(0x40000000),
-                                            blurRadius: 4,
-                                            offset: Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      Positioned(
-                                        top: isSelected ? 9 : 7,
-                                        child: Container(
-                                          width: isSelected ? 12 : 10,
-                                          height: isSelected ? 12 : 10,
-                                          decoration: const BoxDecoration(
-                                            color: Colors.white,
-                                            shape: BoxShape.circle,
+const SizedBox(height: 2),
+                                  // Transform to align pin visual tip with map coordinate (bottomCenter)
+                                  // Material Icons.location_on tip is ~2-3px above widget bottom edge
+                                  Transform.translate(
+                                    offset: const Offset(0, 3),
+                                    child: Stack(
+                                      alignment: Alignment.bottomCenter,
+                                      children: [
+                                        Icon(
+                                          Icons.location_on,
+                                          size: isSelected ? 42 : 36,
+                                          color: isSelected
+                                              ? const Color(0xFFB91C1C)
+                                              : const Color(0xFFC5221F),
+                                          shadows: const [
+                                            Shadow(
+                                              color: Color(0x40000000),
+                                              blurRadius: 4,
+                                              offset: Offset(0, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        Positioned(
+                                          top: 8,
+                                          child: Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),

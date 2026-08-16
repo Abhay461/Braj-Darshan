@@ -70,132 +70,81 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   void _openGoogleMaps(Temple temple, double lat, double lng) async {
-    final effectivePos = _getEffectiveLocation(temple);
-    final hasValidMapLink = temple.directionsUrl != null &&
-        temple.directionsUrl!.trim().isNotEmpty &&
-        (_extractLatLngFromUrl(temple.directionsUrl!) != null ||
-            temple.directionsUrl!.contains('maps.google') ||
-            temple.directionsUrl!.contains('google.com/maps') ||
-            temple.directionsUrl!.contains('goo.gl/maps'));
+    String? targetUrl;
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().startsWith('http')) {
+      targetUrl = temple.directionsUrl!.trim();
+    }
+    targetUrl ??= 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
 
-    final targetUrl = hasValidMapLink
-        ? temple.directionsUrl!.trim()
-        : 'https://www.google.com/maps/search/?api=1&query=${effectivePos.latitude},${effectivePos.longitude}';
     if (kDebugMode) {
       debugPrint('🔍 _openGoogleMaps: ${temple.name}');
-      debugPrint('   effectivePos: ${effectivePos.latitude}, ${effectivePos.longitude}');
-      debugPrint('   hasValidMapLink: $hasValidMapLink');
-      debugPrint('   directionsUrl: ${temple.directionsUrl}');
+      debugPrint('   lat: $lat, lng: $lng');
       debugPrint('   targetUrl: $targetUrl');
     }
     final Uri url = Uri.parse(targetUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
+    } else {
+      final fallbackUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+      if (await canLaunchUrl(fallbackUrl)) {
+        await launchUrl(fallbackUrl, mode: LaunchMode.externalApplication);
+      }
     }
   }
 
   LatLng _getEffectiveLocation(Temple temple) {
-    // 1. Prioritize real database coordinates saved from Admin panel
-    final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
-    if (kDebugMode) {
-      debugPrint('🔍 _getEffectiveLocation: ${temple.name}');
-      debugPrint('   temple.latitude=${temple.latitude}, temple.longitude=${temple.longitude}');
-      debugPrint('   isHardcodedDefault=$isHardcodedDefault');
-      debugPrint('   _resolvedShortUrlLatLng=$_resolvedShortUrlLatLng');
-      debugPrint('   temple.directionsUrl=${temple.directionsUrl}');
-      if (temple.location is Location) {
-        final loc = temple.location as Location;
-        debugPrint('   location.latitude=${loc.latitude}, location.longitude=${loc.longitude}');
-      }
-    }
-    if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
-      final result = LatLng(temple.latitude, temple.longitude);
-      if (kDebugMode) debugPrint('   ✅ Using temple coordinates: $result');
-      return result;
-    }
-    // 2. Short URL resolved coordinates
+    // 1. Return resolved short URL coordinates if available
     if (_resolvedShortUrlLatLng != null) {
-      if (kDebugMode) debugPrint('   ✅ Using resolved short URL: $_resolvedShortUrlLatLng');
       return _resolvedShortUrlLatLng!;
     }
-    // 3. Extract from directionsUrl if available
+    // 2. Extract from directionsUrl if available directly
     if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
       final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
       if (parsed != null) {
-        if (kDebugMode) debugPrint('   ✅ Using directionsUrl parsed: $parsed');
         return parsed;
       }
+    }
+    // 3. Prioritize real database coordinates saved from Admin panel
+    final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
+      return LatLng(temple.latitude, temple.longitude);
     }
     // 4. Fallback to location model coordinates
     if (temple.location is Location) {
       final loc = temple.location as Location;
       if (loc.latitude != 0.0 && loc.longitude != 0.0 && !(loc.latitude == 27.5830 && loc.longitude == 77.7000)) {
-        final result = LatLng(loc.latitude, loc.longitude);
-        if (kDebugMode) debugPrint('   ✅ Using location model: $result');
-        return result;
+        return LatLng(loc.latitude, loc.longitude);
       }
     }
-    final result = LatLng(temple.latitude, temple.longitude);
-    if (kDebugMode) debugPrint('   ⚠️ Fallback to temple coordinates (likely default): $result');
-    return result;
+    return LatLng(temple.latitude, temple.longitude);
   }
 
   void _checkAndResolveShortUrl(Temple temple) async {
     final url = temple.directionsUrl?.trim();
     if (url == null || url.isEmpty || url == _lastResolvedUrl) return;
-
     _lastResolvedUrl = url;
 
+    // Direct regex extraction first
     final direct = _extractLatLngFromUrl(url);
     if (direct != null) {
       if (mounted && _resolvedShortUrlLatLng != direct) {
         setState(() {
           _resolvedShortUrlLatLng = direct;
         });
-        try {
-          _mapController.move(direct, 15.0);
-        } catch (_) {}
+        _mapController.move(direct, 15.0);
       }
       return;
     }
 
-    // Try client-side HTTP redirect resolution first
-    final resolved = await _resolveRedirectUrl(url);
-    if (resolved != null && mounted) {
-      setState(() {
-        _resolvedShortUrlLatLng = resolved;
-      });
-      try {
+    // Resolve short HTTP URL asynchronously if needed
+    if (url.startsWith('http')) {
+      final resolved = await _resolveRedirectUrl(url);
+      if (resolved != null && mounted) {
+        setState(() {
+          _resolvedShortUrlLatLng = resolved;
+        });
         _mapController.move(resolved, 15.0);
-      } catch (e) {
-        debugPrint('Error moving mapController: $e');
       }
-      return;
-    }
-
-    // Fallback: call backend API to resolve short URL server-side
-    try {
-      final dio = Dio(BaseOptions(
-        baseUrl: AppConstants.apiBaseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-      ));
-      final response = await dio.post('/utils/resolve-coordinates', data: {'mapUrl': url});
-      if (response.statusCode == 200 && response.data['success'] == true && response.data['data'] != null) {
-        final lat = (response.data['data']['latitude'] as num?)?.toDouble();
-        final lng = (response.data['data']['longitude'] as num?)?.toDouble();
-        if (lat != null && lng != null && _isValidLatLng(lat, lng) && mounted) {
-          final backendResolved = LatLng(lat, lng);
-          setState(() {
-            _resolvedShortUrlLatLng = backendResolved;
-          });
-          try {
-            _mapController.move(backendResolved, 15.0);
-          } catch (_) {}
-        }
-      }
-    } catch (e) {
-      debugPrint('Backend coordinate resolution failed: $e');
     }
   }
 
@@ -240,7 +189,6 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   bool _isValidLatLng(double lat, double lng) {
     if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return false;
     if (lat == 0.0 && lng == 0.0) return false;
-    if (lat == 17.0 || lat == 15.0 || lat == 18.0 || lat == 1.0 || lat == 2.0 || lat == 3.0 || lat == 4.0 || lat == 5.0) return false;
     return true;
   }
 
@@ -842,6 +790,30 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                             borderRadius: BorderRadius.circular(16),
                             child: Stack(
                               children: [
+                                // DEBUG: Coordinate display overlay (only in debug mode)
+                                if (kDebugMode)
+                                  Positioned(
+                                    top: 8,
+                                    left: 8,
+                                    right: 8,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        'Lat: ${effectiveLatLng.latitude.toStringAsFixed(6)}, Lng: ${effectiveLatLng.longitude.toStringAsFixed(6)}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontFamily: 'monospace',
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ),
+                                  ),
                                 FlutterMap(
                                   mapController: _mapController,
                                   options: MapOptions(
@@ -906,33 +878,38 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
                                                 const SizedBox(height: 2),
-                                                Stack(
-                                                  alignment: Alignment.bottomCenter,
-                                                  children: [
-                                                    const Icon(
-                                                      Icons.location_on,
-                                                      color: Color(0xFFC5221F),
-                                                      size: 36,
-                                                      shadows: [
-                                                        Shadow(
-                                                          color: Color(0x40000000),
-                                                          blurRadius: 4,
-                                                          offset: Offset(0, 2),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Positioned(
-                                                      top: 7,
-                                                      child: Container(
-                                                        width: 10,
-                                                        height: 10,
-                                                        decoration: const BoxDecoration(
-                                                          color: Colors.white,
-                                                          shape: BoxShape.circle,
+                                                // Transform to align pin visual tip with map coordinate (bottomCenter)
+                                                // Material Icons.location_on tip is ~2-3px above widget bottom edge
+                                                Transform.translate(
+                                                  offset: const Offset(0, 3),
+                                                  child: Stack(
+                                                    alignment: Alignment.bottomCenter,
+                                                    children: [
+                                                      const Icon(
+                                                        Icons.location_on,
+                                                        color: Color(0xFFC5221F),
+                                                        size: 36,
+                                                        shadows: [
+                                                          Shadow(
+                                                            color: Color(0x40000000),
+                                                            blurRadius: 4,
+                                                            offset: Offset(0, 2),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      Positioned(
+                                                        top: 7,
+                                                        child: Container(
+                                                          width: 10,
+                                                          height: 10,
+                                                          decoration: const BoxDecoration(
+                                                            color: Colors.white,
+                                                            shape: BoxShape.circle,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  ],
+                                                    ],
+                                                  ),
                                                 ),
                                               ],
                                             ),
