@@ -815,7 +815,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                             height: 72,
                                             alignment: Alignment.bottomCenter,
                                             child: Column(
-                                              mainAxisSize: MainAxisSize.min,
+                                              mainAxisAlignment: MainAxisAlignment.end,
                                               crossAxisAlignment: CrossAxisAlignment.center,
                                               children: [
                                                 Text(

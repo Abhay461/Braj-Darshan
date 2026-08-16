@@ -213,7 +213,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                               scale: isSelected ? 1.15 : 1.0,
                               duration: const Duration(milliseconds: 200),
                               child: Column(
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
