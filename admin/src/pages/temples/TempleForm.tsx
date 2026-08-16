@@ -29,6 +29,7 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 import { PageHeader } from '../../components/common/PageHeader';
 import { ImageUploader } from '../../components/forms/ImageUploader';
+import { LocationMapPicker } from '../../components/forms/LocationMapPicker';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 import { useTemple, useTempleMutations } from '../../hooks/useTemples';
 import { useCategories } from '../../hooks/useCategories';
@@ -533,10 +534,20 @@ export const TempleForm: React.FC = () => {
 
               {isDefaultCoord && !coordAutoExtracted && !isResolvingCoords && (
                 <Alert severity="warning" sx={{ mb: 2 }}>
-                  ⚠️ Default coordinates detected! Please paste a Google Maps link above or enter real lat/lng manually.
-                  (अभी डिफ़ॉल्ट location सेट है — कृपया Google Maps लिंक पेस्ट करें या सही lat/lng भरें)
+                  ⚠️ Default coordinates detected! Please paste a Google Maps link above or drag the pin on the map below.
+                  (अभी डिफ़ॉल्ट location सेट है — कृपया नक्शे पर रेड पिन को सही जगह ड्रैग करें या गूगल मैप्स लिंक पेस्ट करें)
                 </Alert>
               )}
+
+              {/* Interactive Map Picker */}
+              <LocationMapPicker
+                latitude={Number(latitudeValue) || 27.5830}
+                longitude={Number(longitudeValue) || 77.7000}
+                onChange={({ latitude: lat, longitude: lng }) => {
+                  setValue('latitude', lat, { shouldValidate: true, shouldDirty: true });
+                  setValue('longitude', lng, { shouldValidate: true, shouldDirty: true });
+                }}
+              />
 
               <Box sx={{ mb: 2, display: 'flex', gap: 1 }}>
                 <Button

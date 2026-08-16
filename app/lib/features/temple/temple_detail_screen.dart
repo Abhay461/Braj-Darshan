@@ -80,6 +80,13 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
     final targetUrl = hasValidMapLink
         ? temple.directionsUrl!.trim()
         : 'https://www.google.com/maps/search/?api=1&query=${effectivePos.latitude},${effectivePos.longitude}';
+    if (kDebugMode) {
+      debugPrint('🔍 _openGoogleMaps: ${temple.name}');
+      debugPrint('   effectivePos: ${effectivePos.latitude}, ${effectivePos.longitude}');
+      debugPrint('   hasValidMapLink: $hasValidMapLink');
+      debugPrint('   directionsUrl: ${temple.directionsUrl}');
+      debugPrint('   targetUrl: $targetUrl');
+    }
     final Uri url = Uri.parse(targetUrl);
     if (await canLaunchUrl(url)) {
       await launchUrl(url, mode: LaunchMode.externalApplication);
@@ -89,26 +96,47 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   LatLng _getEffectiveLocation(Temple temple) {
     // 1. Prioritize real database coordinates saved from Admin panel
     final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (kDebugMode) {
+      debugPrint('🔍 _getEffectiveLocation: ${temple.name}');
+      debugPrint('   temple.latitude=${temple.latitude}, temple.longitude=${temple.longitude}');
+      debugPrint('   isHardcodedDefault=$isHardcodedDefault');
+      debugPrint('   _resolvedShortUrlLatLng=$_resolvedShortUrlLatLng');
+      debugPrint('   temple.directionsUrl=${temple.directionsUrl}');
+      if (temple.location is Location) {
+        final loc = temple.location as Location;
+        debugPrint('   location.latitude=${loc.latitude}, location.longitude=${loc.longitude}');
+      }
+    }
     if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
-      return LatLng(temple.latitude, temple.longitude);
+      final result = LatLng(temple.latitude, temple.longitude);
+      if (kDebugMode) debugPrint('   ✅ Using temple coordinates: $result');
+      return result;
     }
     // 2. Short URL resolved coordinates
     if (_resolvedShortUrlLatLng != null) {
+      if (kDebugMode) debugPrint('   ✅ Using resolved short URL: $_resolvedShortUrlLatLng');
       return _resolvedShortUrlLatLng!;
     }
     // 3. Extract from directionsUrl if available
     if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
       final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
-      if (parsed != null) return parsed;
+      if (parsed != null) {
+        if (kDebugMode) debugPrint('   ✅ Using directionsUrl parsed: $parsed');
+        return parsed;
+      }
     }
     // 4. Fallback to location model coordinates
     if (temple.location is Location) {
       final loc = temple.location as Location;
       if (loc.latitude != 0.0 && loc.longitude != 0.0 && !(loc.latitude == 27.5830 && loc.longitude == 77.7000)) {
-        return LatLng(loc.latitude, loc.longitude);
+        final result = LatLng(loc.latitude, loc.longitude);
+        if (kDebugMode) debugPrint('   ✅ Using location model: $result');
+        return result;
       }
     }
-    return LatLng(temple.latitude, temple.longitude);
+    final result = LatLng(temple.latitude, temple.longitude);
+    if (kDebugMode) debugPrint('   ⚠️ Fallback to temple coordinates (likely default): $result');
+    return result;
   }
 
   void _checkAndResolveShortUrl(Temple temple) async {
@@ -456,6 +484,12 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
 
         _checkAndResolveShortUrl(temple);
         final effectiveLatLng = _getEffectiveLocation(temple);
+        if (kDebugMode) {
+          debugPrint('🔍 Map init: ${temple.name}');
+          debugPrint('   effectiveLatLng: ${effectiveLatLng.latitude}, ${effectiveLatLng.longitude}');
+          debugPrint('   camera initialCenter: ${effectiveLatLng.latitude}, ${effectiveLatLng.longitude}');
+          debugPrint('   marker point: ${effectiveLatLng.latitude}, ${effectiveLatLng.longitude}');
+        }
 
         return SafeArea(
           top: true,
@@ -917,7 +951,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                       borderRadius: BorderRadius.circular(12),
                                       onTap: () {
                                         HapticFeedback.lightImpact();
-                                        _openGoogleMaps(temple, temple.latitude, temple.longitude);
+                                        _openGoogleMaps(temple, effectiveLatLng.latitude, effectiveLatLng.longitude);
                                       },
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

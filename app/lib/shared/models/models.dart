@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class PaginationMeta {
   final int currentPage;
   final int totalPages;
@@ -298,6 +300,18 @@ class Temple {
     var rawGallery = json['galleryImages'] as List? ?? [];
     List<GalleryImage> galleryList = rawGallery.map((g) => GalleryImage.fromJson(g)).toList();
 
+    // DEBUG: Log raw API latitude/longitude values
+    final rawLat = json['latitude'];
+    final rawLng = json['longitude'];
+    final parsedLat = (rawLat as num?)?.toDouble();
+    final parsedLng = (rawLng as num?)?.toDouble();
+    if (kDebugMode) {
+      debugPrint('🔍 Temple.fromJson: ${json['name'] ?? json['slug'] ?? "unknown"}');
+      debugPrint('   Raw API: latitude=$rawLat (type: ${rawLat.runtimeType}), longitude=$rawLng (type: ${rawLng.runtimeType})');
+      debugPrint('   Parsed: latitude=$parsedLat, longitude=$parsedLng');
+      debugPrint('   Final: latitude=${parsedLat ?? 27.5830}, longitude=${parsedLng ?? 77.7000}');
+    }
+
     return Temple(
       id: json['_id'] ?? json['id'] ?? '',
       name: json['name'] ?? '',
@@ -314,8 +328,8 @@ class Temple {
       featuredImage: json['featuredImage'] ?? json['thumbnailImage'] ?? json['coverImage'] ?? '',
       galleryImages: galleryList,
       address: json['address'] is Map ? TempleAddress.fromJson(json['address']) : null,
-      latitude: (json['latitude'] as num?)?.toDouble() ?? 27.5830,
-      longitude: (json['longitude'] as num?)?.toDouble() ?? 77.7000,
+      latitude: parsedLat ?? 27.5830,
+      longitude: parsedLng ?? 77.7000,
       darshanTiming: json['darshanTiming'],
       phone: json['phone'],
       website: json['website'],
