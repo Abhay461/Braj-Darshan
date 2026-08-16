@@ -44,18 +44,24 @@ router.post('/resolve-coordinates', async (req, res) => {
 router.post('/fix-all-coordinates', async (req, res) => {
   try {
     const Temple = require('../models/Temple');
+    const { force } = req.body || {};
     
-    // Find temples with default or zero coordinates that have a directionsUrl
-    const temples = await Temple.find({
+    // Find temples with directionsUrl
+    const query = {
       isDeleted: { $ne: true },
       directionsUrl: { $exists: true, $ne: '', $ne: null },
-      $or: [
+    };
+
+    if (!force) {
+      query.$or = [
         { latitude: 27.5830, longitude: 77.7000 },
         { latitude: 0, longitude: 0 },
         { latitude: { $exists: false } },
         { longitude: { $exists: false } },
-      ],
-    });
+      ];
+    }
+
+    const temples = await Temple.find(query);
 
     const results = { total: temples.length, fixed: 0, failed: 0, details: [] };
 
