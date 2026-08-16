@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,6 +20,7 @@ import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/ad_banner_widget.dart';
 import '../../core/services/ad_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/config/constants.dart';
 import '../../core/localization/app_translations.dart';
 
 class TempleDetailScreen extends ConsumerStatefulWidget {
@@ -128,6 +130,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
       return;
     }
 
+    // Try client-side HTTP redirect resolution first
     final resolved = await _resolveRedirectUrl(url);
     if (resolved != null && mounted) {
       setState(() {
@@ -138,6 +141,32 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
       } catch (e) {
         debugPrint('Error moving mapController: $e');
       }
+      return;
+    }
+
+    // Fallback: call backend API to resolve short URL server-side
+    try {
+      final dio = Dio(BaseOptions(
+        baseUrl: AppConstants.apiBaseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+      ));
+      final response = await dio.post('/utils/resolve-coordinates', data: {'mapUrl': url});
+      if (response.statusCode == 200 && response.data['success'] == true && response.data['data'] != null) {
+        final lat = (response.data['data']['latitude'] as num?)?.toDouble();
+        final lng = (response.data['data']['longitude'] as num?)?.toDouble();
+        if (lat != null && lng != null && _isValidLatLng(lat, lng) && mounted) {
+          final backendResolved = LatLng(lat, lng);
+          setState(() {
+            _resolvedShortUrlLatLng = backendResolved;
+          });
+          try {
+            _mapController.move(backendResolved, 15.0);
+          } catch (_) {}
+        }
+      }
+    } catch (e) {
+      debugPrint('Backend coordinate resolution failed: $e');
     }
   }
 
