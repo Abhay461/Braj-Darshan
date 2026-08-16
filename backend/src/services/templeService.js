@@ -65,7 +65,7 @@ class TempleService {
    * Update temple by ID.
    */
   async updateTemple(id, data) {
-    if (data.directionsUrl) {
+    if (data.directionsUrl && (!data.latitude || data.latitude === 27.5830) && (!data.longitude || data.longitude === 77.7000)) {
       const extracted = await getCoordsFromUrl(data.directionsUrl);
       if (extracted) {
         data.latitude = extracted.latitude;
