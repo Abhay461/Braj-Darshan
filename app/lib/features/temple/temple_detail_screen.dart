@@ -85,17 +85,21 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   LatLng _getEffectiveLocation(Temple temple) {
-    if (_resolvedShortUrlLatLng != null) {
-      return _resolvedShortUrlLatLng!;
-    }
-    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
-      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
-      if (parsed != null) return parsed;
-    }
+    // 1. Prioritize real database coordinates saved from Admin panel
     final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
     if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
       return LatLng(temple.latitude, temple.longitude);
     }
+    // 2. Short URL resolved coordinates
+    if (_resolvedShortUrlLatLng != null) {
+      return _resolvedShortUrlLatLng!;
+    }
+    // 3. Extract from directionsUrl if available
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
+      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
+      if (parsed != null) return parsed;
+    }
+    // 4. Fallback to location model coordinates
     if (temple.location is Location) {
       final loc = temple.location as Location;
       if (loc.latitude != 0.0 && loc.longitude != 0.0 && !(loc.latitude == 27.5830 && loc.longitude == 77.7000)) {
@@ -763,7 +767,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                         icon: Icons.map_outlined,
                         title: currentLang == 'hi' ? 'मंदिर का स्थान (Map)' : 'Temple Location',
                         child: Container(
-                          height: 220,
+                          height: 160,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
@@ -795,43 +799,80 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                 colorFilter: const ColorFilter.matrix([
                                                   -0.2126, -0.7152, -0.0722, 0, 255,
                                                   -0.2126, -0.7152, -0.0722, 0, 255,
-                                                  -0.2126, -0.7152, -0.0722, 0, 255,
-                                                  0,       0,       0,       1, 0,
-                                                ]),
-                                                child: tileWidget,
-                                              );
-                                            }
-                                          : null,
-                                    ),
+                                                   -0.2126, -0.7152, -0.0722, 0, 255,
+                                                   0,       0,       0,       1, 0,
+                                                 ]),
+                                                 child: tileWidget,
+                                               );
+                                             }
+                                           : null,
+                                     ),
                                     MarkerLayer(
                                       markers: [
                                         Marker(
-                                          point: effectiveLatLng,
-                                          width: 44,
-                                          height: 44,
-                                          alignment: Alignment.topCenter,
-                                          child: Stack(
-                                            alignment: Alignment.center,
-                                            children: [
-                                              const Icon(
-                                                Icons.location_on,
-                                                color: Color(0xFFEA4335),
-                                                size: 44,
-                                              ),
-                                              Positioned(
-                                                top: 9,
-                                                child: Container(
-                                                  width: 12,
-                                                  height: 12,
-                                                  decoration: const BoxDecoration(
-                                                    color: Colors.white,
-                                                    shape: BoxShape.circle,
+                                            point: effectiveLatLng,
+                                            width: 220,
+                                            height: 72,
+                                            alignment: Alignment.bottomCenter,
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  temple.name,
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    color: const Color(0xFFB91C1C),
+                                                    fontSize: 12.5,
+                                                    fontWeight: FontWeight.w900,
+                                                    height: 1.15,
+                                                    letterSpacing: -0.3,
+                                                    shadows: const [
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, -1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, -1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, 1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, -1.5)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 0)),
+                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 0)),
+                                                    ],
                                                   ),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
                                                 ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                                const SizedBox(height: 2),
+                                                Stack(
+                                                  alignment: Alignment.bottomCenter,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.location_on,
+                                                      color: Color(0xFFC5221F),
+                                                      size: 36,
+                                                      shadows: [
+                                                        Shadow(
+                                                          color: Color(0x40000000),
+                                                          blurRadius: 4,
+                                                          offset: Offset(0, 2),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Positioned(
+                                                      top: 7,
+                                                      child: Container(
+                                                        width: 10,
+                                                        height: 10,
+                                                        decoration: const BoxDecoration(
+                                                          color: Colors.white,
+                                                          shape: BoxShape.circle,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                         ),
                                       ],
                                     ),
                                   ],

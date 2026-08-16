@@ -45,17 +45,17 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
   /// Get effective location for a temple: try directionsUrl extraction first,
   /// then fall back to temple's own lat/lng, then location's lat/lng.
   LatLng _getEffectiveLatLng(Temple temple) {
-    // 1. Try extracting from directionsUrl
-    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
-      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
-      if (parsed != null) return parsed;
-    }
-    // 2. Use temple's own coordinates if not hardcoded default
+    // 1. Use temple's stored database coordinates FIRST if valid and not hardcoded default
     final isDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
     if (!isDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
       return LatLng(temple.latitude, temple.longitude);
     }
-    // 3. Use location's coordinates if available
+    // 2. Try extracting from directionsUrl if available
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
+      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
+      if (parsed != null) return parsed;
+    }
+    // 3. Use location model coordinates if available
     if (temple.location is Location) {
       final loc = temple.location as Location;
       if (loc.latitude != 0.0 && loc.longitude != 0.0 &&
@@ -201,44 +201,76 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                       final effectivePos = _getEffectiveLatLng(temple);
                       return Marker(
                         point: effectivePos,
-                        width: isSelected ? 52.0 : 44.0,
-                        height: isSelected ? 52.0 : 44.0,
-                        alignment: Alignment.topCenter,
+                        width: isSelected ? 240.0 : 200.0,
+                        height: isSelected ? 80.0 : 72.0,
+                        alignment: Alignment.bottomCenter,
                         child: Semantics(
                           label: 'Map Marker for ${temple.name}',
                           button: true,
                           child: GestureDetector(
                             onTap: () => _onMarkerTapped(temple),
                             child: AnimatedScale(
-                              scale: isSelected ? 1.2 : 1.0,
+                              scale: isSelected ? 1.15 : 1.0,
                               duration: const Duration(milliseconds: 200),
-                              child: Stack(
-                                alignment: Alignment.center,
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.location_on,
-                                    size: isSelected ? 48 : 40,
-                                    color: isSelected
-                                        ? const Color(0xFFD32F2F)
-                                        : const Color(0xFFEA4335),
-                                    shadows: const [
-                                      Shadow(
-                                        color: Color(0x40000000),
-                                        blurRadius: 6,
-                                        offset: Offset(0, 2),
+                                  Text(
+                                    temple.name,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: isSelected
+                                          ? const Color(0xFFB91C1C)
+                                          : const Color(0xFFC5221F),
+                                      fontSize: isSelected ? 13.5 : 12.0,
+                                      fontWeight: FontWeight.w900,
+                                      height: 1.15,
+                                      letterSpacing: -0.3,
+                                      shadows: const [
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, -1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, -1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, 1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, -1.5)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 0)),
+                                        Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 0)),
+                                      ],
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Stack(
+                                    alignment: Alignment.bottomCenter,
+                                    children: [
+                                      Icon(
+                                        Icons.location_on,
+                                        size: isSelected ? 42 : 36,
+                                        color: isSelected
+                                            ? const Color(0xFFB91C1C)
+                                            : const Color(0xFFC5221F),
+                                        shadows: const [
+                                          Shadow(
+                                            color: Color(0x40000000),
+                                            blurRadius: 4,
+                                            offset: Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      Positioned(
+                                        top: isSelected ? 9 : 7,
+                                        child: Container(
+                                          width: isSelected ? 12 : 10,
+                                          height: isSelected ? 12 : 10,
+                                          decoration: const BoxDecoration(
+                                            color: Colors.white,
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
                                       ),
                                     ],
-                                  ),
-                                  Positioned(
-                                    top: isSelected ? 10 : 8,
-                                    child: Container(
-                                      width: isSelected ? 14 : 12,
-                                      height: isSelected ? 14 : 12,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                    ),
                                   ),
                                 ],
                               ),
@@ -285,14 +317,14 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
 
               if (_selectedTemple != null)
                 Positioned(
-                  bottom: 16,
-                  left: 16,
-                  right: 16,
+                  bottom: 12,
+                  left: 14,
+                  right: 14,
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -311,7 +343,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                         Row(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                               child: Semantics(
                                 label: _selectedTemple!.name,
                                 image: true,
@@ -319,40 +351,43 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                   imageUrl: _selectedTemple!.coverImage.isNotEmpty
                                       ? _selectedTemple!.coverImage
                                       : 'https://via.placeholder.com/150',
-                                  width: 70,
-                                  height: 70,
+                                  width: 52,
+                                  height: 52,
                                   fit: BoxFit.cover,
                                   placeholder: (_, __) => Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: 52,
+                                    height: 52,
                                     color: Theme.of(context).colorScheme.surface,
                                   ),
                                   errorWidget: (_, __, ___) => Container(
-                                    width: 70,
-                                    height: 70,
+                                    width: 52,
+                                    height: 52,
                                     color: Theme.of(context).colorScheme.surface,
-                                    child: Icon(Icons.temple_hindu_outlined, size: 28, color: Theme.of(context).colorScheme.onSurface),
+                                    child: Icon(Icons.temple_hindu_outlined, size: 24, color: Theme.of(context).colorScheme.onSurface),
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 14),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     _selectedTemple!.name,
-                                    style: Theme.of(context).textTheme.titleMedium,
+                                    style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: 2),
                                   Row(
                                     children: [
                                       Icon(
                                         Icons.location_on,
-                                        size: 14,
+                                        size: 13,
                                         color: const Color(0xFFEA4335),
                                       ),
                                       const SizedBox(width: 3),
@@ -363,6 +398,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                               : 'Vrindavan Dham',
                                           style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                             color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
+                                            fontSize: 11,
                                           ),
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
@@ -374,29 +410,30 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                               ),
                             ),
                             IconButton(
-                              constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+                              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                               padding: EdgeInsets.zero,
                               icon: const Icon(Icons.close, size: 18),
                               onPressed: () => setState(() => _selectedTemple = null),
                             ),
                           ],
                         ),
-                        const SizedBox(height: 14),
+                        const SizedBox(height: 8),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
                             foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                            minimumSize: const Size(double.infinity, 48),
+                            minimumSize: const Size(double.infinity, 40),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          icon: const Icon(Icons.arrow_forward, size: 16),
+                          icon: const Icon(Icons.arrow_forward, size: 15),
                           label: Text(
                             'View Temple Details',
                             style: Theme.of(context).textTheme.labelLarge!.copyWith(
                               color: Theme.of(context).colorScheme.onPrimary,
                               fontWeight: FontWeight.w700,
+                              fontSize: 13,
                             ),
                           ),
                           onPressed: () {
