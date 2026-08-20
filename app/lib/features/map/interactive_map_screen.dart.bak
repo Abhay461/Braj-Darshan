@@ -166,7 +166,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
   }
 
   /// Get tile builder for dark mode
-  Widget Function(BuildContext, Widget, Object)? _getTileBuilder(bool isDark, String mapStyle) {
+  Widget Function(BuildContext, Widget, Tile)? _getTileBuilder(bool isDark, String mapStyle) {
     if (!isDark) return null;
     
     // For dark style, we apply a color filter to make tiles dark
@@ -554,7 +554,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                         height: 52,
                                         color: Theme.of(context).colorScheme.surface,
                                       ),
-                                      errorWidget: (_, __, ___) => Container(
+                                      errorWidget: (_, ___, ___) => Container(
                                         width: 52,
                                         height: 52,
                                         color: Theme.of(context).colorScheme.surface,
@@ -663,6 +663,3 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
     );
   }
 }
-
-
-

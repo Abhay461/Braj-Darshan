@@ -97,6 +97,28 @@ export interface Festival {
   updatedAt?: string;
 }
 
+export interface PinIconOption {
+  name: string;
+  iconClass: string;
+  isDefault: boolean;
+}
+
+export interface MapSettings {
+  defaultZoom: number;
+  minZoom: number;
+  maxZoom: number;
+  defaultCenterLat: number;
+  defaultCenterLng: number;
+  defaultPinIconStyle: string;
+  defaultPinColor: string;
+  defaultPinSize: number;
+  mapStyle: string;
+  availablePinIcons: PinIconOption[];
+  updatedBy?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface Temple {
   _id: string;
   id?: string;
@@ -115,6 +137,10 @@ export interface Temple {
   address?: TempleAddress;
   latitude: number;
   longitude: number;
+  mapZoom?: number;
+  mapPinIconStyle?: string;
+  mapPinColor?: string;
+  mapPinSize?: number;
   darshanTiming?: string;
   phone?: string;
   website?: string;

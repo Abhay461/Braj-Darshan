@@ -56,6 +56,28 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
   }
 
 
+  String _getTempleImage(Temple t) {
+    if (t.coverImage.trim().isNotEmpty) {
+      return t.coverImage.trim();
+    }
+    if (t.thumbnailImage != null && t.thumbnailImage!.trim().isNotEmpty) {
+      return t.thumbnailImage!.trim();
+    }
+    if (t.featuredImage != null && t.featuredImage!.trim().isNotEmpty) {
+      return t.featuredImage!.trim();
+    }
+    if (t.galleryImages.isNotEmpty) {
+      final g = t.galleryImages.firstWhere(
+        (img) => img.imageUrl.trim().isNotEmpty,
+        orElse: () => t.galleryImages.first,
+      );
+      if (g.imageUrl.trim().isNotEmpty) {
+        return g.imageUrl.trim();
+      }
+    }
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -70,6 +92,7 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
     // 1. Clean Soft Card List Item
     // -------------------------------------------------------------------------
     if (!widget.showImage) {
+      final imgUrl = _getTempleImage(widget.temple);
       return Container(
         margin: const EdgeInsets.only(bottom: 6.0),
         decoration: BoxDecoration(
@@ -94,20 +117,33 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
             onTap: widget.onTap,
             borderRadius: BorderRadius.circular(14),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 7.0),
               child: Row(
                 children: [
-                  Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      Icons.temple_hindu_outlined,
-                      size: 18,
-                      color: isDark ? Colors.white : const Color(0xFF18181B),
+                  // Actual Temple Image Thumbnail
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: imgUrl.isNotEmpty
+                          ? CachedNetworkImage(
+                              imageUrl: imgUrl,
+                              width: 44,
+                              height: 44,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                                child: const Icon(Icons.temple_hindu_outlined, size: 22, color: Color(0xFF71717A)),
+                              ),
+                            )
+                          : Container(
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                              child: const Icon(Icons.temple_hindu_outlined, size: 22, color: Color(0xFF71717A)),
+                            ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -202,23 +238,58 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
               children: [
                 Hero(
                   tag: tag,
-                  child: CachedNetworkImage(
-                    imageUrl: widget.temple.thumbnailImage?.isNotEmpty == true
-                        ? widget.temple.thumbnailImage!
-                        : (widget.temple.coverImage.isNotEmpty ? widget.temple.coverImage : 'https://via.placeholder.com/300'),
-                    height: widget.imageHeight,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (context, url) => Container(
-                      height: widget.imageHeight,
-                      color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      height: widget.imageHeight,
-                      color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-                      child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
-                    ),
-                  ),
+                  child: (() {
+                    String imgUrl = '';
+                    final t = widget.temple;
+                    if (t.coverImage.trim().isNotEmpty) {
+                      imgUrl = t.coverImage.trim();
+                    } else if (t.thumbnailImage != null && t.thumbnailImage!.trim().isNotEmpty) {
+                      imgUrl = t.thumbnailImage!.trim();
+                    } else if (t.featuredImage != null && t.featuredImage!.trim().isNotEmpty) {
+                      imgUrl = t.featuredImage!.trim();
+                    } else if (t.galleryImages.isNotEmpty) {
+                      final g = t.galleryImages.firstWhere(
+                        (img) => img.imageUrl.trim().isNotEmpty,
+                        orElse: () => t.galleryImages.first,
+                      );
+                      if (g.imageUrl.trim().isNotEmpty) {
+                        imgUrl = g.imageUrl.trim();
+                      }
+                    }
+
+                    if (imgUrl.isNotEmpty) {
+                      return CachedNetworkImage(
+                        imageUrl: imgUrl,
+                        height: widget.imageHeight,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(
+                          height: widget.imageHeight,
+                          color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
+                        ),
+                        errorWidget: (context, url, error) => Container(
+                          height: widget.imageHeight,
+                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                          child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
+                        ),
+                      );
+                    } else {
+                      return Container(
+                        height: widget.imageHeight,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: isDark
+                                ? [const Color(0xFF2C2411), const Color(0xFF1E180A)]
+                                : [Colors.amber.shade100, Colors.orange.shade50],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: const Icon(Icons.temple_hindu, color: Color(0xFFC5221F), size: 36),
+                      );
+                    }
+                  })(),
                 ),
                 Positioned(
                   top: 8,
@@ -292,23 +363,58 @@ class _TempleCardState extends ConsumerState<TempleCard> with SingleTickerProvid
                     child: Semantics(
                       label: widget.temple.name,
                       image: true,
-                      child: CachedNetworkImage(
-                        imageUrl: widget.temple.thumbnailImage?.isNotEmpty == true
-                            ? widget.temple.thumbnailImage!
-                            : (widget.temple.coverImage.isNotEmpty ? widget.temple.coverImage : 'https://via.placeholder.com/300'),
-                        height: widget.imageHeight,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
+                    child: (() {
+                      String imgUrl = '';
+                      final t = widget.temple;
+                      if (t.coverImage.trim().isNotEmpty) {
+                        imgUrl = t.coverImage.trim();
+                      } else if (t.thumbnailImage != null && t.thumbnailImage!.trim().isNotEmpty) {
+                        imgUrl = t.thumbnailImage!.trim();
+                      } else if (t.featuredImage != null && t.featuredImage!.trim().isNotEmpty) {
+                        imgUrl = t.featuredImage!.trim();
+                      } else if (t.galleryImages.isNotEmpty) {
+                        final g = t.galleryImages.firstWhere(
+                          (img) => img.imageUrl.trim().isNotEmpty,
+                          orElse: () => t.galleryImages.first,
+                        );
+                        if (g.imageUrl.trim().isNotEmpty) {
+                          imgUrl = g.imageUrl.trim();
+                        }
+                      }
+
+                      if (imgUrl.isNotEmpty) {
+                        return CachedNetworkImage(
+                          imageUrl: imgUrl,
                           height: widget.imageHeight,
-                          color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
-                        ),
-                        errorWidget: (context, url, error) => Container(
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: widget.imageHeight,
+                            color: isDark ? const Color(0xFF1E1E22) : const Color(0xFFF4F4F5),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: widget.imageHeight,
+                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                            child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
+                          ),
+                        );
+                      } else {
+                        return Container(
                           height: widget.imageHeight,
-                          color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-                          child: const Icon(Icons.temple_hindu_outlined, size: 36, color: Color(0xFF71717A)),
-                        ),
-                      ),
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: isDark
+                                  ? [const Color(0xFF2C2411), const Color(0xFF1E180A)]
+                                  : [Colors.amber.shade100, Colors.orange.shade50],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                          ),
+                          child: const Icon(Icons.temple_hindu, color: Color(0xFFC5221F), size: 36),
+                        );
+                      }
+                    })(),
                     ),
                   ),
                   Positioned(

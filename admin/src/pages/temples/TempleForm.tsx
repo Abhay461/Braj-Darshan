@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm, Controller, useFieldArray } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -96,12 +96,19 @@ function isValidCoord(lat: number, lng: number): boolean {
   return true;
 }
 
+const aartiTimingSchema = z.object({
+  name: z.string().min(1, 'Aarti name is required').max(100),
+  time: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Time must be in HH:mm 24-hour format'),
+  description: z.string().optional().default(''),
+});
+
 const templeSchema = z.object({
   name: z.string().min(1, 'Temple name is required').max(200),
   nameHindi: z.string().optional().default(''),
   history: z.string().optional().default(''),
   historyHindi: z.string().optional().default(''),
   darshanTiming: z.string().optional().default(''),
+  aartiTimings: z.array(aartiTimingSchema).optional().default([]),
   donationUrl: z.string().optional().default(''),
   guestHouseBookingUrl: z.string().optional().default(''),
   liveDarshanUrl: z.string().optional().default(''),
@@ -117,7 +124,147 @@ const templeSchema = z.object({
   status: z.enum(['active', 'inactive', 'draft']).default('active'),
 });
 
+type AartiTiming = z.infer<typeof aartiTimingSchema>;
 type TempleFormData = z.infer<typeof templeSchema>;
+
+// ─── Aarti Timings Field Array Component ────────────────────────────
+const AartiTimingsFieldArray: React.FC<{ control: any }> = ({ control }) => {
+  const { fields, append, remove, move } = useFieldArray({
+    control,
+    name: 'aartiTimings',
+  });
+
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+
+  return (
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1.5, color: '#E65100' }}>
+        Aarti Timings (आरती समय) - For Countdown Widget
+      </Typography>
+      <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+        Add individual aarti times in 24-hour format (HH:mm). Used for the Home Screen countdown widget.
+      </Typography>
+
+      {fields.length === 0 && (
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={() => append({ name: '', time: '', description: '' })}
+          sx={{ mb: 2 }}
+        >
+          Add First Aarti Timing
+        </Button>
+      )}
+
+      {fields.map((field, index) => (
+        <Card key={field.id} sx={{ mb: 1.5, p: 1.5, border: '1px solid #E0E0E0' }}>
+          <CardContent sx={{ p: 0 }}>
+            <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+              <Box sx={{ flex: 1, minWidth: 180 }}>
+                <Controller
+                  name={`aartiTimings.${index}.name`}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Aarti Name *"
+                      placeholder="e.g. Mangala Aarti, Evening Aarti"
+                      fullWidth
+                      error={!!errors.aartiTimings?.[index]?.name}
+                      helperText={errors.aartiTimings?.[index]?.name?.message}
+                    />
+                  )}
+                />
+              </Box>
+
+              <Box sx={{ flex: 1, minWidth: 140 }}>
+                <Controller
+                  name={`aartiTimings.${index}.time`}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Time (HH:mm) *"
+                      placeholder="04:30"
+                      fullWidth
+                      inputProps={{ inputMode: 'numeric' }}
+                      error={!!errors.aartiTimings?.[index]?.time}
+                      helperText={errors.aartiTimings?.[index]?.time?.message || '24-hour format (HH:mm)'}
+                    />
+                  )}
+                />
+              </Box>
+
+              <Box sx={{ flex: 1, minWidth: 200 }}>
+                <Controller
+                  name={`aartiTimings.${index}.description`}
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      label="Description"
+                      placeholder="e.g. Early morning aarti"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 1.5 }}>
+                <IconButton
+                  size="small"
+                  onClick={() => remove(index)}
+                  color="error"
+                  sx={{ alignSelf: 'flex-start' }}
+                  aria-label="Remove aarti timing"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+                {fields.length > 1 && (
+                  <Box sx={{ display: 'flex', gap: 0.5 }}>
+                    <IconButton
+                      size="small"
+                      onClick={() => index > 0 && move(index, index - 1)}
+                      disabled={index === 0}
+                      aria-label="Move up"
+                    >
+                      <ArrowUpwardIcon fontSize="small" />
+                    </IconButton>
+                    <IconButton
+                      size="small"
+                      onClick={() => index < fields.length - 1 && move(index, index + 1)}
+                      disabled={index === fields.length - 1}
+                      aria-label="Move down"
+                    >
+                      <ArrowDownwardIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
+
+      {fields.length > 0 && (
+        <Button
+          variant="outlined"
+          startIcon={<AddIcon />}
+          onClick={() => append({ name: '', time: '', description: '' })}
+          sx={{ mt: 1 }}
+        >
+          Add Another Aarti Timing
+        </Button>
+      )}
+    </Box>
+  );
+};
+
+// Need to import these icons
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/DeleteOutlined';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
 
 export const TempleForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -148,6 +295,7 @@ export const TempleForm: React.FC = () => {
       history: '',
       historyHindi: '',
       darshanTiming: '',
+      aartiTimings: [],
       donationUrl: '',
       guestHouseBookingUrl: '',
       liveDarshanUrl: '',
@@ -226,6 +374,7 @@ export const TempleForm: React.FC = () => {
         history: templeData.history || '',
         historyHindi: templeData.historyHindi || (templeData as any).historyHindi || '',
         darshanTiming: templeData.darshanTiming || '',
+        aartiTimings: templeData.aartiTimings || [],
         donationUrl: templeData.donationUrl || '',
         guestHouseBookingUrl: templeData.guestHouseBookingUrl || '',
         liveDarshanUrl: templeData.liveDarshanUrl || '',
@@ -420,6 +569,11 @@ export const TempleForm: React.FC = () => {
                       />
                     )}
                   />
+                </Grid>
+
+                {/* Aarti Timings for Countdown Widget */}
+                <Grid size={{ xs: 12 }}>
+                  <AartiTimingsFieldArray control={control} />
                 </Grid>
               </Grid>
             </CardContent>

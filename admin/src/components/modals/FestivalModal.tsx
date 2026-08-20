@@ -21,6 +21,13 @@ import {
 import { Festival, Temple } from '../../types';
 import { ImageUploader } from '../forms/ImageUploader';
 
+const themeConfigSchema = z.object({
+  bannerImage: z.string().optional().default(''),
+  accentColor: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/).optional().default(''),
+  showPetals: z.boolean().optional().default(false),
+  petalType: z.enum(['gulal', 'flower', 'diya', 'none']).optional().default('none'),
+});
+
 const festivalSchema = z.object({
   name: z.string().min(1, 'Festival name is required').max(200),
   description: z.string().optional(),
@@ -28,9 +35,11 @@ const festivalSchema = z.object({
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   templeIds: z.array(z.string()).optional().default([]),
+  themeConfig: themeConfigSchema.optional().default({}),
   status: z.enum(['active', 'inactive']).default('active'),
 });
 
+type ThemeConfig = z.infer<typeof themeConfigSchema>;
 type FestivalFormData = z.infer<typeof festivalSchema>;
 
 interface FestivalModalProps {
@@ -66,6 +75,12 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
       startDate: '',
       endDate: '',
       templeIds: [],
+      themeConfig: {
+        bannerImage: '',
+        accentColor: '',
+        showPetals: false,
+        petalType: 'none',
+      },
       status: 'active',
     },
   });
@@ -85,6 +100,12 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
         startDate: festival.startDate ? festival.startDate.split('T')[0] : '',
         endDate: festival.endDate ? festival.endDate.split('T')[0] : '',
         templeIds: existingIds,
+        themeConfig: festival.themeConfig || {
+          bannerImage: '',
+          accentColor: '',
+          showPetals: false,
+          petalType: 'none',
+        },
         status: festival.status || 'active',
       });
     } else {
@@ -95,6 +116,12 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
         startDate: '',
         endDate: '',
         templeIds: [],
+        themeConfig: {
+          bannerImage: '',
+          accentColor: '',
+          showPetals: false,
+          petalType: 'none',
+        },
         status: 'active',
       });
     }
@@ -164,6 +191,81 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
                 control={control}
                 render={({ field }) => (
                   <TextField {...field} type="date" label="End Date" fullWidth SlotProps={{ inputLabel: { shrink: true } }} />
+                )}
+              />
+            </Grid>
+
+            {/* Theme Configuration for Home Screen Festival Effects */}
+            <Grid size={{ xs: 12 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 700, color: '#E65100' }}>
+                Theme Configuration (Home Screen Effects)
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+                Optional visual effects for the Home Screen during this festival period.
+              </Typography>
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Controller
+                name="themeConfig.accentColor"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Accent Color (Hex)"
+                    placeholder="#E65100"
+                    fullWidth
+                    helperText="Custom accent color for festival period (e.g., #E65100 for Saffron, #D4AF37 for Gold)"
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Controller
+                name="themeConfig.bannerImage"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Theme Banner Image URL"
+                    placeholder="https://..."
+                    fullWidth
+                    helperText="Optional banner image for festival theme"
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Controller
+                name="themeConfig.showPetals"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox {...field} color="warning" />
+                    }
+                    label="Show Petals/Gulal Effect"
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid size={{ xs: 12, sm: 6 }}>
+              <Controller
+                name="themeConfig.petalType"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth>
+                    <InputLabel>Petal Effect Type</InputLabel>
+                    <Select {...field} label="Petal Effect Type">
+                      <MenuItem value="none">None</MenuItem>
+                      <MenuItem value="gulal">Gulal (Colored Powder)</MenuItem>
+                      <MenuItem value="flower">Flower Petals</MenuItem>
+                      <MenuItem value="diya">Diya (Lamps)</MenuItem>
+                    </Select>
+                  </FormControl>
                 )}
               />
             </Grid>

@@ -19,6 +19,7 @@ import { FacilityList } from './pages/facilities/FacilityList';
 import { FestivalList } from './pages/festivals/FestivalList';
 import { MediaLibrary } from './pages/media/MediaLibrary';
 import { BackupImportExport } from './pages/backup/BackupImportExport';
+import { MapSettingsPage } from './pages/MapSettings';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,7 +34,7 @@ const queryClient = new QueryClient({
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated } = useAuth();
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to='/login' replace />;
   }
   return <>{children}</>;
 };
@@ -48,10 +49,10 @@ export const App: React.FC = () => {
             <AuthProvider>
               <BrowserRouter>
                 <Routes>
-                  <Route path="/login" element={<Login />} />
+                  <Route path='/login' element={<Login />} />
 
                   <Route
-                    path="/"
+                    path='/'
                     element={
                       <ProtectedRoute>
                         <DashboardLayout />
@@ -59,18 +60,19 @@ export const App: React.FC = () => {
                     }
                   >
                     <Route index element={<Dashboard />} />
-                    <Route path="temples" element={<TempleList />} />
-                    <Route path="temples/new" element={<TempleForm />} />
-                    <Route path="temples/:id/edit" element={<TempleForm />} />
-                    <Route path="categories" element={<CategoryList />} />
-                    <Route path="locations" element={<LocationList />} />
-                    <Route path="facilities" element={<FacilityList />} />
-                    <Route path="festivals" element={<FestivalList />} />
-                    <Route path="media" element={<MediaLibrary />} />
-                    <Route path="backup" element={<BackupImportExport />} />
+                    <Route path='temples' element={<TempleList />} />
+                    <Route path='temples/new' element={<TempleForm />} />
+                    <Route path='temples/:id/edit' element={<TempleForm />} />
+                    <Route path='categories' element={<CategoryList />} />
+                    <Route path='locations' element={<LocationList />} />
+                    <Route path='facilities' element={<FacilityList />} />
+                    <Route path='festivals' element={<FestivalList />} />
+                    <Route path='media' element={<MediaLibrary />} />
+                    <Route path='backup' element={<BackupImportExport />} />
+                    <Route path='map-settings' element={<MapSettingsPage />} />
                   </Route>
 
-                  <Route path="*" element={<Navigate to="/" replace />} />
+                  <Route path='*' element={<Navigate to='/' replace />} />
                 </Routes>
               </BrowserRouter>
             </AuthProvider>

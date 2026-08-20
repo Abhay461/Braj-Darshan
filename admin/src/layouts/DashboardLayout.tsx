@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -29,6 +29,7 @@ import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import AccountCircleIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/WarningAmberOutlined';
+import MapIcon from '@mui/icons-material/MapOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useHealth } from '../hooks/useHealth';
 
@@ -39,6 +40,7 @@ const navItems = [
   { label: 'Temples', path: '/temples', icon: <TempleIcon /> },
   { label: 'Categories', path: '/categories', icon: <CategoryIcon /> },
   { label: 'Locations', path: '/locations', icon: <LocationIcon /> },
+  { label: 'Map Settings', path: '/map-settings', icon: <MapIcon /> },
   { label: 'Festivals', path: '/festivals', icon: <FestivalIcon /> },
   { label: 'Media Library', path: '/media', icon: <MediaIcon /> },
   { label: 'Backup & Import', path: '/backup', icon: <BackupIcon /> },

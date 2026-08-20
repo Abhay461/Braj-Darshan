@@ -39,6 +39,12 @@ const festivalSchema = new mongoose.Schema(
         ref: 'Temple',
       },
     ],
+    themeConfig: {
+      bannerImage: { type: String, trim: true, default: '' },
+      accentColor: { type: String, trim: true, match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color format'], default: '' },
+      showPetals: { type: Boolean, default: false },
+      petalType: { type: String, enum: ['gulal', 'flower', 'diya', 'none'], default: 'none' },
+    },
     status: {
       type: String,
       enum: ['active', 'inactive'],

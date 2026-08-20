@@ -39,11 +39,25 @@ const create = [
     .withMessage('Longitude is required')
     .isFloat({ min: -180, max: 180 })
     .withMessage('Longitude must be between -180 and 180'),
+  body('mapZoom').optional().isFloat({ min: 1, max: 20 }).withMessage('Map zoom must be between 1 and 20'),
+  body('mapPinIconStyle')
+    .optional()
+    .isIn(['location_on', 'place', 'temple_hindu', 'location_pin', 'my_location', 'flag', 'landscape', 'terrain'])
+    .withMessage('Invalid pin icon style'),
+  body('mapPinColor')
+    .optional()
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
+    .withMessage('Invalid hex color format'),
+body('mapPinSize').optional().isInt({ min: 20, max: 80 }).withMessage('Pin size must be between 20 and 80'),
   body('nameHindi').optional().isString().trim(),
   body('history').optional().isString().trim(),
   body('historyHindi').optional().isString().trim(),
   body('importance').optional().isString().trim(),
   body('darshanTiming').optional().isString().trim(),
+  body('aartiTimings').optional().isArray(),
+  body('aartiTimings.*.name').optional().isString().trim().isLength({ max: 100 }).withMessage('Aarti name cannot exceed 100 characters'),
+  body('aartiTimings.*.time').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Aarti time must be in HH:mm 24-hour format'),
+  body('aartiTimings.*.description').optional().isString().trim(),
   body('phone').optional().isString().trim(),
   body('website').optional().isString().trim(),
   body('donationUrl').optional().isString().trim(),
@@ -77,11 +91,23 @@ const update = [
   body('coverImage').optional().isString(),
   body('latitude').optional().isFloat({ min: -90, max: 90 }),
   body('longitude').optional().isFloat({ min: -180, max: 180 }),
+  body('mapZoom').optional().isFloat({ min: 1, max: 20 }),
+  body('mapPinIconStyle')
+    .optional()
+    .isIn(['location_on', 'place', 'temple_hindu', 'location_pin', 'my_location', 'flag', 'landscape', 'terrain']),
+  body('mapPinColor')
+    .optional()
+    .matches(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
+  body('mapPinSize').optional().isInt({ min: 20, max: 80 }),
   body('nameHindi').optional().isString().trim(),
   body('history').optional().isString().trim(),
   body('historyHindi').optional().isString().trim(),
-  body('importance').optional().isString().trim(),
+body('importance').optional().isString().trim(),
   body('darshanTiming').optional().isString().trim(),
+  body('aartiTimings').optional().isArray(),
+  body('aartiTimings.*.name').optional().isString().trim().isLength({ max: 100 }).withMessage('Aarti name cannot exceed 100 characters'),
+  body('aartiTimings.*.time').optional().matches(/^([01]\d|2[0-3]):([0-5]\d)$/).withMessage('Aarti time must be in HH:mm 24-hour format'),
+  body('aartiTimings.*.description').optional().isString().trim(),
   body('phone').optional().isString().trim(),
   body('website').optional().isString().trim(),
   body('donationUrl').optional().isString().trim(),

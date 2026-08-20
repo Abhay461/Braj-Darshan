@@ -31,19 +31,19 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getTemples API Error: $e');
+      debugPrint('TempleRepository.getTemples API Error: ' + e.toString());
     }
     return [];
   }
 
   Future<Temple?> getTempleByIdOrSlug(String idOrSlug) async {
     try {
-      final response = await dioClient.dio.get('/temples/$idOrSlug');
+      final response = await dioClient.dio.get('/temples/' + idOrSlug);
       if (response.data['success'] == true && response.data['data'] != null) {
         return Temple.fromJson(response.data['data']);
       }
     } catch (e) {
-      debugPrint('TempleRepository.getTempleByIdOrSlug API Error: $e');
+      debugPrint('TempleRepository.getTempleByIdOrSlug API Error: ' + e.toString());
     }
     return null;
   }
@@ -56,7 +56,7 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getFeaturedTemples API Error: $e');
+      debugPrint('TempleRepository.getFeaturedTemples API Error: ' + e.toString());
     }
     return [];
   }
@@ -69,7 +69,7 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getPopularTemples API Error: $e');
+      debugPrint('TempleRepository.getPopularTemples API Error: ' + e.toString());
     }
     return [];
   }
@@ -82,7 +82,7 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getRecentTemples API Error: $e');
+      debugPrint('TempleRepository.getRecentTemples API Error: ' + e.toString());
     }
     return [];
   }
@@ -105,7 +105,7 @@ class TempleRepository {
         return rawList.map((item) => Temple.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getNearbyTemples API Error: $e');
+      debugPrint('TempleRepository.getNearbyTemples API Error: ' + e.toString());
     }
     return [];
   }
@@ -118,7 +118,7 @@ class TempleRepository {
         return rawList.map((item) => Category.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getCategories API Error: $e');
+      debugPrint('TempleRepository.getCategories API Error: ' + e.toString());
     }
     return [];
   }
@@ -131,7 +131,7 @@ class TempleRepository {
         return rawList.map((item) => Location.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getLocations API Error: $e');
+      debugPrint('TempleRepository.getLocations API Error: ' + e.toString());
     }
     return [];
   }
@@ -144,8 +144,20 @@ class TempleRepository {
         return rawList.map((item) => Festival.fromJson(item)).toList();
       }
     } catch (e) {
-      debugPrint('TempleRepository.getFestivals API Error: $e');
+      debugPrint('TempleRepository.getFestivals API Error: ' + e.toString());
     }
     return [];
+  }
+
+  Future<MapSettings?> getMapSettings() async {
+    try {
+      final response = await dioClient.dio.get('/map-settings');
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return MapSettings.fromJson(response.data['data']);
+      }
+    } catch (e) {
+      debugPrint('TempleRepository.getMapSettings API Error: ' + e.toString());
+    }
+    return null;
   }
 }

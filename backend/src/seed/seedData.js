@@ -15,6 +15,7 @@ const Location = require('../models/Location');
 const Facility = require('../models/Facility');
 const Festival = require('../models/Festival');
 const Temple = require('../models/Temple');
+const EmergencyContact = require('../models/EmergencyContact');
 const logger = require('../utils/logger');
 
 // ─── Categories ────────────────────────────────────────
@@ -57,6 +58,7 @@ const seedDatabase = async () => {
         Facility.deleteMany({}),
         Festival.deleteMany({}),
         Temple.deleteMany({}),
+        EmergencyContact.deleteMany({}),
       ]);
       logger.info('Database data completely destroyed');
       process.exit(0);
@@ -69,6 +71,7 @@ const seedDatabase = async () => {
       Facility.deleteMany({}),
       Festival.deleteMany({}),
       Temple.deleteMany({}),
+      EmergencyContact.deleteMany({}),
     ]);
     logger.info('Existing data cleared');
 
@@ -106,6 +109,13 @@ const seedDatabase = async () => {
           },
         ],
         darshanTiming: 'Morning: 7:45 AM - 12:00 PM | Evening: 5:30 PM - 9:30 PM',
+        aartiTimings: [
+          { name: 'Mangala Aarti', time: '04:30', description: 'Early morning aarti' },
+          { name: 'Shringar Aarti', time: '07:45', description: 'Morning decoration aarti' },
+          { name: 'Rajbhog Aarti', time: '12:00', description: 'Midday offering aarti' },
+          { name: 'Evening Aarti', time: '17:30', description: 'Evening aarti' },
+          { name: 'Shayan Aarti', time: '21:00', description: 'Night closing aarti' },
+        ],
         phone: '+91-565-2442000',
         website: 'https://www.yugalsarkar.com',
         visitDuration: '1-2 hours',
@@ -148,6 +158,13 @@ const seedDatabase = async () => {
           },
         ],
         darshanTiming: 'Morning: 5:30 AM - 12:00 PM | Evening: 4:30 PM - 8:30 PM',
+        aartiTimings: [
+          { name: 'Mangala Aarti', time: '05:30', description: 'Early morning aarti' },
+          { name: 'Shringar Aarti', time: '08:00', description: 'Morning decoration aarti' },
+          { name: 'Rajbhog Aarti', time: '12:00', description: 'Midday offering aarti' },
+          { name: 'Evening Aarti', time: '16:30', description: 'Evening aarti' },
+          { name: 'Shayan Aarti', time: '20:30', description: 'Night closing aarti' },
+        ],
         phone: '+91-565-2530000',
         website: 'https://www.jkp.org.in',
         visitDuration: '2-3 hours',
@@ -182,6 +199,15 @@ const seedDatabase = async () => {
         thumbnailImage: 'https://res.cloudinary.com/demo/image/upload/w_300,h_225,c_fill/v1/braj-darshan/temples/iskcon-vrindavan/cover.jpg',
         galleryImages: [],
         darshanTiming: '4:30 AM - 1:00 PM | 4:30 PM - 8:30 PM',
+        aartiTimings: [
+          { name: 'Mangala Aarti', time: '04:30', description: 'Early morning aarti' },
+          { name: 'Tulasi Aarti', time: '07:00', description: 'Tulasi worship aarti' },
+          { name: 'Shringar Aarti', time: '07:30', description: 'Morning decoration aarti' },
+          { name: 'Guru Puja', time: '08:00', description: 'Guru puja ceremony' },
+          { name: 'Rajbhog Aarti', time: '12:00', description: 'Midday offering aarti' },
+          { name: 'Evening Aarti', time: '18:30', description: 'Evening aarti' },
+          { name: 'Shayan Aarti', time: '20:30', description: 'Night closing aarti' },
+        ],
         phone: '+91-565-2540021',
         website: 'https://www.iskconvrindavan.com',
         visitDuration: '1-2 hours',
@@ -379,6 +405,12 @@ const seedDatabase = async () => {
         startDate: new Date('2026-08-25'),
         endDate: new Date('2026-08-26'),
         templeIds: festivalTemples,
+        themeConfig: {
+          bannerImage: 'https://res.cloudinary.com/demo/image/upload/v1/braj-darshan/banners/janmashtami-theme.jpg',
+          accentColor: '#E65100',
+          showPetals: true,
+          petalType: 'gulal',
+        },
         status: 'active',
       },
       {
@@ -388,11 +420,158 @@ const seedDatabase = async () => {
         startDate: new Date('2026-09-08'),
         endDate: new Date('2026-09-09'),
         templeIds: festivalTemples,
+        themeConfig: {
+          bannerImage: 'https://res.cloudinary.com/demo/image/upload/v1/braj-darshan/banners/radhashtami-theme.jpg',
+          accentColor: '#D4AF37',
+          showPetals: true,
+          petalType: 'flower',
+        },
         status: 'active',
       },
     ];
 
     await Festival.insertMany(festivals);
+
+    // ─── Seed Emergency Contacts ──────────────────────────
+    const emergencyContacts = [
+      {
+        name: 'Tourist Police Vrindavan',
+        category: 'tourist_police',
+        phone: '1800-180-5454',
+        description: '24/7 Tourist Police Helpline for Vrindavan and Mathura',
+        isVerified: true,
+        area: 'Vrindavan',
+        sortOrder: 1,
+      },
+      {
+        name: 'Mathura Tourist Police',
+        category: 'tourist_police',
+        phone: '1800-180-5454',
+        description: 'Tourist Police Helpline for Mathura district',
+        isVerified: true,
+        area: 'Mathura',
+        sortOrder: 2,
+      },
+      {
+        name: 'Ambulance (108)',
+        category: 'ambulance',
+        phone: '108',
+        description: 'National Emergency Ambulance Service',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 3,
+      },
+      {
+        name: 'Ambulance (102)',
+        category: 'ambulance',
+        phone: '102',
+        description: 'National Ambulance Service - Free',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 4,
+      },
+      {
+        name: 'Police Emergency',
+        category: 'police',
+        phone: '112',
+        description: 'National Emergency Number - Police, Fire, Ambulance',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 5,
+      },
+      {
+        name: 'Fire Brigade',
+        category: 'fire',
+        phone: '101',
+        description: 'Fire Emergency Services',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 6,
+      },
+      {
+        name: 'Vrindavan District Hospital',
+        category: 'hospital',
+        phone: '+91-565-2442200',
+        description: 'Government District Hospital, Vrindavan',
+        location: {
+          lat: 27.5750,
+          lng: 77.6800,
+          address: 'Vrindavan, Uttar Pradesh 281121',
+          name: 'Vrindavan District Hospital',
+        },
+        isVerified: true,
+        area: 'Vrindavan',
+        sortOrder: 7,
+      },
+      {
+        name: 'Mathura Medical College Hospital',
+        category: 'hospital',
+        phone: '+91-565-2400000',
+        description: 'Major Government Hospital in Mathura',
+        location: {
+          lat: 27.4924,
+          lng: 77.6737,
+          address: 'Mathura, Uttar Pradesh 281001',
+          name: 'Mathura Medical College Hospital',
+        },
+        isVerified: true,
+        area: 'Mathura',
+        sortOrder: 8,
+      },
+      {
+        name: 'Ramakrishna Mission Hospital',
+        category: 'hospital',
+        phone: '+91-565-2442345',
+        description: 'Charitable Hospital in Vrindavan',
+        location: {
+          lat: 27.5800,
+          lng: 77.6900,
+          address: 'Vrindavan, Uttar Pradesh 281121',
+          name: 'Ramakrishna Mission Hospital',
+        },
+        isVerified: true,
+        area: 'Vrindavan',
+        sortOrder: 9,
+      },
+      {
+        name: 'Women Helpline',
+        category: 'helpline',
+        phone: '1091',
+        description: 'Women Safety Helpline',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 10,
+      },
+      {
+        name: 'Child Helpline',
+        category: 'helpline',
+        phone: '1098',
+        description: 'Child Protection Helpline',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 11,
+      },
+      {
+        name: 'Senior Citizen Helpline',
+        category: 'helpline',
+        phone: '14567',
+        description: 'Senior Citizen Support Helpline',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 12,
+      },
+      {
+        name: 'Disaster Management',
+        category: 'helpline',
+        phone: '1078',
+        description: 'Disaster Management Helpline',
+        isVerified: true,
+        area: 'Braj',
+        sortOrder: 13,
+      },
+    ];
+
+    await EmergencyContact.insertMany(emergencyContacts);
 
     logger.info(`Database seeded successfully!`);
     logger.info(`Categories: ${createdCategories.length}`);
@@ -400,6 +579,7 @@ const seedDatabase = async () => {
     logger.info(`Facilities: ${createdFacilities.length}`);
     logger.info(`Temples: ${createdTemples.length}`);
     logger.info(`Festivals: ${festivals.length}`);
+    logger.info(`Emergency Contacts: ${emergencyContacts.length}`);
 
     process.exit(0);
   } catch (error) {

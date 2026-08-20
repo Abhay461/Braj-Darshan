@@ -1,4 +1,4 @@
-﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 
 class PaginationMeta {
   final int currentPage;
@@ -257,10 +257,6 @@ class Temple {
   final String status;
   final String? seoTitle;
   final String? seoDescription;
-  final double? mapZoom;
-  final String? mapPinIconStyle;
-  final String? mapPinColor;
-  final double? mapPinSize;
 
   Temple({
     required this.id,
@@ -298,10 +294,6 @@ class Temple {
     required this.status,
     this.seoTitle,
     this.seoDescription,
-    this.mapZoom,
-    this.mapPinIconStyle,
-    this.mapPinColor,
-    this.mapPinSize,
   });
 
   factory Temple.fromJson(Map<String, dynamic> json) {
@@ -314,7 +306,7 @@ class Temple {
     final parsedLat = (rawLat as num?)?.toDouble();
     final parsedLng = (rawLng as num?)?.toDouble();
     if (kDebugMode) {
-      debugPrint('Temple.fromJson: ${json['name'] ?? json['slug'] ?? "unknown"}');
+      debugPrint('🔍 Temple.fromJson: ${json['name'] ?? json['slug'] ?? "unknown"}');
       debugPrint('   Raw API: latitude=$rawLat (type: ${rawLat.runtimeType}), longitude=$rawLng (type: ${rawLng.runtimeType})');
       debugPrint('   Parsed: latitude=$parsedLat, longitude=$parsedLng');
       debugPrint('   Final: latitude=${parsedLat ?? 27.5830}, longitude=${parsedLng ?? 77.7000}');
@@ -356,97 +348,6 @@ class Temple {
       status: json['status'] ?? 'active',
       seoTitle: json['seoTitle'],
       seoDescription: json['seoDescription'],
-      mapZoom: (json['mapZoom'] as num?)?.toDouble(),
-      mapPinIconStyle: json['mapPinIconStyle'],
-      mapPinColor: json['mapPinColor'],
-      mapPinSize: (json['mapPinSize'] as num?)?.toDouble(),
     );
-  }
-}
-
-class PinIconOption {
-  final String name;
-  final String iconClass;
-  final bool isDefault;
-
-  PinIconOption({
-    required this.name,
-    required this.iconClass,
-    required this.isDefault,
-  });
-
-  factory PinIconOption.fromJson(Map<String, dynamic> json) {
-    return PinIconOption(
-      name: json['name'] ?? '',
-      iconClass: json['iconClass'] ?? '',
-      isDefault: json['isDefault'] ?? false,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'iconClass': iconClass,
-      'isDefault': isDefault,
-    };
-  }
-}
-
-class MapSettings {
-  final double defaultZoom;
-  final double minZoom;
-  final double maxZoom;
-  final double defaultCenterLat;
-  final double defaultCenterLng;
-  final String defaultPinIconStyle;
-  final String defaultPinColor;
-  final double defaultPinSize;
-  final String mapStyle;
-  final List<PinIconOption> availablePinIcons;
-
-  MapSettings({
-    required this.defaultZoom,
-    required this.minZoom,
-    required this.maxZoom,
-    required this.defaultCenterLat,
-    required this.defaultCenterLng,
-    required this.defaultPinIconStyle,
-    required this.defaultPinColor,
-    required this.defaultPinSize,
-    required this.mapStyle,
-    required this.availablePinIcons,
-  });
-
-  factory MapSettings.fromJson(Map<String, dynamic> json) {
-    return MapSettings(
-      defaultZoom: (json['defaultZoom'] as num?)?.toDouble() ?? 14.0,
-      minZoom: (json['minZoom'] as num?)?.toDouble() ?? 5.0,
-      maxZoom: (json['maxZoom'] as num?)?.toDouble() ?? 18.0,
-      defaultCenterLat: (json['defaultCenterLat'] as num?)?.toDouble() ?? 27.5830,
-      defaultCenterLng: (json['defaultCenterLng'] as num?)?.toDouble() ?? 77.7000,
-      defaultPinIconStyle: json['defaultPinIconStyle'] ?? 'location_on',
-      defaultPinColor: json['defaultPinColor'] ?? '#C5221F',
-      defaultPinSize: (json['defaultPinSize'] as num?)?.toDouble() ?? 42.0,
-      mapStyle: json['mapStyle'] ?? 'standard',
-      availablePinIcons: (json['availablePinIcons'] as List?)
-              ?.map((e) => PinIconOption.fromJson(e))
-              .toList() ??
-          [],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'defaultZoom': defaultZoom,
-      'minZoom': minZoom,
-      'maxZoom': maxZoom,
-      'defaultCenterLat': defaultCenterLat,
-      'defaultCenterLng': defaultCenterLng,
-      'defaultPinIconStyle': defaultPinIconStyle,
-      'defaultPinColor': defaultPinColor,
-      'defaultPinSize': defaultPinSize,
-      'mapStyle': mapStyle,
-      'availablePinIcons': availablePinIcons.map((e) => e.toJson()).toList(),
-    };
   }
 }

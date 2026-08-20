@@ -1,6 +1,8 @@
 class AppTranslations {
   static final Map<String, Map<String, String>> _localizedValues = {
     'en': {
+      'home': 'Home',
+      'festivals': 'Festivals',
       'app_title': 'Braj Darshan',
       'app_subtitle': 'Spiritual Guide v2.0',
       'all_temples': 'All Temples',
@@ -26,6 +28,8 @@ class AppTranslations {
       'hindi': 'हिंदी (Hindi)',
     },
     'hi': {
+      'home': 'होम (Home)',
+      'festivals': 'त्यौहार (Festivals)',
       'app_title': 'ब्रज दर्शन',
       'app_subtitle': 'आध्यात्मिक मार्गदर्शिका v2.0',
       'all_temples': 'सभी मंदिर',

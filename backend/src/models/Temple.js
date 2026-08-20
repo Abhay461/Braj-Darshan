@@ -55,7 +55,7 @@ const templeSchema = new mongoose.Schema(
       default: '',
     },
 
-    // ─── References ────────────────────────────────────
+    // --- References ------------------------------------
     categoryId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Category',
@@ -69,7 +69,7 @@ const templeSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ─── Images (Cloudinary) ───────────────────────────
+    // --- Images (Cloudinary) ---------------------------
     coverImage: {
       type: String,
       required: [true, 'Cover image URL is required'],
@@ -82,7 +82,7 @@ const templeSchema = new mongoose.Schema(
     },
     galleryImages: [galleryImageSchema],
 
-    // ─── Address & Geolocation ─────────────────────────
+    // --- Address & Geolocation -------------------------
     address: {
       street: { type: String, trim: true, default: '' },
       area: { type: String, trim: true, default: '' },
@@ -104,12 +104,67 @@ const templeSchema = new mongoose.Schema(
       max: [180, 'Longitude must be between -180 and 180'],
     },
 
-    // ─── Visit Information ─────────────────────────────
+    // --- Temple-Specific Map Settings (optional overrides) -----
+    mapZoom: {
+      type: Number,
+      min: [1, 'Map zoom must be at least 1'],
+      max: [20, 'Map zoom cannot exceed 20'],
+    },
+    mapPinIconStyle: {
+      type: String,
+      trim: true,
+      enum: {
+        values: [
+          'location_on',
+          'place',
+          'temple_hindu',
+          'location_pin',
+          'my_location',
+          'flag',
+          'landscape',
+          'terrain',
+        ],
+        message: 'Invalid pin icon style',
+      },
+    },
+    mapPinColor: {
+      type: String,
+      trim: true,
+      match: [/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Invalid hex color format'],
+    },
+    mapPinSize: {
+      type: Number,
+      min: [20, 'Pin size must be at least 20'],
+      max: [80, 'Pin size cannot exceed 80'],
+    },
+
+    // --- Visit Information -----------------------------
     darshanTiming: {
       type: String,
       trim: true,
       default: '',
     },
+    aartiTimings: [
+      {
+        name: {
+          type: String,
+          required: true,
+          trim: true,
+          maxlength: [100, 'Aarti name cannot exceed 100 characters'],
+        },
+        time: {
+          type: String,
+          required: true,
+          trim: true,
+          match: [/^([01]\d|2[0-3]):([0-5]\d)$/, 'Time must be in HH:mm 24-hour format'],
+        },
+        description: {
+          type: String,
+          trim: true,
+          default: '',
+        },
+      },
+    ],
     phone: {
       type: String,
       trim: true,
@@ -154,7 +209,7 @@ const templeSchema = new mongoose.Schema(
       default: false,
     },
 
-    // ─── Facilities ────────────────────────────────────
+    // --- Facilities ------------------------------------
     facilities: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -162,7 +217,7 @@ const templeSchema = new mongoose.Schema(
       },
     ],
 
-    // ─── Search & Tagging ──────────────────────────────
+    // --- Search & Tagging ------------------------------
     tags: [
       {
         type: String,
@@ -178,7 +233,7 @@ const templeSchema = new mongoose.Schema(
       },
     ],
 
-    // ─── Listing & Status Flags ────────────────────────
+    // --- Listing & Status Flags ------------------------
     isFeatured: {
       type: Boolean,
       default: false,
@@ -199,7 +254,7 @@ const templeSchema = new mongoose.Schema(
       index: true,
     },
 
-    // ─── SEO Metadata ──────────────────────────────────
+    // --- SEO Metadata ----------------------------------
     seoTitle: {
       type: String,
       trim: true,
@@ -211,7 +266,7 @@ const templeSchema = new mongoose.Schema(
       default: '',
     },
 
-    // ─── Soft Delete ───────────────────────────────────
+    // --- Soft Delete -----------------------------------
     isDeleted: {
       type: Boolean,
       default: false,
@@ -229,7 +284,7 @@ const templeSchema = new mongoose.Schema(
   }
 );
 
-// ─── Compound Indexes for High Concurrency (100k+ scale) ─
+// --- Compound Indexes for High Concurrency (100k+ scale) -
 templeSchema.index({ isDeleted: 1, status: 1, createdAt: -1 });
 templeSchema.index({ isDeleted: 1, status: 1, isFeatured: 1, createdAt: -1 });
 templeSchema.index({ isDeleted: 1, status: 1, isPopular: 1, createdAt: -1 });
@@ -237,7 +292,7 @@ templeSchema.index({ isDeleted: 1, status: 1, categoryId: 1, createdAt: -1 });
 templeSchema.index({ isDeleted: 1, status: 1, locationId: 1, createdAt: -1 });
 templeSchema.index({ isDeleted: 1, latitude: 1, longitude: 1 });
 
-// ─── Text Index for Full-Text Search ────────────────────
+// --- Text Index for Full-Text Search --------------------
 templeSchema.index(
   {
     name: 'text',
@@ -268,7 +323,7 @@ templeSchema.index(
   }
 );
 
-// ─── Pre-save Hooks ─────────────────────────────────────
+// --- Pre-save Hooks -------------------------------------
 templeSchema.pre('save', async function (next) {
   if (this.isModified('name') || this.isNew) {
     let baseSlug = slugify(this.name, { lower: true, strict: true, locale: 'en' });
@@ -298,7 +353,7 @@ templeSchema.pre('save', async function (next) {
   next();
 });
 
-// ─── Virtuals ──────────────────────────────────────────
+// --- Virtuals ------------------------------------------
 templeSchema.virtual('id').get(function () {
   return this._id.toHexString();
 });

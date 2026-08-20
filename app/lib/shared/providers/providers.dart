@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/network/dio_client.dart';
 import '../../core/services/hive_service.dart';
@@ -46,6 +46,11 @@ final locationsProvider = FutureProvider<List<Location>>((ref) async {
 // Festivals Provider
 final festivalsProvider = FutureProvider<List<Festival>>((ref) async {
   return ref.watch(templeRepositoryProvider).getFestivals();
+});
+
+// Map Settings Provider
+final mapSettingsProvider = FutureProvider<MapSettings?>((ref) async {
+  return ref.watch(templeRepositoryProvider).getMapSettings();
 });
 
 // Search Query & Filter Notifier

@@ -44,6 +44,58 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Icons.auto_awesome_outlined;
   }
 
+  Widget _buildDrawerItem({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+    bool isSelected = false,
+    String? subtitle,
+  }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final activeColor = const Color(0xFFC5221F);
+    final inactiveColor = theme.colorScheme.onSurface;
+    final activeBg = isDark
+        ? const Color(0xFF3B1E1C).withValues(alpha: 0.5)
+        : const Color(0xFFFFF0ED);
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      decoration: BoxDecoration(
+        color: isSelected ? activeBg : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ListTile(
+        dense: true,
+        minVerticalPadding: 12,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+        leading: Icon(
+          icon,
+          size: 22,
+          color: isSelected ? activeColor : inactiveColor.withValues(alpha: 0.85),
+        ),
+        title: Text(
+          title,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+            color: isSelected ? activeColor : inactiveColor,
+            fontSize: 14.5,
+          ),
+        ),
+        subtitle: subtitle != null
+            ? Text(
+                subtitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isSelected ? activeColor.withValues(alpha: 0.8) : inactiveColor.withValues(alpha: 0.6),
+                ),
+              )
+            : null,
+        onTap: onTap,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -62,7 +114,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             top: false,
             child: Column(
               children: [
-                // Drawer Header Container (Light Golden Theme)
+                // Drawer Header Container (Saffron/Cream Theme)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.only(top: 40, bottom: 20, left: 16, right: 16),
@@ -76,7 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     border: Border(
                       bottom: BorderSide(
-                        color: const Color(0xFFD4AF37).withOpacity( 0.4),
+                        color: const Color(0xFFD4AF37).withValues(alpha: 0.4),
                         width: 1.5,
                       ),
                     ),
@@ -87,7 +139,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD4AF37).withOpacity( 0.2),
+                          color: const Color(0xFFD4AF37).withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: const Icon(
@@ -119,182 +171,137 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: ListView(
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     children: [
-                      Semantics(
-                        label: 'Navigate to Home',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.home_outlined, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'home'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Navigate to Search Shrines',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.search_outlined, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'search_shrines'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            context.push('/search');
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Navigate to Saved Favorites',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.favorite_border, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'saved_favorites'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            context.push('/favorites');
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Navigate to Festivals',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.event_outlined, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'festivals'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            context.push('/festivals');
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Navigate to Interactive Map',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.map_outlined, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'interactive_map'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            context.push('/map');
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Open Nearby Hotels',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.hotel_outlined, size: 22),
-                          title: Text(
-                            AppTranslations.getText(currentLang, 'nearby_hotels'),
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            _openNearbyHotels();
-                          },
-                        ),
-                      ),
-                      Semantics(
-                        label: 'Navigate to Yatra Planner',
-                        button: true,
-                        child: ListTile(
-                          leading: const Icon(Icons.calendar_month_outlined, size: 22),
-                          title: Text(
-                            'My Yatra Planner',
-                            style: Theme.of(context).textTheme.titleSmall,
-                          ),
-                          onTap: () {
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context);
-                            context.push('/yatra-planner');
-                          },
-                        ),
-                      ),
-                      ExpansionTile(
-                        shape: const Border(),
-                        collapsedShape: const Border(),
-                        leading: const Icon(Icons.language_outlined, size: 22),
-                        title: Text(
-                          AppTranslations.getText(currentLang, 'language'),
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        subtitle: Text(
-                          currentLang == 'hi' ? 'हिंदी (Hindi)' : 'English',
-                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
-                          ),
-                        ),
-                        children: [
-                          RadioGroup<String>(
-                            groupValue: currentLang,
-                            onChanged: (val) {
-                              if (val != null) {
-                                HapticFeedback.selectionClick();
-                                ref.read(appLanguageProvider.notifier).setLanguage(val);
-                              }
-                            },
-                            child: Column(
-                              children: [
-                                RadioListTile<String>(
-                                  contentPadding: const EdgeInsets.only(left: 32, right: 16),
-                                  title: Text('English', style: Theme.of(context).textTheme.labelLarge),
-                                  value: 'en',
-                                  fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
-                                ),
-                                RadioListTile<String>(
-                                  contentPadding: const EdgeInsets.only(left: 32, right: 16),
-                                  title: Text('हिंदी (Hindi)', style: Theme.of(context).textTheme.labelLarge),
-                                  value: 'hi',
-                                  fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.info_outline, size: 22),
-                        title: Text(
-                          AppTranslations.getText(currentLang, 'about_app'),
-                          style: Theme.of(context).textTheme.titleSmall,
-                        ),
-                        subtitle: Text(
-                          'v2.0 • Braj Darshan',
-                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity( 0.6),
-                          ),
-                        ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.home_outlined,
+                        title: AppTranslations.getText(currentLang, 'home'),
+                        isSelected: true, // Active on HomeScreen
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          showAboutDialog(
-                            context: context,
-                            applicationName: 'Braj Darshan',
-                            applicationVersion: '2.0.0',
-                            applicationIcon: const Icon(Icons.temple_hindu, size: 36, color: AppTheme.secondaryIndigo),
-                            children: const [
-                              Text('Spiritual Guide for Vrindavan, Mathura & Braj Dham.'),
-                            ],
-                          );
+                          Navigator.pop(context);
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.search_outlined,
+                        title: AppTranslations.getText(currentLang, 'search_shrines'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/search');
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.favorite_border,
+                        title: AppTranslations.getText(currentLang, 'saved_favorites'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/favorites');
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.event_outlined,
+                        title: AppTranslations.getText(currentLang, 'festivals'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/festivals');
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.map_outlined,
+                        title: AppTranslations.getText(currentLang, 'interactive_map'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/map');
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.night_shelter_outlined,
+                        title: AppTranslations.getText(currentLang, 'nearby_hotels'),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          _openNearbyHotels();
+                        },
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.event_note_outlined,
+                        title: 'My Yatra Planner',
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/yatra-planner');
+                        },
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        child: Divider(height: 1, thickness: 0.5),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                        child: ExpansionTile(
+                          shape: const Border(),
+                          collapsedShape: const Border(),
+                          leading: const Icon(Icons.language_outlined, size: 22),
+                          title: Text(
+                            AppTranslations.getText(currentLang, 'language'),
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                  fontSize: 14.5,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                          ),
+                          subtitle: Text(
+                            currentLang == 'hi' ? 'हिंदी (Hindi)' : 'English',
+                            style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                            ),
+                          ),
+                          children: [
+                            RadioGroup<String>(
+                              groupValue: currentLang,
+                              onChanged: (val) {
+                                if (val != null) {
+                                  HapticFeedback.selectionClick();
+                                  ref.read(appLanguageProvider.notifier).setLanguage(val);
+                                }
+                              },
+                              child: Column(
+                                children: [
+                                  RadioListTile<String>(
+                                    contentPadding: const EdgeInsets.only(left: 32, right: 16),
+                                    title: Text('English', style: Theme.of(context).textTheme.labelLarge),
+                                    value: 'en',
+                                    fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
+                                  ),
+                                  RadioListTile<String>(
+                                    contentPadding: const EdgeInsets.only(left: 32, right: 16),
+                                    title: Text('हिंदी (Hindi)', style: Theme.of(context).textTheme.labelLarge),
+                                    value: 'hi',
+                                    fillColor: WidgetStateProperty.all(Theme.of(context).colorScheme.secondary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _buildDrawerItem(
+                        context: context,
+                        icon: Icons.info_outline,
+                        title: AppTranslations.getText(currentLang, 'about_app'),
+                        subtitle: 'v2.0 • Braj Darshan',
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Navigator.pop(context);
+                          context.push('/about');
                         },
                       ),
                     ],
@@ -722,23 +729,49 @@ class TopDestinationsSection extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Top Image
-                        CachedNetworkImage(
-                          imageUrl: temple.coverImage.isNotEmpty
-                              ? temple.coverImage
-                              : (temple.thumbnailImage?.isNotEmpty == true ? temple.thumbnailImage! : 'https://via.placeholder.com/300'),
-                          height: 86,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            height: 86,
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            height: 86,
-                            color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
-                            child: const Icon(Icons.temple_hindu_outlined, size: 28, color: Color(0xFF71717A)),
-                          ),
-                        ),
+                        (() {
+                          String imgUrl = '';
+                          if (temple.coverImage.trim().isNotEmpty) {
+                            imgUrl = temple.coverImage.trim();
+                          } else if (temple.thumbnailImage != null && temple.thumbnailImage!.trim().isNotEmpty) {
+                            imgUrl = temple.thumbnailImage!.trim();
+                          } else if (temple.featuredImage != null && temple.featuredImage!.trim().isNotEmpty) {
+                            imgUrl = temple.featuredImage!.trim();
+                          } else if (temple.galleryImages.isNotEmpty) {
+                            final g = temple.galleryImages.firstWhere(
+                              (img) => img.imageUrl.trim().isNotEmpty,
+                              orElse: () => temple.galleryImages.first,
+                            );
+                            if (g.imageUrl.trim().isNotEmpty) {
+                              imgUrl = g.imageUrl.trim();
+                            }
+                          }
+
+                          if (imgUrl.isNotEmpty) {
+                            return CachedNetworkImage(
+                              imageUrl: imgUrl,
+                              height: 86,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                height: 86,
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFF4F4F5),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                height: 86,
+                                color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                                child: const Icon(Icons.temple_hindu_outlined, size: 28, color: Color(0xFF71717A)),
+                              ),
+                            );
+                          } else {
+                            return Container(
+                              height: 86,
+                              width: double.infinity,
+                              color: isDark ? const Color(0xFF27272A) : const Color(0xFFE4E4E7),
+                              child: const Icon(Icons.temple_hindu_outlined, size: 28, color: Color(0xFF71717A)),
+                            );
+                          }
+                        })(),
 
                         // Bottom Metadata (Title + Location - Snug Fit)
                         Padding(

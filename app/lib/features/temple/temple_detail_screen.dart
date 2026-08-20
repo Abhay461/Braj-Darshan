@@ -399,6 +399,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final templeAsync = ref.watch(templeDetailProvider(widget.templeId));
+    final allTemplesAsync = ref.watch(allTemplesProvider);
     final favorites = ref.watch(favoritesProvider);
     final isFav = favorites.contains(widget.templeId);
     final currentLang = ref.watch(appLanguageProvider);
@@ -846,10 +847,12 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                     MarkerLayer(
                                       markers: [
                                         Marker(
-                                            point: effectiveLatLng,
-                                            width: 220,
-                                            height: 72,
-                                            alignment: Alignment.bottomCenter,
+                                          point: effectiveLatLng,
+                                          width: 220,
+                                          height: 72,
+                                          alignment: Alignment.bottomCenter,
+                                          child: Transform.translate(
+                                            offset: const Offset(0, -63),
                                             child: Column(
                                               mainAxisAlignment: MainAxisAlignment.end,
                                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -859,10 +862,10 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                   textAlign: TextAlign.center,
                                                   style: TextStyle(
                                                     color: const Color(0xFFB91C1C),
-                                                    fontSize: 12.5,
-                                                    fontWeight: FontWeight.w900,
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.bold,
                                                     height: 1.15,
-                                                    letterSpacing: -0.3,
+                                                    letterSpacing: -0.2,
                                                     shadows: const [
                                                       Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 1.5)),
                                                       Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, -1.5)),
@@ -877,9 +880,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                   maxLines: 2,
                                                   overflow: TextOverflow.ellipsis,
                                                 ),
-                                                const SizedBox(height: 2),
-                                                // Transform to align pin visual tip with map coordinate (bottomCenter)
-                                                // Material Icons.location_on tip is ~2-3px above widget bottom edge
+                                                const SizedBox(height: 8),
                                                 Transform.translate(
                                                   offset: const Offset(0, 3),
                                                   child: Stack(
@@ -888,7 +889,7 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                       const Icon(
                                                         Icons.location_on,
                                                         color: Color(0xFFC5221F),
-                                                        size: 36,
+                                                        size: 42,
                                                         shadows: [
                                                           Shadow(
                                                             color: Color(0x40000000),
@@ -898,10 +899,10 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                         ],
                                                       ),
                                                       Positioned(
-                                                        top: 7,
+                                                        top: 9,
                                                         child: Container(
-                                                          width: 10,
-                                                          height: 10,
+                                                          width: 11,
+                                                          height: 11,
                                                           decoration: const BoxDecoration(
                                                             color: Colors.white,
                                                             shape: BoxShape.circle,
@@ -913,7 +914,8 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                                 ),
                                               ],
                                             ),
-                                         ),
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -960,6 +962,15 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                             ),
                           ),
                         ),
+                      ),
+
+                      const SizedBox(height: 20),
+                      _buildNearbyTemplesSection(
+                        context: context,
+                        currentTemple: temple,
+                        currentLang: currentLang,
+                        effectiveLatLng: effectiveLatLng,
+                        allTemplesAsync: allTemplesAsync,
                       ),
 
                       const SizedBox(height: 24),
@@ -1044,6 +1055,226 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
       ),
     );
   }
+
+  Widget _buildNearbyTemplesSection({
+    required BuildContext context,
+    required Temple currentTemple,
+    required String currentLang,
+    required LatLng effectiveLatLng,
+    required AsyncValue<List<Temple>> allTemplesAsync,
+  }) {
+    return allTemplesAsync.when(
+      data: (allTemples) {
+        // Validate coordinates (skip missing / zero / invalid lat/lng)
+        bool isValidCoords(double lat, double lng) {
+          return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 && (lat != 0.0 || lng != 0.0);
+        }
+
+        // Filter valid temples excluding current temple
+        final validTemples = allTemples.where((t) {
+          return t.id != currentTemple.id && isValidCoords(t.latitude, t.longitude);
+        }).toList();
+
+        if (validTemples.isEmpty) return const SizedBox.shrink();
+
+        // Calculate straight-line distance for each valid temple
+        const distanceCalc = Distance();
+        final List<_NearbyTempleData> allCalculated = validTemples.map((t) {
+          final targetLatLng = LatLng(t.latitude, t.longitude);
+          final meters = distanceCalc.as(LengthUnit.Meter, effectiveLatLng, targetLatLng);
+          final formatted = meters >= 1000
+              ? '${(meters / 1000).toStringAsFixed(1)} km'
+              : '${meters.round()} m';
+          return _NearbyTempleData(
+            temple: t,
+            distanceInMeters: meters,
+            distanceFormatted: formatted,
+          );
+        }).toList();
+
+        // Sort strictly by distance (nearest first)
+        allCalculated.sort((a, b) => a.distanceInMeters.compareTo(b.distanceInMeters));
+
+        // Filter by 30 km radius (30,000 meters); fallback to closest temples if none within 30km
+        final withinRadius = allCalculated.where((item) => item.distanceInMeters <= 30000).toList();
+        final List<_NearbyTempleData> nearbyData = (withinRadius.isNotEmpty ? withinRadius : allCalculated)
+            .take(8)
+            .toList();
+
+        if (nearbyData.isEmpty) return const SizedBox.shrink();
+
+        final sectionTitle = currentLang == 'hi'
+            ? 'पास के मंदिर'
+            : 'Nearby Temples';
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 22,
+                  color: Color(0xFFC5221F),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  sectionTitle,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 125,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: nearbyData.length,
+                itemBuilder: (context, index) {
+                  final item = nearbyData[index];
+                  final temple = item.temple;
+                  final cityName = (temple.address?.city?.isNotEmpty == true)
+                      ? temple.address!.city!
+                      : (temple.location is Location
+                          ? (temple.location as Location).name
+                          : (temple.location is Map ? temple.location['name'] ?? 'Braj' : 'Braj'));
+
+                  return Container(
+                    width: 145,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: GestureDetector(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        context.push('/temple/${temple.id}');
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.4),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        clipBehavior: Clip.antiAlias,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(
+                              height: 70,
+                              width: double.infinity,
+                              child: (() {
+                                String imgUrl = '';
+                                if (temple.coverImage.trim().isNotEmpty) {
+                                  imgUrl = temple.coverImage.trim();
+                                } else if (temple.thumbnailImage != null && temple.thumbnailImage!.trim().isNotEmpty) {
+                                  imgUrl = temple.thumbnailImage!.trim();
+                                } else if (temple.featuredImage != null && temple.featuredImage!.trim().isNotEmpty) {
+                                  imgUrl = temple.featuredImage!.trim();
+                                } else if (temple.galleryImages.isNotEmpty) {
+                                  final g = temple.galleryImages.firstWhere(
+                                    (g) => g.imageUrl.trim().isNotEmpty,
+                                    orElse: () => temple.galleryImages.first,
+                                  );
+                                  if (g.imageUrl.trim().isNotEmpty) {
+                                    imgUrl = g.imageUrl.trim();
+                                  }
+                                }
+
+                                if (imgUrl.isNotEmpty) {
+                                  return CachedNetworkImage(
+                                    imageUrl: imgUrl,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Container(
+                                      color: Colors.grey.shade200,
+                                    ),
+                                    errorWidget: (context, url, err) => Container(
+                                      color: Colors.grey.shade200,
+                                      child: const Icon(Icons.temple_hindu, color: Colors.grey, size: 24),
+                                    ),
+                                  );
+                                } else {
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [Colors.amber.shade100, Colors.orange.shade50],
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                    ),
+                                    child: const Icon(Icons.temple_hindu, color: Color(0xFFC5221F), size: 24),
+                                  );
+                                }
+                              })(),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    temple.name,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 12.0,
+                                          height: 1.15,
+                                        ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '📍 $cityName • ${item.distanceFormatted}',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 10.0,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _NearbyTempleData {
+  final Temple temple;
+  final double distanceInMeters;
+  final String distanceFormatted;
+
+  _NearbyTempleData({
+    required this.temple,
+    required this.distanceInMeters,
+    required this.distanceFormatted,
+  });
 }
 
 class _PlanYatraBottomSheetContent extends ConsumerStatefulWidget {

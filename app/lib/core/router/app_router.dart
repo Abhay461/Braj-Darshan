@@ -10,6 +10,7 @@ import '../../features/festivals/festivals_screen.dart';
 import '../../features/map/interactive_map_screen.dart';
 import '../../features/planner/yatra_planner_screen.dart';
 import '../../features/settings/settings_screen.dart';
+import '../../features/about/about_screen.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',
@@ -83,6 +84,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/settings',
       builder: (context, state) => const SettingsScreen(),
+    ),
+    GoRoute(
+      path: '/about',
+      builder: (context, state) => const AboutScreen(),
     ),
   ],
 );
