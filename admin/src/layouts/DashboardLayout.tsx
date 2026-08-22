@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 import {
   Box,
@@ -180,8 +180,8 @@ export const DashboardLayout: React.FC = () => {
         position="fixed"
         elevation={0}
         sx={{
-          width: { sm: \calc(100% - \px)\ },
-          ml: { sm: \\px\ },
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          ml: { sm: `${DRAWER_WIDTH}px` },
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(8px)',
           borderBottom: '1px solid #E4E4E7',
@@ -260,7 +260,7 @@ export const DashboardLayout: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: { xs: 2.5, sm: 4 },
-          width: { sm: \calc(100% - \px)\ },
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
           mt: 8,
         }}
       >
