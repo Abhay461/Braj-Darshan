@@ -10,6 +10,8 @@ import {
   Button,
   TextField,
   FormControl,
+  FormControlLabel,
+  Typography,
   InputLabel,
   Select,
   MenuItem,
@@ -180,7 +182,7 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
                 name="startDate"
                 control={control}
                 render={({ field }) => (
-                  <TextField {...field} type="date" label="Start Date" fullWidth SlotProps={{ inputLabel: { shrink: true } }} />
+                  <TextField {...field} type="date" label="Start Date" fullWidth slotProps={{ inputLabel: { shrink: true } }} />
                 )}
               />
             </Grid>
@@ -190,7 +192,7 @@ export const FestivalModal: React.FC<FestivalModalProps> = ({
                 name="endDate"
                 control={control}
                 render={({ field }) => (
-                  <TextField {...field} type="date" label="End Date" fullWidth SlotProps={{ inputLabel: { shrink: true } }} />
+                  <TextField {...field} type="date" label="End Date" fullWidth slotProps={{ inputLabel: { shrink: true } }} />
                 )}
               />
             </Grid>

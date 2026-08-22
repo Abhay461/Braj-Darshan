@@ -1,4 +1,4 @@
-﻿export interface ApiResponse<T> {
+export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
@@ -80,6 +80,13 @@ export interface Facility {
   updatedAt?: string;
 }
 
+export interface FestivalThemeConfig {
+  bannerImage?: string;
+  accentColor?: string;
+  showPetals?: boolean;
+  petalType?: 'gulal' | 'flower' | 'diya' | 'none';
+}
+
 export interface Festival {
   _id: string;
   id?: string;
@@ -90,6 +97,7 @@ export interface Festival {
   startDate?: string | null;
   endDate?: string | null;
   templeIds?: (string | Temple)[];
+  themeConfig?: FestivalThemeConfig;
   status?: 'active' | 'inactive';
   isDeleted?: boolean;
   deletedAt?: string | null;

@@ -10,6 +10,8 @@ import {
   Button,
   TextField,
   FormControl,
+  FormControlLabel,
+  Typography,
   InputLabel,
   Select,
   MenuItem,
@@ -127,7 +129,7 @@ export const EmergencyModal: React.FC<EmergencyModalProps> = ({
       <DialogTitle sx={{ fontWeight: 700 }}>
         {contact ? 'Edit Emergency Contact' : 'Create New Emergency Contact'}
       </DialogTitle>
-      <form onSubmit={handleFormSubmit(handleFormSubmit)}>
+      <form onSubmit={handleSubmit(handleFormSubmit)}>
         <DialogContent>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 6 }}>
