@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const router = express.Router();
 
 const mapSettingsController = require('../controllers/mapSettingsController');
@@ -87,6 +87,6 @@ const adminAuth = require('../middleware/adminAuth');
 
 router.get('/', mapSettingsController.getMapSettings);
 router.put('/', mapSettingsValidator.update, validateRequest, adminAuth, mapSettingsController.updateMapSettings);
-router.post('/reset', mapSettingsValidator.idParam, validateRequest, adminAuth, mapSettingsController.resetMapSettings);
+router.post('/reset', adminAuth, mapSettingsController.resetMapSettings);
 
 module.exports = router;

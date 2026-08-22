@@ -3,10 +3,45 @@ import { mapSettingsApi } from '../api/mapSettingsApi';
 import { MapSettings } from '../types';
 import { useSnackbar } from 'notistack';
 
+const DEFAULT_MAP_SETTINGS: MapSettings = {
+  defaultZoom: 14.0,
+  minZoom: 5.0,
+  maxZoom: 18.0,
+  defaultCenterLat: 27.5830,
+  defaultCenterLng: 77.7000,
+  defaultPinIconStyle: 'location_on',
+  defaultPinColor: '#C5221F',
+  defaultPinSize: 42,
+  mapStyle: 'standard',
+  availablePinIcons: [
+    { name: 'Default Pin', iconClass: 'location_on', isDefault: true },
+    { name: 'Place Pin', iconClass: 'place', isDefault: false },
+    { name: 'Temple Icon', iconClass: 'temple_hindu', isDefault: false },
+    { name: 'Location Pin', iconClass: 'location_pin', isDefault: false },
+    { name: 'My Location', iconClass: 'my_location', isDefault: false },
+    { name: 'Flag', iconClass: 'flag', isDefault: false },
+    { name: 'Landscape', iconClass: 'landscape', isDefault: false },
+    { name: 'Terrain', iconClass: 'terrain', isDefault: false },
+  ],
+};
+
 export const useMapSettings = () => {
   return useQuery({
     queryKey: ['mapSettings'],
-    queryFn: () => mapSettingsApi.getMapSettings(),
+    queryFn: async () => {
+      try {
+        const res = await mapSettingsApi.getMapSettings();
+        return res;
+      } catch (err) {
+        console.warn('Map settings API endpoint unreachable/not deployed, falling back to defaults:', err);
+        return {
+          success: true,
+          message: 'Using default local map settings',
+          data: DEFAULT_MAP_SETTINGS,
+          isFallback: true,
+        };
+      }
+    },
   });
 };
 

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -63,6 +63,8 @@ export const MapSettingsPage: React.FC = () => {
   const { updateMapSettings, resetMapSettings, isUpdating, isResetting } = useMapSettingsMutations();
 
   const settings = settingsRes?.data;
+  const isFallback = (settingsRes as any)?.isFallback;
+
   const [formData, setFormData] = useState<Partial<MapSettings>>({
     defaultZoom: settings?.defaultZoom ?? 14.0,
     minZoom: settings?.minZoom ?? 5.0,
@@ -79,9 +81,28 @@ export const MapSettingsPage: React.FC = () => {
     settings?.availablePinIcons ?? PIN_ICON_OPTIONS.map((opt) => ({
       name: opt.name,
       iconClass: opt.iconClass,
-      isDefault: opt.isDefault,
+      isDefault: false,
     }))
   );
+
+  React.useEffect(() => {
+    if (settings) {
+      setFormData({
+        defaultZoom: settings.defaultZoom ?? 14.0,
+        minZoom: settings.minZoom ?? 5.0,
+        maxZoom: settings.maxZoom ?? 18.0,
+        defaultCenterLat: settings.defaultCenterLat ?? 27.5830,
+        defaultCenterLng: settings.defaultCenterLng ?? 77.7000,
+        defaultPinIconStyle: settings.defaultPinIconStyle ?? 'location_on',
+        defaultPinColor: settings.defaultPinColor ?? '#C5221F',
+        defaultPinSize: settings.defaultPinSize ?? 42,
+        mapStyle: settings.mapStyle ?? 'standard',
+      });
+      if (settings.availablePinIcons && settings.availablePinIcons.length > 0) {
+        setAvailablePinIcons(settings.availablePinIcons);
+      }
+    }
+  }, [settings]);
 
   const handleChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -146,7 +167,7 @@ export const MapSettingsPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (error && !isFallback) {
     return (
       <Box>
         <PageHeader title="Map Settings" subtitle="Configure global map appearance and behavior" />
@@ -162,6 +183,11 @@ export const MapSettingsPage: React.FC = () => {
 
   return (
     <Box>
+      {isFallback && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <strong>Backend Service Notice:</strong> Currently displaying default map settings. The cloud API (<code>/api/v1/map-settings</code>) is reaching deployment sync. Saved changes will connect to live MongoDB once backend service finishes redeployment.
+        </Alert>
+      )}
       <PageHeader
         title="Map Settings"
         subtitle="Configure global map appearance, zoom levels, pin styles, and default center"
