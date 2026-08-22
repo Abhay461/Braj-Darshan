@@ -30,6 +30,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/WarningAmberOutlined';
 import MapIcon from '@mui/icons-material/MapOutlined';
+import ShieldIcon from '@mui/icons-material/ShieldOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useHealth } from '../hooks/useHealth';
 
@@ -42,6 +43,7 @@ const navItems = [
   { label: 'Locations', path: '/locations', icon: <LocationIcon /> },
   { label: 'Map Settings', path: '/map-settings', icon: <MapIcon /> },
   { label: 'Festivals', path: '/festivals', icon: <FestivalIcon /> },
+  { label: 'Emergency Contacts', path: '/emergency-contacts', icon: <ShieldIcon /> },
   { label: 'Media Library', path: '/media', icon: <MediaIcon /> },
   { label: 'Backup & Import', path: '/backup', icon: <BackupIcon /> },
 ];
@@ -178,8 +180,8 @@ export const DashboardLayout: React.FC = () => {
         position="fixed"
         elevation={0}
         sx={{
-          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
-          ml: { sm: `${DRAWER_WIDTH}px` },
+          width: { sm: \calc(100% - \px)\ },
+          ml: { sm: \\px\ },
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
           backdropFilter: 'blur(8px)',
           borderBottom: '1px solid #E4E4E7',
@@ -258,7 +260,7 @@ export const DashboardLayout: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: { xs: 2.5, sm: 4 },
-          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          width: { sm: \calc(100% - \px)\ },
           mt: 8,
         }}
       >

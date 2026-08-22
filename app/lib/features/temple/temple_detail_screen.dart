@@ -1426,8 +1426,8 @@ class _PlanYatraBottomSheetContentState extends ConsumerState<_PlanYatraBottomSh
 
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.saffronHighlight,
-                foregroundColor: Colors.black,
+                backgroundColor: AppTheme.primarySaffron,
+                foregroundColor: AppTheme.deepBrown,
                 minimumSize: const Size(double.infinity, 48),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
               ),
@@ -1451,7 +1451,7 @@ class _PlanYatraBottomSheetContentState extends ConsumerState<_PlanYatraBottomSh
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Yatra visit planned! Notification reminder scheduled.'),
-                    backgroundColor: AppTheme.saffronHighlight,
+                    backgroundColor: AppTheme.primarySaffron,
                   ),
                 );
 

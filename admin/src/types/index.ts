@@ -1,4 +1,4 @@
-export interface ApiResponse<T> {
+﻿export interface ApiResponse<T> {
   success: boolean;
   message: string;
   data: T;
@@ -184,4 +184,29 @@ export interface QueryParams {
   locationId?: string;
   isFeatured?: boolean;
   isPopular?: boolean;
+}
+
+export interface EmergencyContactLocation {
+  lat?: number;
+  lng?: number;
+  address?: string;
+  name?: string;
+}
+
+export interface EmergencyContact {
+  _id: string;
+  id?: string;
+  name: string;
+  category: 'police' | 'medical' | 'fire' | 'helpline' | 'hospital' | 'ambulance' | 'tourist_police' | 'other';
+  phone: string;
+  description?: string;
+  location?: EmergencyContactLocation;
+  isActive: boolean;
+  sortOrder: number;
+  area: string;
+  isVerified: boolean;
+  isDeleted?: boolean;
+  deletedAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }

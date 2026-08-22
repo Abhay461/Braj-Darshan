@@ -6,6 +6,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/error_view.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class LocationsScreen extends ConsumerWidget {
   const LocationsScreen({super.key});
@@ -72,13 +73,13 @@ class LocationsScreen extends ConsumerWidget {
                             width: 50,
                             height: 50,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outlineVariant.withOpacity( 0.3),
+                              color: AppTheme.primarySaffron.withValues(alpha: 0.15),
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Icon(
                               Icons.location_on,
                               size: 26,
-                              color: const Color(0xFFEA4335),
+                              color: AppTheme.primarySaffron,
                             ),
                           ),
                           const SizedBox(width: 14),

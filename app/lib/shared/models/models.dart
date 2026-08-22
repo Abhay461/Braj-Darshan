@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 class PaginationMeta {
   final int currentPage;
@@ -186,6 +187,215 @@ class Facility {
   }
 }
 
+class AartiTiming {
+  final String name;
+  final String time; // HH:mm 24-hour format
+  final String description;
+
+  AartiTiming({
+    required this.name,
+    required this.time,
+    required this.description,
+  });
+
+  factory AartiTiming.fromJson(Map<String, dynamic> json) {
+    return AartiTiming(
+      name: json['name'] ?? '',
+      time: json['time'] ?? '',
+      description: json['description'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'time': time,
+      'description': description,
+    };
+  }
+}
+
+class WeatherData {
+  final int temperature;
+  final String condition;
+  final String description;
+  final int humidity;
+  final int windSpeed;
+  final String icon;
+  final String yatraSuggestion;
+  final String suggestionType; // 'rain', 'heat', 'warm', 'fog', 'cool', 'pleasant'
+  final String locationName;
+  final String country;
+  final int timestamp;
+  final bool fromCache;
+  final bool cacheExpired;
+
+  WeatherData({
+    required this.temperature,
+    required this.condition,
+    required this.description,
+    required this.humidity,
+    required this.windSpeed,
+    required this.icon,
+    required this.yatraSuggestion,
+    required this.suggestionType,
+    required this.locationName,
+    required this.country,
+    required this.timestamp,
+    this.fromCache = false,
+    this.cacheExpired = false,
+  });
+
+  factory WeatherData.fromJson(Map<String, dynamic> json) {
+    return WeatherData(
+      temperature: (json['temperature'] as num?)?.toInt() ?? 0,
+      condition: json['condition'] ?? '',
+      description: json['description'] ?? '',
+      humidity: (json['humidity'] as num?)?.toInt() ?? 0,
+      windSpeed: (json['windSpeed'] as num?)?.toInt() ?? 0,
+      icon: json['icon'] ?? '01d',
+      yatraSuggestion: json['yatraSuggestion'] ?? '',
+      suggestionType: json['suggestionType'] ?? 'pleasant',
+      locationName: json['locationName'] ?? 'Vrindavan',
+      country: json['country'] ?? 'IN',
+      timestamp: (json['timestamp'] as num?)?.toInt() ?? 0,
+      fromCache: json['fromCache'] ?? false,
+      cacheExpired: json['cacheExpired'] ?? false,
+    );
+  }
+
+  String get weatherIconUrl => 'https://openweathermap.org/img/wn/@2x.png';
+  
+  bool get isDay => icon.endsWith('d');
+}
+
+class EmergencyContactLocation {
+  final double? lat;
+  final double? lng;
+  final String? address;
+  final String? name;
+
+  EmergencyContactLocation({
+    this.lat,
+    this.lng,
+    this.address,
+    this.name,
+  });
+
+  factory EmergencyContactLocation.fromJson(Map<String, dynamic> json) {
+    return EmergencyContactLocation(
+      lat: (json['lat'] as num?)?.toDouble(),
+      lng: (json['lng'] as num?)?.toDouble(),
+      address: json['address'],
+      name: json['name'],
+    );
+  }
+}
+
+class EmergencyContact {
+  final String id;
+  final String name;
+  final String category; // 'police', 'medical', 'fire', 'helpline', 'hospital', 'ambulance', 'tourist_police', 'other'
+  final String phone;
+  final String? description;
+  final EmergencyContactLocation? location;
+  final bool isActive;
+  final int sortOrder;
+  final String area;
+  final bool isVerified;
+
+  EmergencyContact({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.phone,
+    this.description,
+    this.location,
+    required this.isActive,
+    required this.sortOrder,
+    required this.area,
+    required this.isVerified,
+  });
+
+  factory EmergencyContact.fromJson(Map<String, dynamic> json) {
+    return EmergencyContact(
+      id: json['_id'] ?? json['id'] ?? '',
+      name: json['name'] ?? '',
+      category: json['category'] ?? 'helpline',
+      phone: json['phone'] ?? '',
+      description: json['description'],
+      location: json['location'] != null 
+          ? EmergencyContactLocation.fromJson(json['location']) 
+          : null,
+      isActive: json['isActive'] ?? true,
+      sortOrder: json['sortOrder'] ?? 0,
+      area: json['area'] ?? 'Braj',
+      isVerified: json['isVerified'] ?? false,
+    );
+  }
+
+  IconData get categoryIcon {
+    switch (category) {
+      case 'police':
+      case 'tourist_police':
+        return Icons.local_police_outlined;
+      case 'hospital':
+      case 'medical':
+        return Icons.local_hospital_outlined;
+      case 'ambulance':
+        return Icons.emergency_outlined;
+      case 'fire':
+        return Icons.local_fire_department_outlined;
+      case 'helpline':
+        return Icons.phone_in_talk_outlined;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  String get categoryLabel {
+    switch (category) {
+      case 'tourist_police':
+        return 'Tourist Police';
+      case 'hospital':
+        return 'Hospital';
+      case 'medical':
+        return 'Medical';
+      case 'ambulance':
+        return 'Ambulance';
+      case 'fire':
+        return 'Fire';
+      case 'helpline':
+        return 'Helpline';
+      default:
+        return category[0].toUpperCase() + category.substring(1);
+    }
+  }
+}
+
+class FestivalThemeConfig {
+  final String? bannerImage;
+  final String? accentColor;
+  final bool showPetals;
+  final String petalType; // 'gulal', 'flower', 'diya', 'none'
+
+  FestivalThemeConfig({
+    this.bannerImage,
+    this.accentColor,
+    this.showPetals = false,
+    this.petalType = 'none',
+  });
+
+  factory FestivalThemeConfig.fromJson(Map<String, dynamic> json) {
+    return FestivalThemeConfig(
+      bannerImage: json['bannerImage'],
+      accentColor: json['accentColor'],
+      showPetals: json['showPetals'] ?? false,
+      petalType: json['petalType'] ?? 'none',
+    );
+  }
+}
+
 class Festival {
   final String id;
   final String name;
@@ -195,6 +405,8 @@ class Festival {
   final String? startDate;
   final String? endDate;
   final List<dynamic>? templeIds;
+  final FestivalThemeConfig? themeConfig;
+  final String? status;
 
   Festival({
     required this.id,
@@ -205,6 +417,8 @@ class Festival {
     this.startDate,
     this.endDate,
     this.templeIds,
+    this.themeConfig,
+    this.status,
   });
 
   factory Festival.fromJson(Map<String, dynamic> json) {
@@ -217,7 +431,24 @@ class Festival {
       startDate: json['startDate'],
       endDate: json['endDate'],
       templeIds: json['templeIds'],
+      themeConfig: json['themeConfig'] != null 
+          ? FestivalThemeConfig.fromJson(json['themeConfig']) 
+          : null,
+      status: json['status'],
     );
+  }
+
+  bool get isCurrentlyActive {
+    if (startDate == null || endDate == null) return false;
+    try {
+      final now = DateTime.now();
+      final start = DateTime.parse(startDate!);
+      final end = DateTime.parse(endDate!);
+      return now.isAfter(start.subtract(const Duration(days: 1))) && 
+             now.isBefore(end.add(const Duration(days: 1)));
+    } catch (_) {
+      return false;
+    }
   }
 }
 
@@ -240,6 +471,7 @@ class Temple {
   final double latitude;
   final double longitude;
   final String? darshanTiming;
+  final List<AartiTiming> aartiTimings;
   final String? phone;
   final String? website;
   final String? donationUrl;
@@ -281,6 +513,7 @@ class Temple {
     required this.latitude,
     required this.longitude,
     this.darshanTiming,
+    this.aartiTimings = const [],
     this.phone,
     this.website,
     this.donationUrl,
@@ -308,16 +541,25 @@ class Temple {
     var rawGallery = json['galleryImages'] as List? ?? [];
     List<GalleryImage> galleryList = rawGallery.map((g) => GalleryImage.fromJson(g)).toList();
 
+    // Parse aartiTimings
+    List<AartiTiming> aartiList = [];
+    if (json['aartiTimings'] != null && json['aartiTimings'] is List) {
+      aartiList = (json['aartiTimings'] as List)
+          .map((e) => AartiTiming.fromJson(e))
+          .toList();
+    }
+
     // DEBUG: Log raw API latitude/longitude values
     final rawLat = json['latitude'];
     final rawLng = json['longitude'];
     final parsedLat = (rawLat as num?)?.toDouble();
     final parsedLng = (rawLng as num?)?.toDouble();
     if (kDebugMode) {
-      debugPrint('Temple.fromJson: ${json['name'] ?? json['slug'] ?? "unknown"}');
-      debugPrint('   Raw API: latitude=$rawLat (type: ${rawLat.runtimeType}), longitude=$rawLng (type: ${rawLng.runtimeType})');
-      debugPrint('   Parsed: latitude=$parsedLat, longitude=$parsedLng');
-      debugPrint('   Final: latitude=${parsedLat ?? 27.5830}, longitude=${parsedLng ?? 77.7000}');
+      debugPrint('Temple.fromJson: ');
+      debugPrint('   Raw API: latitude= (type: ), longitude= (type: )');
+      debugPrint('   Parsed: latitude=, longitude=');
+      debugPrint('   Final: latitude=, longitude=');
+      debugPrint('   Aarti Timings: ');
     }
 
     return Temple(
@@ -339,6 +581,7 @@ class Temple {
       latitude: parsedLat ?? 27.5830,
       longitude: parsedLng ?? 77.7000,
       darshanTiming: json['darshanTiming'],
+      aartiTimings: aartiList,
       phone: json['phone'],
       website: json['website'],
       donationUrl: json['donationUrl'],
@@ -450,3 +693,6 @@ class MapSettings {
     };
   }
 }
+
+
+

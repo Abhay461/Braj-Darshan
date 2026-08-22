@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -20,6 +20,7 @@ import { FestivalList } from './pages/festivals/FestivalList';
 import { MediaLibrary } from './pages/media/MediaLibrary';
 import { BackupImportExport } from './pages/backup/BackupImportExport';
 import { MapSettingsPage } from './pages/MapSettings';
+import { EmergencyContactsList } from './pages/emergency/EmergencyContactsList';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +68,7 @@ export const App: React.FC = () => {
                     <Route path='locations' element={<LocationList />} />
                     <Route path='facilities' element={<FacilityList />} />
                     <Route path='festivals' element={<FestivalList />} />
+                    <Route path='emergency-contacts' element={<EmergencyContactsList />} />
                     <Route path='media' element={<MediaLibrary />} />
                     <Route path='backup' element={<BackupImportExport />} />
                     <Route path='map-settings' element={<MapSettingsPage />} />

@@ -24,30 +24,22 @@ class DioClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          if (kDebugMode) {
-            debugPrint('🌐 HTTP Request: ${options.method} ${options.uri}');
-          }
+          debugPrint('🌐 [DIO] Request: ${options.method} ${options.uri}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          if (kDebugMode) {
-            debugPrint('✅ HTTP Response [${response.statusCode}]: ${response.requestOptions.uri}');
-          }
+          debugPrint('✅ [DIO] Response [${response.statusCode}]: ${response.requestOptions.uri}');
           return handler.next(response);
         },
         onError: (DioException error, handler) async {
-          if (kDebugMode) {
-            debugPrint('❌ HTTP Error [${error.response?.statusCode}]: ${error.requestOptions.uri} - ${error.message}');
-          }
+          debugPrint('❌ [DIO] Error [${error.response?.statusCode}]: ${error.requestOptions.uri} - ${error.message} (type: ${error.type})');
 
           // Render free tier cold-start auto-retry (if timeout and hasn't been retried yet)
           if ((error.type == DioExceptionType.connectionTimeout ||
                   error.type == DioExceptionType.receiveTimeout ||
                   error.type == DioExceptionType.sendTimeout) &&
               error.requestOptions.extra['retried'] != true) {
-            if (kDebugMode) {
-              debugPrint('🔄 Retrying request after cold start timeout: ${error.requestOptions.uri}');
-            }
+            debugPrint('🔄 [DIO] Retrying request after cold start timeout: ${error.requestOptions.uri}');
             try {
               final options = error.requestOptions;
               options.extra['retried'] = true;

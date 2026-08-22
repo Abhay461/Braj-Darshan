@@ -73,10 +73,10 @@ class FestivalsScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         decoration: BoxDecoration(
-                          color: AppTheme.saffronHighlight.withOpacity( 0.15),
+                          color: AppTheme.primarySaffron.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: AppTheme.saffronHighlight.withOpacity( 0.3),
+                            color: AppTheme.primarySaffron.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Column(
@@ -84,14 +84,14 @@ class FestivalsScreen extends ConsumerWidget {
                             const Icon(
                               Icons.event_outlined,
                               size: 18,
-                              color: AppTheme.saffronHighlight,
+                              color: AppTheme.primarySaffron,
                             ),
                             const SizedBox(height: 4),
                             Text(
                               monthBadge,
                               style: Theme.of(context).textTheme.labelSmall!.copyWith(
                                 fontWeight: FontWeight.w800,
-                                color: AppTheme.saffronHighlight,
+                                color: AppTheme.primarySaffron,
                               ),
                             ),
                           ],

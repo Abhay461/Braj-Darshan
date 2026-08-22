@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/localization/app_translations.dart';
 import '../../shared/providers/providers.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class AboutScreen extends ConsumerWidget {
   const AboutScreen({super.key});
@@ -13,8 +14,8 @@ class AboutScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    final primaryColor = const Color(0xFFC5221F);
-    final goldColor = const Color(0xFFD4AF37);
+    final primaryColor = AppTheme.primarySaffron;
+    final goldColor = AppTheme.templeGold;
 
     return Scaffold(
       appBar: AppBar(
@@ -270,7 +271,7 @@ class AboutScreen extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 22, color: const Color(0xFFC5221F)),
+              Icon(icon, size: 22, color: AppTheme.primarySaffron),
               const SizedBox(width: 8),
               Text(
                 title,
@@ -336,10 +337,10 @@ class AboutScreen extends ConsumerWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFC5221F).withValues(alpha: 0.08),
+                        color: AppTheme.primarySaffron.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(item.icon, size: 18, color: const Color(0xFFC5221F)),
+                      child: Icon(item.icon, size: 18, color: AppTheme.primarySaffron),
                     ),
                     const SizedBox(width: 12),
                     Expanded(

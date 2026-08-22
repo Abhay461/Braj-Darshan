@@ -49,7 +49,7 @@ class HiveService {
   static Box<dynamic> get settingsBox => Hive.box<dynamic>(AppConstants.settingsBox);
 
   static String getThemeMode() {
-    return settingsBox.get('theme_mode', defaultValue: 'system');
+    return settingsBox.get('theme_mode', defaultValue: 'light');
   }
 
   static Future<void> setThemeMode(String mode) async {

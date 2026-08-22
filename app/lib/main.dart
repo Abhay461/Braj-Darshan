@@ -10,34 +10,47 @@ import 'core/router/app_router.dart';
 
 
 
+import 'shared/providers/providers.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
+  debugPrint('🚀 [MAIN] Starting app initialization...');
+  
   try {
+    debugPrint('📦 [MAIN] Initializing HiveService...');
     await HiveService.init();
+    debugPrint('✅ [MAIN] HiveService initialized');
   } catch (e) {
-    debugPrint('HiveService initialization error: $e');
+    debugPrint('❌ [MAIN] HiveService error: $e');
   }
 
   try {
+    debugPrint('📦 [MAIN] Initializing AdService...');
     await AdService.init();
+    debugPrint('✅ [MAIN] AdService initialized');
   } catch (e) {
-    debugPrint('AdService initialization error: $e');
+    debugPrint('❌ [MAIN] AdService error: $e');
   }
 
   try {
+    debugPrint('📦 [MAIN] Initializing NotificationService...');
     await NotificationService().initialize();
+    debugPrint('✅ [MAIN] NotificationService initialized');
   } catch (e) {
-    debugPrint('NotificationService initialization error: $e');
+    debugPrint('❌ [MAIN] NotificationService error: $e');
   }
 
   // Enforce root/jailbreak detection
   try {
+    debugPrint('🔒 [MAIN] Running security check...');
     await SecurityCheck.enforceDeviceSecurity();
+    debugPrint('✅ [MAIN] Security check passed');
   } catch (e) {
-    debugPrint('Security check error: $e');
+    debugPrint('❌ [MAIN] Security check error: $e');
   }
 
+  debugPrint('🚀 [MAIN] Running app');
   runApp(
     const ProviderScope(
       child: BrajDarshanApp(),
@@ -45,17 +58,20 @@ void main() async {
   );
 }
 
-class BrajDarshanApp extends StatelessWidget {
+class BrajDarshanApp extends ConsumerWidget {
   const BrajDarshanApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const overlayStyle = SystemUiOverlayStyle(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+
+    final overlayStyle = SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-      statusBarBrightness: Brightness.dark,
-      systemNavigationBarColor: AppTheme.canvasLight,
-      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+      statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      systemNavigationBarColor: isDark ? AppTheme.sandalwoodDark : AppTheme.sandalwoodCream,
+      systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
     );
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -64,7 +80,8 @@ class BrajDarshanApp extends StatelessWidget {
         title: 'Braj Darshan',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
-        themeMode: ThemeMode.light,
+        darkTheme: AppTheme.darkTheme,
+        themeMode: themeMode,
         routerConfig: appRouter,
       ),
     );

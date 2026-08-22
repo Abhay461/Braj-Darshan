@@ -11,7 +11,8 @@ import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/error_view.dart';
-import '../../core/config/constants.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/config/constants.dart';
 
 class InteractiveMapScreen extends ConsumerStatefulWidget {
   const InteractiveMapScreen({super.key});
@@ -87,7 +88,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
     if (temple.mapPinColor != null && temple.mapPinColor!.isNotEmpty) {
       colorHex = temple.mapPinColor!;
     } else {
-      colorHex = _mapSettings?.defaultPinColor ?? '#C5221F';
+      colorHex = _mapSettings?.defaultPinColor ?? '#E65100';
     }
     return _parseColor(colorHex);
   }
@@ -111,7 +112,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
       }
       return Color(int.parse(hex, radix: 16));
     } catch (_) {
-      return const Color(0xFFC5221F); // Default fallback
+      return AppTheme.primarySaffron; // Default fallback
     }
   }
 
@@ -583,7 +584,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                                           Icon(
                                             Icons.location_on,
                                             size: 13,
-                                            color: const Color(0xFFEA4335),
+                                            color: AppTheme.primarySaffron,
                                           ),
                                           const SizedBox(width: 3),
                                           Expanded(
