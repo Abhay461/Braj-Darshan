@@ -11,6 +11,7 @@ import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/error_view.dart';
+import '../../shared/widgets/braj_map_pin_widget.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/config/constants.dart';
 
@@ -188,18 +189,18 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
     return null;
   }
 
-  /// Get effective location for a temple: try directionsUrl extraction first,
-  /// then fall back to temple's own lat/lng, then location's lat/lng.
+  /// Get effective location for a temple: prioritize temple's stored database coordinates
+  /// saved from Admin panel, then fall back to directionsUrl extraction, then location model.
   LatLng _getEffectiveLatLng(Temple temple) {
-    // 1. Try extracting from directionsUrl if available
-    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
-      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
-      if (parsed != null) return parsed;
-    }
-    // 2. Use temple's stored database coordinates if valid and not hardcoded default
+    // 1. Prioritize temple's stored database coordinates saved from Admin panel
     final isDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
     if (!isDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
       return LatLng(temple.latitude, temple.longitude);
+    }
+    // 2. Try extracting from directionsUrl if available
+    if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
+      final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
+      if (parsed != null) return parsed;
     }
     // 3. Use location model coordinates if available
     if (temple.location is Location) {
@@ -319,6 +320,7 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
               final defaultZoom = _getDefaultZoom();
               final minZoom = _getMinZoom();
               final maxZoom = _getMaxZoom();
+              final validTemples = temples.where(_hasValidLocation).toList();
 
               return Stack(
                 children: [
@@ -380,101 +382,30 @@ class _InteractiveMapScreenState extends ConsumerState<InteractiveMapScreen> {
                       ),
 
                       MarkerLayer(
-                        markers: temples.where(_hasValidLocation).map((temple) {
-                          final isSelected = _selectedTemple?.id == temple.id;
-                          final effectivePos = _getEffectiveLatLng(temple);
-                          final pinColor = _getEffectivePinColor(temple);
-                          final pinSize = _getEffectivePinSize(temple);
-                          final pinIcon = _getIconData(_getEffectivePinIconStyle(temple));
-                          final selectedPinSize = pinSize * 1.14; // Slightly larger when selected
+                        markers: [
+                          // Render debug coordinate points under pins (only in debug mode for verification)
+                          if (kDebugMode)
+                            ...validTemples.map((temple) => BrajMapPinWidget.buildDebugPointMarker(_getEffectiveLatLng(temple))),
 
-                          return Marker(
-                            point: effectivePos,
-                            width: 220.0,
-                            height: 90.0,
-                            alignment: Alignment.bottomCenter,
-                            child: Transform.translate(
-                              offset: const Offset(0, -63),
-                              child: Semantics(
-                                label: 'Map Marker for ${temple.name}',
-                                button: true,
-                                child: GestureDetector(
-                                  onTap: () => _onMarkerTapped(temple),
-                                  child: AnimatedScale(
-                                    alignment: Alignment.bottomCenter,
-                                    scale: isSelected ? 1.15 : 1.0,
-                                    duration: const Duration(milliseconds: 200),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          temple.name,
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            color: isSelected
-                                                ? Color.fromARGB(255, (pinColor.r * 0.7).round(), (pinColor.g * 0.7).round(), (pinColor.b * 0.7).round())
-                                                : pinColor,
-                                            fontSize: isSelected ? 14.0 : 13.0,
-                                            fontWeight: FontWeight.bold,
-                                            height: 1.15,
-                                            letterSpacing: -0.2,
-                                            shadows: const [
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, -1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, -1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, 1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, -1.5)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 0)),
-                                              Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 0)),
-                                            ],
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        // Transform to align pin visual tip with map coordinate (bottomCenter)
-                                        // Material Icons.location_on tip is ~2-3px above widget bottom edge
-                                        Transform.translate(
-                                          offset: const Offset(0, 3),
-                                          child: Stack(
-                                            alignment: Alignment.bottomCenter,
-                                            children: [
-                                              Icon(
-                                                pinIcon,
-                                                size: isSelected ? selectedPinSize : pinSize,
-                                                color: pinColor,
-                                                shadows: const [
-                                                  Shadow(
-                                                    color: Color(0x40000000),
-                                                    blurRadius: 4,
-                                                    offset: Offset(0, 2),
-                                                  ),
-                                                ],
-                                              ),
-                                              Positioned(
-                                                top: isSelected ? (selectedPinSize * 0.23) : (pinSize * 0.21),
-                                                child: Container(
-                                                  width: isSelected ? (selectedPinSize * 0.31) : (pinSize * 0.26),
-                                                  height: isSelected ? (selectedPinSize * 0.31) : (pinSize * 0.26),
-                                                  decoration: const BoxDecoration(
-                                                    color: Colors.white,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                          // Render temple map pins with mathematically precise tip alignment
+                          ...validTemples.map((temple) {
+                            final isSelected = _selectedTemple?.id == temple.id;
+                            final effectivePos = _getEffectiveLatLng(temple);
+                            final pinColor = _getEffectivePinColor(temple);
+                            final pinSize = _getEffectivePinSize(temple);
+                            final pinIcon = _getIconData(_getEffectivePinIconStyle(temple));
+
+                            return BrajMapPinWidget.buildMarker(
+                              point: effectivePos,
+                              title: temple.name,
+                              icon: pinIcon,
+                              pinColor: pinColor,
+                              pinSize: pinSize,
+                              isSelected: isSelected,
+                              onTap: () => _onMarkerTapped(temple),
+                            );
+                          }),
+                        ],
                       ),
                     ],
                   ),

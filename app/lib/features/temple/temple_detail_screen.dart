@@ -19,6 +19,7 @@ import '../../shared/providers/yatra_planner_provider.dart';
 import '../../shared/widgets/loading_skeleton.dart';
 import '../../shared/widgets/error_view.dart';
 import '../../shared/widgets/ad_banner_widget.dart';
+import '../../shared/widgets/braj_map_pin_widget.dart';
 import '../../core/services/ad_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/config/constants.dart';
@@ -93,21 +94,21 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
   }
 
   LatLng _getEffectiveLocation(Temple temple) {
-    // 1. Return resolved short URL coordinates if available
+    // 1. Prioritize real database coordinates saved from Admin panel
+    final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
+    if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
+      return LatLng(temple.latitude, temple.longitude);
+    }
+    // 2. Return resolved short URL coordinates if available
     if (_resolvedShortUrlLatLng != null) {
       return _resolvedShortUrlLatLng!;
     }
-    // 2. Extract from directionsUrl if available directly
+    // 3. Extract from directionsUrl if available directly
     if (temple.directionsUrl != null && temple.directionsUrl!.trim().isNotEmpty) {
       final parsed = _extractLatLngFromUrl(temple.directionsUrl!.trim());
       if (parsed != null) {
         return parsed;
       }
-    }
-    // 3. Prioritize real database coordinates saved from Admin panel
-    final isHardcodedDefault = (temple.latitude == 27.5830 && temple.longitude == 77.7000);
-    if (!isHardcodedDefault && temple.latitude != 0.0 && temple.longitude != 0.0) {
-      return LatLng(temple.latitude, temple.longitude);
     }
     // 4. Fallback to location model coordinates
     if (temple.location is Location) {
@@ -844,80 +845,21 @@ class _TempleDetailScreenState extends ConsumerState<TempleDetailScreen> {
                                              }
                                            : null,
                                      ),
-                                    MarkerLayer(
-                                      markers: [
-                                        Marker(
-                                          point: effectiveLatLng,
-                                          width: 220,
-                                          height: 72,
-                                          alignment: Alignment.bottomCenter,
-                                          child: Transform.translate(
-                                            offset: const Offset(0, -63),
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.end,
-                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  temple.name,
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                    color: const Color(0xFFB91C1C),
-                                                    fontSize: 13.5,
-                                                    fontWeight: FontWeight.bold,
-                                                    height: 1.15,
-                                                    letterSpacing: -0.2,
-                                                    shadows: const [
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, -1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, -1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, 1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(0, -1.5)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(1.5, 0)),
-                                                      Shadow(color: Colors.white, blurRadius: 4, offset: Offset(-1.5, 0)),
-                                                    ],
-                                                  ),
-                                                  maxLines: 2,
-                                                  overflow: TextOverflow.ellipsis,
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Transform.translate(
-                                                  offset: const Offset(0, 3),
-                                                  child: Stack(
-                                                    alignment: Alignment.bottomCenter,
-                                                    children: [
-                                                      const Icon(
-                                                        Icons.location_on,
-                                                        color: Color(0xFFC5221F),
-                                                        size: 42,
-                                                        shadows: [
-                                                          Shadow(
-                                                            color: Color(0x40000000),
-                                                            blurRadius: 4,
-                                                            offset: Offset(0, 2),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                      Positioned(
-                                                        top: 9,
-                                                        child: Container(
-                                                          width: 11,
-                                                          height: 11,
-                                                          decoration: const BoxDecoration(
-                                                            color: Colors.white,
-                                                            shape: BoxShape.circle,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                     MarkerLayer(
+                                       markers: [
+                                         if (kDebugMode)
+                                           BrajMapPinWidget.buildDebugPointMarker(effectiveLatLng),
+                                         BrajMapPinWidget.buildMarker(
+                                           point: effectiveLatLng,
+                                           title: temple.name,
+                                           icon: Icons.location_on,
+                                           pinColor: const Color(0xFFEA4335),
+                                           pinSize: 42.0,
+                                           isSelected: true,
+                                           onTap: () => _openGoogleMaps(temple, effectiveLatLng.latitude, effectiveLatLng.longitude),
+                                         ),
+                                       ],
+                                     ),
                                   ],
                                 ),
                                 Positioned(
