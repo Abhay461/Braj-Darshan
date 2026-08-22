@@ -467,16 +467,18 @@ export const MapSettingsPage: React.FC = () => {
                 <Paper key={index} elevation={1} sx={{ p: 2, mb: 1.5, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 120 }}>
                     <Tooltip title={icon.iconClass}>
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                        disabled
-                        sx={{ minWidth: 40 }}
-                      >
-                        {getIconComponent(icon.iconClass)}
-                      </IconButton>
-                      <FormControl sx={{ minWidth: 180 }} size="small">
+                      <span>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          disabled
+                          sx={{ minWidth: 40 }}
+                        >
+                          {getIconComponent(icon.iconClass)}
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                    <FormControl sx={{ minWidth: 180 }} size="small">
                         <Select
                           value={icon.iconClass}
                           label="Icon"
@@ -492,7 +494,6 @@ export const MapSettingsPage: React.FC = () => {
                           ))}
                         </Select>
                       </FormControl>
-                    </Tooltip>
                   </Box>
 
                   <Box sx={{ flexGrow: 1, minWidth: 200 }}>

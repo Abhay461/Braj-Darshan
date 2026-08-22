@@ -16,10 +16,10 @@ subprojects {
         if (project.android.namespace == null) {
             def manifest = file("${project.projectDir}/src/main/AndroidManifest.xml")
             if (manifest.exists()) {
-                def parsed = new groovy.xml.XmlParser().parse(manifest)
-                def packageName = parsed.attribute('package')
-                if (packageName != null) {
-                    project.android.namespace = packageName
+                def manifestText = manifest.text
+                def matcher = (manifestText =~ /package="([^"]+)"/)
+                if (matcher.find()) {
+                    project.android.namespace = matcher.group(1)
                 }
             }
         }
