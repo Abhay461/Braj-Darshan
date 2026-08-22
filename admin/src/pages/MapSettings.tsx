@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import Typography from '@mui/material/Typography';
 import {
   Box,
   Card,
   CardContent,
-  Typography,
   TextField,
   Button,
   FormControl,
@@ -30,14 +30,14 @@ import { useMapSettings, useMapSettingsMutations } from '../hooks/useMapSettings
 import { MapSettings, PinIconOption } from '../types';
 
 const PIN_ICON_OPTIONS = [
-  { name: 'Default Pin', iconClass: 'location_on', icon: <LocationOnIcon /> },
-  { name: 'Place Pin', iconClass: 'place', icon: <LocationOnIcon /> },
-  { name: 'Temple Icon', iconClass: 'temple_hindu', icon: <LocationOnIcon /> },
-  { name: 'Location Pin', iconClass: 'location_pin', icon: <LocationOnIcon /> },
-  { name: 'My Location', iconClass: 'my_location', icon: <LocationOnIcon /> },
-  { name: 'Flag', iconClass: 'flag', icon: <LocationOnIcon /> },
-  { name: 'Landscape', iconClass: 'landscape', icon: <LocationOnIcon /> },
-  { name: 'Terrain', iconClass: 'terrain', icon: <LocationOnIcon /> },
+  { name: 'Default Pin', iconClass: 'location_on' },
+  { name: 'Place Pin', iconClass: 'place' },
+  { name: 'Temple Icon', iconClass: 'temple_hindu' },
+  { name: 'Location Pin', iconClass: 'location_pin' },
+  { name: 'My Location', iconClass: 'my_location' },
+  { name: 'Flag', iconClass: 'flag' },
+  { name: 'Landscape', iconClass: 'landscape' },
+  { name: 'Terrain', iconClass: 'terrain' },
 ];
 
 const MAP_STYLE_OPTIONS = [
